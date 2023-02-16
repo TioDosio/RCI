@@ -1,5 +1,5 @@
 #include <stdio.h>
 void main
 {
-    printf("Bananinhas das boas");
+    /*printf("Bananinhas das boas");*\
 }
