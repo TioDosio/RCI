@@ -1,5 +1,6 @@
 #include <stdio.h>
-void main()
+
+int main()
 {
-    printf("Teste git");
+    printf("Delfas vai fazer o projeto");
 }
