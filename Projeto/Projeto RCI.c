@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
     switch (argc)
     {
@@ -9,6 +9,7 @@ int main(int argc, char **argv)
         break;
 
     case 2:
-        printf("Um argumento\n");
+        char arg = argv[1];
+        printf("Argumento: %s\n", arg);
     }
 }
