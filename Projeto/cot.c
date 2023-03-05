@@ -42,12 +42,11 @@ int main(int argc, char *argv[])
         break;
     }
 
-    while (1)
+    /*while (1)
     { // WTF is that?
         fd_set readfds, ready_sockets, current_sockets;
         FD_ZERO(&readfds);
         FD_SET(0, &readfds);
-        FD_SET(1, &readfds);
         int n = select(2, &readfds, NULL, NULL, NULL);
         if (n == -1)
         {
@@ -62,5 +61,22 @@ int main(int argc, char *argv[])
         {
             printf("stdout\n");
         }
+    }
+    return 0;*/
+    while (1)
+    {
+        fd_set rfds;
+        int retval; // return value of select
+        FD_ZERO(&rfds);
+        FD_SET(0, &rfds);
+        retval = select(1, &rfds, NULL, NULL, NULL);
+
+        if (retval == -1)
+            perror("select()");
+        else if (retval)
+            printf("Data is available now.\n");
+        /* FD_ISSET(0, &rfds) will be true. */
+        else
+            printf("No data within five seconds.\n");
     }
 }
