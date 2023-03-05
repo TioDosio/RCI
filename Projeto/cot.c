@@ -41,4 +41,26 @@ int main(int argc, char *argv[])
         printf("argc %d\n", argc);
         break;
     }
+
+    while (1)
+    { // WTF is that?
+        fd_set readfds, ready_sockets, current_sockets;
+        FD_ZERO(&readfds);
+        FD_SET(0, &readfds);
+        FD_SET(1, &readfds);
+        int n = select(2, &readfds, NULL, NULL, NULL);
+        if (n == -1)
+        {
+            perror("select");
+            exit(1);
+        }
+        if (FD_ISSET(0, &readfds))
+        {
+            printf("stdin\n");
+        }
+        if (FD_ISSET(1, &readfds))
+        {
+            printf("stdout\n");
+        }
+    }
 }
