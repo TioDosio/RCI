@@ -1,1 +1,0 @@
-1- Usar apenas argv e argc ou usar o getopt para ler os argumentos de entrada.
