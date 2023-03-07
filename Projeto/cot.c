@@ -74,8 +74,12 @@ int main(int argc, char *argv[])
         if (retval == -1)
             perror("select()");
         else if (retval)
-            printf("Data is available now.\n");
-        /* FD_ISSET(0, &rfds) will be true. */
+        {
+            char buf[100];
+            fgets(buf, 100, stdin);
+            printf("yet\n");
+            printf("%s", buf);
+        }
         else
             printf("No data within five seconds.\n");
     }
