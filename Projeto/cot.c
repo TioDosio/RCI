@@ -62,11 +62,17 @@ int main(int argc, char *argv[])
             fgets(buf, 100, stdin);
             printf("yet\n");
             printf("%s", buf);
+            break;
         }
         if (FD_ISSET(1, &readfds))
         {
             printf("stdout\n");
         }
     }
+    void join()
+    {
+        printf("join\n");
+    }
+
     return 0;
 }
