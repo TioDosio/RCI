@@ -12,8 +12,11 @@ int main(int argc, char *argv[])
     switch (argc)
     {
     case 1:
-        printf("Sem argumentos\n"); // Não tem argumentos
-        break;
+        printf("Sem argumentos\n");                           // Não tem argumentos
+        char idk[200] = "djoin net id bootid bootIP bootTCP"; // ver o comprimento das strings para meter buffers adequados
+        int a = strlen(idk);
+        printf("%d\n", a);
+        exit(1);
     case 3: // Recebe apenas o IP e o TCP
         printf("Com 2 argumentos\n");
         regIP = "193.136.138.142";
@@ -39,15 +42,16 @@ int main(int argc, char *argv[])
     default:
         printf("Argumentos invalidos\n");
         printf("argc %d\n", argc);
-        break;
+        exit(1);
     }
 
-    /*while (1)
+    while (1)
     { // WTF is that?
         fd_set readfds, ready_sockets, current_sockets;
         FD_ZERO(&readfds);
         FD_SET(0, &readfds);
         int n = select(2, &readfds, NULL, NULL, NULL);
+        char buf[100];
         if (n == -1)
         {
             perror("select");
@@ -55,32 +59,14 @@ int main(int argc, char *argv[])
         }
         if (FD_ISSET(0, &readfds))
         {
-            printf("stdin\n");
+            fgets(buf, 100, stdin);
+            printf("yet\n");
+            printf("%s", buf);
         }
         if (FD_ISSET(1, &readfds))
         {
             printf("stdout\n");
         }
     }
-    return 0;*/
-    while (1)
-    {
-        fd_set rfds;
-        int retval; // return value of select
-        FD_ZERO(&rfds);
-        FD_SET(0, &rfds);
-        retval = select(1, &rfds, NULL, NULL, NULL);
-
-        if (retval == -1)
-            perror("select()");
-        else if (retval)
-        {
-            char buf[100];
-            fgets(buf, 100, stdin);
-            printf("yet\n");
-            printf("%s", buf);
-        }
-        else
-            printf("No data within five seconds.\n");
-    }
+    return 0;
 }
