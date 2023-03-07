@@ -3,12 +3,22 @@
 #include <string.h>
 #include <sys/select.h>
 
+void join()
+{
+    printf("joining...\n");
+}
+void leave()
+{
+    printf("leaving...\n");
+}
+
 int main(int argc, char *argv[])
 {
     char *IP = NULL;    // IP do TCP que é dado
     int TCP = 0;        // Porto do TCP que é dado
     char *regIP = NULL; // IP do UDP pode ou não ser dado
     int regUDP = 0;     // Porto do UDP que pode ou não ser dado
+    struct timeval tv;
     switch (argc)
     {
     case 1:
@@ -50,29 +60,43 @@ int main(int argc, char *argv[])
         fd_set readfds, ready_sockets, current_sockets;
         FD_ZERO(&readfds);
         FD_SET(0, &readfds);
-        int n = select(2, &readfds, NULL, NULL, NULL);
+        tv.tv_sec = 30;
+        tv.tv_usec = 0;
+        int retval = select(2, &readfds, NULL, NULL, &tv);
         char buf[100];
-        if (n == -1)
+        if (retval == -1)
         {
             perror("select");
-            exit(1);
+            printf("Morreu\n");
+            // exit(1);
         }
-        if (FD_ISSET(0, &readfds))
+        else if (retval > 0)
         {
-            fgets(buf, 100, stdin);
-            printf("yet\n");
-            printf("%s", buf);
-            break;
+            if (FD_ISSET(0, &readfds))
+            {
+                fgets(buf, 100, stdin);
+                int resul, resulb;
+                if (strcmp(buf, "join\n") == 0)
+                {
+                    join();
+                    break;
+                }
+                else if (strcmp(buf, "leave\n") == 0)
+                {
+                    leave();
+                    break;
+                }
+                else
+                {
+                    printf("Invalid command\n");
+                }
+                break;
+            }
         }
-        if (FD_ISSET(1, &readfds))
+        else
         {
-            printf("stdout\n");
+            printf("Timeout\n");
         }
     }
-    void join()
-    {
-        printf("join\n");
-    }
-
     return 0;
 }
