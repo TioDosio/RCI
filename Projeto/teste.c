@@ -9,7 +9,6 @@ void join()
 {
     printf("Joining...\n");
 }
-
 int main()
 {
     int fd1, fd2;
@@ -66,7 +65,7 @@ int main()
         }
         else
         {
-            printf("No data within 5 seconds.\n");
+            printf("No data within 30 seconds.\n");
         }
     }
 
