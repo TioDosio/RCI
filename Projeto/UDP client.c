@@ -39,10 +39,10 @@ int main(void)
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;      // IPv4
     hints.ai_socktype = SOCK_DGRAM; // UDP socket
-    errcode = getaddrinfo("tejo.tecnico.ulisboa.pt", "58001", &hints, &res);
+    errcode = getaddrinfo("tejo.tecnico.ulisboa.pt", "59 q  ", &hints, &res);
     if (errcode != 0) /*error*/
         exit(1);
-    n = sendto(fd, "Banana\n", 7, 0, res->ai_addr, res->ai_addrlen);
+    n = sendto(fd, sendV, 9, 0, res->ai_addr, res->ai_addrlen);
     if (n == -1) /*error*/
         exit(1);
     addrlen = sizeof(addr);
