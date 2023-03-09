@@ -1,77 +1,63 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 #include <unistd.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <fcntl.h>
-void join()
+
+#define BUF_SIZE 1024
+
+void communicate_with_udp_server(const char *server_ip, int server_port)
 {
-    printf("Joining...\n");
+    // Create a UDP socket
+    int sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock == -1)
+    {
+        perror("socket");
+        exit(EXIT_FAILURE);
+    }
+
+    // Configure the server address
+    struct sockaddr_in server_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(server_port);
+    if  inet_aton(server_ip, &server_addr.sin_addr) == 0)   ///////////////////////////////////////////////////////////////////////                                         
+    {
+        fprintf(stderr, "Invalid address: %s\n", server_ip);
+        exit(EXIT_FAILURE);
+    }
+
+    // Send a message to the server
+    const char *message = "NODES 001";
+    int num_sent = sendto(sock, message, strlen(message), 0, (struct sockaddr *)&server_addr, sizeof(server_addr));
+    if (num_sent == -1)
+    {
+        perror("sendto");
+        exit(EXIT_FAILURE);
+    }
+
+    // Receive a response from the server
+    char buf[BUF_SIZE];
+    struct sockaddr_in client_addr;
+    socklen_t client_addr_len = sizeof(client_addr);
+    int num_recv = recvfrom(sock, buf, BUF_SIZE, 0, (struct sockaddr *)&client_addr, &client_addr_len);
+    if (num_recv == -1)
+    {
+        perror("recvfrom");
+        exit(EXIT_FAILURE);
+    }
+    buf[num_recv] = '\0';
+
+    // Print the response from the server
+    printf("Received response from %s:%d: %s\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port), buf);
+
+    // Close the socket
+    close(sock);
 }
+
 int main()
 {
-    int fd1, fd2;
-    fd_set rfds;
-    struct timeval tv;
-    int retval;
-    char buf[256];
-
-    // open file descriptors
-    fd1 = fileno(stdin);
-    if (fd1 == -1)
-    {
-        perror("fileno");
-        exit(EXIT_FAILURE);
-    }
-
-    /*fd2 = open("file2.txt", O_RDONLY);
-    if (fd2 == -1)
-    {
-        perror("open");
-        exit(EXIT_FAILURE);
-    }*/
-
-    // wait up to 5 seconds for input on either file descriptor
-    while (1)
-    {
-        FD_ZERO(&rfds);
-        FD_SET(fd1, &rfds);
-        // FD_SET(fd2, &rfds);
-
-        tv.tv_sec = 30;
-        tv.tv_usec = 0;
-
-        retval = select(FD_SETSIZE, &rfds, NULL, NULL, &tv);
-        if (retval == -1)
-        {
-            perror("select");
-            exit(EXIT_FAILURE);
-        }
-        else if (retval > 0)
-        {
-            if (FD_ISSET(fd1, &rfds))
-            {
-                fgets(buf, sizeof(buf), stdin);
-                if (strncmp(buf, "join", 4) == 0)
-                {
-                    join();
-                }
-            }
-            /*if (FD_ISSET(fd2, &rfds))
-            {
-                printf("File descriptor 2 is readable.\n");
-            }*/
-        }
-        else
-        {
-            printf("No data within 30 seconds.\n");
-        }
-    }
-
-    // close file descriptors
-    close(fd1);
-    // close(fd2);
-
+    communicate_with_udp_server("193.136.138.142", 59000);
     return 0;
 }
