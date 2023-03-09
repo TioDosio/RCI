@@ -15,6 +15,8 @@ int main(void)
     struct addrinfo hints, *res;
     int fd, errcode;
     ssize_t n;
+    char SendV[50], net[] = "666"; // O que é enviado ao servidor UDP
+    sprintf(SendV, "NODES %s", net);
     struct sockaddr addr;
     ssize_t nbytes, nleft, nwritten, nread;
     char *ptr, buffer[128 + 1];
@@ -39,10 +41,10 @@ int main(void)
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;      // IPv4
     hints.ai_socktype = SOCK_DGRAM; // UDP socket
-    errcode = getaddrinfo("tejo.tecnico.ulisboa.pt", "59 q  ", &hints, &res);
+    errcode = getaddrinfo("tejo.tecnico.ulisboa.pt", "58001", &hints, &res);
     if (errcode != 0) /*error*/
         exit(1);
-    n = sendto(fd, sendV, 9, 0, res->ai_addr, res->ai_addrlen);
+    n = sendto(fd, SendV, strlen(SendV), 0, res->ai_addr, res->ai_addrlen);
     if (n == -1) /*error*/
         exit(1);
     addrlen = sizeof(addr);
@@ -51,9 +53,7 @@ int main(void)
         exit(1);
     buffer[n] = '\0';
     printf("echo: %s\n", buffer);
-    close(fd);
-    freeaddrinfo(res);
-    exit(0);
+
     ptr = strcpy(buffer, "Hello!\n");
     nbytes = 7;
     nleft = nbytes;
