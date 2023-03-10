@@ -25,10 +25,23 @@ void get(char *dest, char *name)
 {
     printf("getting\n");
 }
-int join(char *net, char *id)
+int Com_UDP(int PauloBranco, char *net, char *id, char *IP, char *TCP)
 {
-    char sendV[15];
-    sprintf(sendV, "NODES %s", net);
+    char sendV[50];
+    if (PauloBranco == 1)
+    {
+        // sscanf(sendV, "%s %s %s", PauloBranco, net, id);  // UNREG net id
+        sprintf(sendV, "UNREG %s %s", net, id); // NODES net
+    }
+    else if (PauloBranco == 0)
+    {
+        sprintf(sendV, "REG %s %s %s %s", net, id, IP, TCP); // REG net id IP TCP
+    }
+    else if (PauloBranco == 2)
+    {
+        sprintf(sendV, "NODES %s", net); // NODES net
+    }
+    printf("sending: %s", sendV);
     struct addrinfo hints, *res;
     int fd, errcode;
     ssize_t n;
@@ -92,12 +105,6 @@ void sr()
 {
     printf("show routing\n");
 }
-
-void leave()
-{
-    printf("leaving...\n");
-}
-
 int main(int argc, char *argv[])
 {
     int fd0;
@@ -107,10 +114,10 @@ int main(int argc, char *argv[])
         perror("fileno");
         exit(EXIT_FAILURE);
     }
-    char *IP = NULL;    // IP do TCP que é dado
-    int TCP = 0;        // Porto do TCP que é dado
-    char *regIP = NULL; // IP do UDP pode ou não ser dado
-    int regUDP = 0;     // Porto do UDP que pode ou não ser dado
+    char *IP = NULL;     // IP do TCP que é dado
+    char *TCP = NULL;    // Porto do TCP que é dado
+    char *regIP = NULL;  // IP do UDP pode ou não ser dado
+    char *regUDP = NULL; // Porto do UDP que pode ou não ser dado
     switch (argc)
     {
     case 1:
@@ -119,24 +126,24 @@ int main(int argc, char *argv[])
     case 3: // Recebe apenas o IP e o TCP
         printf("Com 2 argumentos\n");
         regIP = "193.136.138.142";
-        regUDP = 59000;
-        IP = argv[1];
-        TCP = atoi(argv[2]);
+        regUDP = "59000";
+        IP = "95.95.75.236"; // argv[1];
+        TCP = "59001";       // atoi(argv[2]);
         printf("IP: %s\n", IP);
-        printf("TCP: %d\n", TCP);
+        printf("TCP: %s\n", TCP);
         printf("RegIp: %s\n", regIP);
-        printf("RegUDP: %d\n", regUDP);
+        printf("RegUDP: %s\n", regUDP);
         break;
     case 5: // Recebe o IP e o TCP e o IP e o UDP
         printf("Com 4 argumentos\n");
         IP = argv[1];
         regIP = argv[3];
-        TCP = atoi(argv[2]);
-        regUDP = atoi(argv[4]);
+        // TCP = atoi(argv[2]);
+        // regUDP = atoi(argv[4]);
         printf("IP: %s\n", IP);
-        printf("TCP: %d\n", TCP);
+        printf("TCP: %s\n", TCP);
         printf("RegIp: %s\n", regIP);
-        printf("RegUDP: %d\n", regUDP);
+        printf("RegUDP: %s\n", regUDP);
         break;
     default:
         printf("Argumentos invalidos\n");
@@ -158,14 +165,16 @@ int main(int argc, char *argv[])
         }
         fgets(buf, sizeof(buf), stdin);
         char strV[10]; // guardar o 1º comando
+        int PauloBranco = 2;
         sscanf(buf, "%s ", strV);
         if (FD_ISSET(STDIN_FILENO, &readfds))
         {
             if (strcmp(strV, "join") == 0) // join net id
             {
                 char id[3], net[4];
+                PauloBranco = 0;
                 sscanf(buf, "%s %s %s", strV, net, id);
-                join(net, id);
+                Com_UDP(PauloBranco, net, id, IP, TCP);
             }
             else if (strcmp(strV, "djoin") == 0) // djoin net id bootid bootIP bootTCP
             {
@@ -205,11 +214,21 @@ int main(int argc, char *argv[])
             }
             else if (strcmp(strV, "leave") == 0) // leave
             {
-                leave();
+                char id[3], net[4];
+                PauloBranco = 1;
+                sscanf(buf, "%s %s %s", strV, net, id);
+                Com_UDP(PauloBranco, net, id, IP, TCP);
+            }
+            else if (strcmp(strV, "show") == 0) // exit
+            {
+                char id[3], net[4];
+                sscanf(buf, "%s %s %s", strV, net, id);
+                Com_UDP(PauloBranco, net, id, IP, TCP);
             }
             else if (strcmp(strV, "exit") == 0) // exit
             {
-                sair();
+                printf("See yaa soon...\n");
+                exit(0);
             }
             else
             {
