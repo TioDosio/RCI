@@ -1,3 +1,4 @@
+/* Grupo 47 André Teodósio e Henrique Delfino.*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,10 +13,6 @@ void help()
     printf("Usage: ./cot <IP> <TCP>\n");
     printf("Usage: ./cot\n");
     exit(1);
-}
-void create(char *name)
-{
-    printf("creating\n");
 }
 void delete()
 {
@@ -186,13 +183,11 @@ int main(int argc, char *argv[])
             {
                 char name[101];
                 sscanf(buf, "%s %s", strV, name);
-                create(name);
+                printf("created name: %s\n", name);
             }
             else if (strcmp(strV, "delete") == 0) // delete name
             {
-                char name[101];
-                sscanf(buf, "%s %s", strV, name);
-                delete (name);
+                char name[] = "";
             }
             else if (strcmp(strV, "get") == 0) // get dest name
             {
