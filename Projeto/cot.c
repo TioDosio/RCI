@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-
+#include <unistd.h>
 void help()
 {
     printf("Usage: ./cot <IP> <TCP> <regIP> <regUDP>\n");
@@ -27,6 +27,8 @@ void get(char *dest, char *name)
 }
 int join(char *net, char *id)
 {
+    char sendV[15];
+    sprintf(sendV, "NODES %s", net);
     struct addrinfo hints, *res;
     int fd, errcode;
     ssize_t n;
@@ -54,10 +56,10 @@ int join(char *net, char *id)
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;      // IPv4
     hints.ai_socktype = SOCK_DGRAM; // UDP socket
-    errcode = getaddrinfo("tejo.tecnico.ulisboa.pt", "59 q  ", &hints, &res);
+    errcode = getaddrinfo("tejo.tecnico.ulisboa.pt", "59000", &hints, &res);
     if (errcode != 0) /*error*/
         exit(1);
-    n = sendto(fd, sendV, 9, 0, res->ai_addr, res->ai_addrlen);
+    n = sendto(fd, sendV, strlen(sendV), 0, res->ai_addr, res->ai_addrlen);
     if (n == -1) /*error*/
         exit(1);
     addrlen = sizeof(addr);
@@ -65,38 +67,9 @@ int join(char *net, char *id)
     if (n == -1) /*error*/
         exit(1);
     buffer[n] = '\0';
-    printf("echo: %s\n", buffer);
+    printf("%s\n", buffer);
     close(fd);
     freeaddrinfo(res);
-    exit(0);
-    ptr = strcpy(buffer, "Hello!\n");
-    nbytes = 7;
-    nleft = nbytes;
-    while (nleft > 0)
-    {
-        nwritten = write(fd, ptr, nleft);
-        if (nwritten <= 0) /*error*/
-            exit(1);
-        nleft -= nwritten;
-        ptr += nwritten;
-    }
-    nleft = nbytes;
-    ptr = buffer;
-    while (nleft > 0)
-    {
-        nread = read(fd, ptr, nleft);
-        if (nread == -1) /*error*/
-            exit(1);
-        else if (nread == 0)
-            break; // closed by peer
-        nleft -= nread;
-        ptr += nread;
-    }
-    nread = nbytes - nleft;
-    buffer[nread] = '\0';
-    printf("echo: %s\n", buffer);
-    close(fd);
-    printf("joining... net:%s id:%s\n", net, id);
 }
 void djoin(char *net, char *id, char *bootid, char *bootIP, char *bootTCP) //                    djoin(net, id, bootid, bootIP, bootTCP);
 
@@ -138,7 +111,6 @@ int main(int argc, char *argv[])
     int TCP = 0;        // Porto do TCP que é dado
     char *regIP = NULL; // IP do UDP pode ou não ser dado
     int regUDP = 0;     // Porto do UDP que pode ou não ser dado
-    struct timeval tv;
     switch (argc)
     {
     case 1:
@@ -147,7 +119,7 @@ int main(int argc, char *argv[])
     case 3: // Recebe apenas o IP e o TCP
         printf("Com 2 argumentos\n");
         regIP = "193.136.138.142";
-        regUDP = 58001; /////////////////////////////Mudar para 59000
+        regUDP = 59000;
         IP = argv[1];
         TCP = atoi(argv[2]);
         printf("IP: %s\n", IP);
@@ -171,85 +143,81 @@ int main(int argc, char *argv[])
         printf("argc %d\n", argc);
         help();
     }
-
+    fd_set readfds;
+    FD_ZERO(&readfds);
+    FD_SET(STDIN_FILENO, &readfds);
     while (1)
-    { // WTF is that?
-        fd_set readfds, ready_sockets, current_sockets;
-        FD_ZERO(&readfds);
-        FD_SET(fd0, &readfds);
-        tv.tv_sec = 30;
-        tv.tv_usec = 0;
-        int rval = select(2, &readfds, NULL, NULL, &tv);
+    {
         char buf[100];
+        int rval = select(2, &readfds, NULL, NULL, NULL);
         if (rval == -1)
         {
             perror("select");
             printf("Error rval a -1\n");
             exit(EXIT_FAILURE);
         }
-        else if (rval > 0)
+        fgets(buf, sizeof(buf), stdin);
+        char strV[10]; // guardar o 1º comando
+        sscanf(buf, "%s ", strV);
+        if (FD_ISSET(STDIN_FILENO, &readfds))
         {
-            if (FD_ISSET(fd0, &readfds))
+            if (strcmp(strV, "join") == 0) // join net id
             {
-                fgets(buf, sizeof(buf), stdin);
-                char strV[10]; // guardar o 1º comando
-                sscanf(buf, "%s ", strV);
-                if (strcmp(strV, "join") == 0) // join net id
-                {
-                    char id[3], net[4];
-                    sscanf(buf, "%s %s %s", strV, net, id);
-                    join(net, id);
-                }
-                else if (strcmp(strV, "djoin") == 0) // djoin net id bootid bootIP bootTCP
-                {
-                    char id[3], net[4], bootid[3], bootIP[16], bootTCP[5];
-                    sscanf(buf, "%s %s %s %s %s %s", strV, net, id, bootid, bootIP, bootTCP);
-                    djoin(net, id, bootid, bootIP, bootTCP);
-                }
-                else if (strcmp(strV, "create") == 0) // create name
-                {
-                    char name[101];
-                    sscanf(buf, "%s %s", strV, name);
-                    create(name);
-                }
-                else if (strcmp(strV, "delete") == 0) // delete name
-                {
-                    char name[101];
-                    sscanf(buf, "%s %s", strV, name);
-                    delete (name);
-                }
-                else if (strcmp(strV, "get") == 0) // get dest name
-                {
-                    char dest[4], name[101];
-                    sscanf(buf, "%s %s %s", strV, dest, name);
-                    get(dest, name);
-                }
-                else if ((strcmp(strV, "show topology") == 0) || (strcmp(strV, "st\n") == 0)) // show topology (st)
-                {
-                    st();
-                }
-                else if ((strcmp(strV, "show names") == 0) || (strcmp(strV, "sn\n") == 0)) // show names (sn)
-                {
-                    sn();
-                }
-                else if ((strcmp(strV, "show routing") == 0) || (strcmp(strV, "sr\n") == 0)) // show routing (sr)
-                {
-                    sr();
-                }
-                else if (strcmp(strV, "leave") == 0) // leave
-                {
-                    leave();
-                }
-                else if (strcmp(strV, "exit") == 0) // exit
-                {
-                    sair();
-                }
-                else
-                {
-                    printf("Invalid command\n");
-                }
+                char id[3], net[4];
+                sscanf(buf, "%s %s %s", strV, net, id);
+                join(net, id);
+            }
+            else if (strcmp(strV, "djoin") == 0) // djoin net id bootid bootIP bootTCP
+            {
+                char id[3], net[4], bootid[3], bootIP[16], bootTCP[5];
+                sscanf(buf, "%s %s %s %s %s %s", strV, net, id, bootid, bootIP, bootTCP);
+                djoin(net, id, bootid, bootIP, bootTCP);
+            }
+            else if (strcmp(strV, "create") == 0) // create name
+            {
+                char name[101];
+                sscanf(buf, "%s %s", strV, name);
+                create(name);
+            }
+            else if (strcmp(strV, "delete") == 0) // delete name
+            {
+                char name[101];
+                sscanf(buf, "%s %s", strV, name);
+                delete (name);
+            }
+            else if (strcmp(strV, "get") == 0) // get dest name
+            {
+                char dest[4], name[101];
+                sscanf(buf, "%s %s %s", strV, dest, name);
+                get(dest, name);
+            }
+            else if ((strcmp(strV, "show topology") == 0) || (strcmp(strV, "st\n") == 0)) // show topology (st)
+            {
+                st();
+            }
+            else if ((strcmp(strV, "show names") == 0) || (strcmp(strV, "sn\n") == 0)) // show names (sn)
+            {
+                sn();
+            }
+            else if ((strcmp(strV, "show routing") == 0) || (strcmp(strV, "sr\n") == 0)) // show routing (sr)
+            {
+                sr();
+            }
+            else if (strcmp(strV, "leave") == 0) // leave
+            {
+                leave();
+            }
+            else if (strcmp(strV, "exit") == 0) // exit
+            {
+                sair();
+            }
+            else
+            {
+                printf("Invalid command\n");
             }
         }
+        FD_ZERO(&readfds);
+        FD_SET(STDIN_FILENO, &readfds);
     }
     return 0;
 }
