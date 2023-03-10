@@ -44,7 +44,7 @@ int Com_UDP(int PauloBranco, char *net, char *id, char *IP, char *TCP)
     ssize_t n;
     struct sockaddr addr;
     ssize_t nbytes, nleft, nwritten, nread;
-    char *ptr, buffer[128 + 1];
+    char *ptr, buffer[2500];
     int socket(int domain, int type, int protocol);
     ssize_t sendto(int s, const void *buf, size_t len, int flags,
                    const struct sockaddr *dest_addr, socklen_t addrlen);
@@ -147,11 +147,12 @@ int main(int argc, char *argv[])
         printf("argc %d\n", argc);
         help();
     }
-    fd_set readfds;
-    FD_ZERO(&readfds);
-    FD_SET(STDIN_FILENO, &readfds);
     while (1)
     {
+        // for com fdset com todos os fd's
+        fd_set readfds;
+        FD_ZERO(&readfds);
+        FD_SET(STDIN_FILENO, &readfds);
         char buf[100];
         int rval = select(2, &readfds, NULL, NULL, NULL);
         if (rval == -1)
@@ -179,7 +180,7 @@ int main(int argc, char *argv[])
                 sscanf(buf, "%s %s %s %s %s %s", strV, net, id, bootid, bootIP, bootTCP);
                 djoin(net, id, bootid, bootIP, bootTCP);
             }
-            else if (strcmp(strV, "create") == 0) // create name
+            else if (strcmp(strV, "create") == 0) //////////////////////////////////////////// create name -> Criar vários nomes
             {
                 char name[101];
                 sscanf(buf, "%s %s", strV, name);
