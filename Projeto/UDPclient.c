@@ -53,32 +53,6 @@ int main(void)
     if (n == -1) /*error*/
         exit(1);
     buffer[n] = '\0';
-    printf("echo: %s\n", buffer);
-
-    ptr = strcpy(buffer, "Bananinhas das boas\n");
-    nbytes = 7;
-    nleft = nbytes;
-    while (nleft > 0)
-    {
-        nwritten = write(fd, ptr, nleft);
-        if (nwritten <= 0) /*error*/
-            exit(1);
-        nleft -= nwritten;
-        ptr += nwritten;
-    }
-    nleft = nbytes;
-    ptr = buffer;
-    while (nleft > 0)
-    {
-        nread = read(fd, ptr, nleft);
-        if (nread == -1) /*error*/
-            exit(1);
-        else if (nread == 0)
-            break; // closed by peer
-        nleft -= nread;
-        ptr += nread;
-    }
-    nread = nbytes - nleft;
     buffer[nread] = '\0';
     printf("echo: %s\n", buffer);
     close(fd);

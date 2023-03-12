@@ -34,11 +34,11 @@ int Com_UDP(int PauloBranco, char *net, char *id, char *IP, char *TCP)
     {
         sprintf(sendV, "REG %s %s %s %s", net, id, IP, TCP); // REG net id IP TCP
     }
-    else if (PauloBranco == 2)
+    else
     {
         sprintf(sendV, "NODES %s", net); // NODES net
     }
-    printf("sending: %s", sendV);
+    printf("sending: %s\n\n", sendV);
     struct addrinfo hints, *res;
     int fd, errcode;
     ssize_t n;
@@ -73,11 +73,33 @@ int Com_UDP(int PauloBranco, char *net, char *id, char *IP, char *TCP)
     if (n == -1) /*error*/
         exit(1);
     addrlen = sizeof(addr);
-    n = recvfrom(fd, buffer, 128, 0, &addr, &addrlen);
-    if (n == -1) /*error*/
+
+    n = recvfrom(fd, buffer, 2500, 0, &addr, &addrlen); // Recebe a resposta do servidor
+    if (n == -1)                                        /*error*/
         exit(1);
-    buffer[n] = '\0';
-    printf("%s\n", buffer);
+    buffer[n] = '\0'; // adiciona terminador de string
+    printf("received: %s\n\n", buffer);
+    // meter argumentos do buffer nos arrays
+    char *saveptr;
+    char *line = strtok_r(buffer, "\n", &saveptr); // Skip the first line
+    line = strtok_r(NULL, "\n", &saveptr);         // Start with the second line
+    char IDar[100][3];
+    char IPar[100][15];
+    char Portar[100][6];
+    int i = 0;
+    while (line != NULL)
+    {
+        sscanf(line, "%s %s %s", IDar[i], IPar[i], Portar[i]);
+        line = strtok_r(NULL, "\n", &saveptr);
+        i++;
+    }
+    int count = i;
+    for (size_t i = 0; i < count; i++)
+    {
+        printf("First arguments: %s %s %s\n", IDar[i], IPar[i], Portar[i]);
+    }
+
+    printf("\n");
     close(fd);
     freeaddrinfo(res);
 }
