@@ -29,7 +29,7 @@ int Com_UDP(int PauloBranco, char *net, char *id, char *IP, char *TCP)
     {
         // sscanf(sendV, "%s %s %s", PauloBranco, net, id);  // UNREG net id
         sprintf(sendV, "UNREG %s %s", net, id); // NODES net
-    }
+    }   
     else if (PauloBranco == 0)
     {
         sprintf(sendV, "REG %s %s %s %s", net, id, IP, TCP); // REG net id IP TCP
@@ -75,8 +75,10 @@ int Com_UDP(int PauloBranco, char *net, char *id, char *IP, char *TCP)
     addrlen = sizeof(addr);
 
     n = recvfrom(fd, buffer, 2500, 0, &addr, &addrlen); // Recebe a resposta do servidor
-    if (n == -1)                                        /*error*/
+    if (n == -1)
+    { /*error*/
         exit(1);
+    }
     buffer[n] = '\0'; // adiciona terminador de string
     printf("received: %s\n\n", buffer);
     // meter argumentos do buffer nos arrays

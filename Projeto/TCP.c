@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+
 int main(void)
 {
     struct addrinfo hints, *res;
