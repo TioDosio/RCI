@@ -22,14 +22,14 @@ void get(char *dest, char *name)
 {
     printf("getting\n");
 }
-int Com_UDP(int PauloBranco, char *net, char *id, char *IP, char *TCP)
+char *Com_UDP(int PauloBranco, char *net, char *id, char *IP, char *TCP)
 {
     char sendV[50];
     if (PauloBranco == 1)
     {
         // sscanf(sendV, "%s %s %s", PauloBranco, net, id);  // UNREG net id
         sprintf(sendV, "UNREG %s %s", net, id); // NODES net
-    }   
+    }
     else if (PauloBranco == 0)
     {
         sprintf(sendV, "REG %s %s %s %s", net, id, IP, TCP); // REG net id IP TCP
@@ -82,29 +82,21 @@ int Com_UDP(int PauloBranco, char *net, char *id, char *IP, char *TCP)
     buffer[n] = '\0'; // adiciona terminador de string
     printf("received: %s\n\n", buffer);
     // meter argumentos do buffer nos arrays
-    char *saveptr;
-    char *line = strtok_r(buffer, "\n", &saveptr); // Skip the first line
-    line = strtok_r(NULL, "\n", &saveptr);         // Start with the second line
-    char IDar[100][3];
-    char IPar[100][15];
-    char Portar[100][6];
-    int i = 0;
+    char *saveptr, IDv[100], IPv[100], Portv[100];
+    char *line = strtok_r(buffer, "\n", &saveptr);
     while (line != NULL)
     {
-        sscanf(line, "%s %s %s", IDar[i], IPar[i], Portar[i]);
+        sscanf(line, "%s %s %s", IDv, IPv, Portv);
         line = strtok_r(NULL, "\n", &saveptr);
-        i++;
     }
-    int count = i;
-    for (size_t i = 0; i < count; i++)
+    if (line == NULL)
     {
-        printf("First arguments: %s %s %s\n", IDar[i], IPar[i], Portar[i]);
+        printf("\n%s %s %s\n", IDv, IPv, Portv);
     }
-
-    printf("\n");
     close(fd);
     freeaddrinfo(res);
 }
+
 void djoin(char *net, char *id, char *bootid, char *bootIP, char *bootTCP) //                    djoin(net, id, bootid, bootIP, bootTCP);
 
 {

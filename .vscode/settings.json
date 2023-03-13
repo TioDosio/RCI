@@ -3,6 +3,7 @@
         "unistd.h": "c",
         "socket.h": "c",
         "typeinfo": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "netdb.h": "c"
     }
 }

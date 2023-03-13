@@ -3,7 +3,7 @@ CC = gcc
 CFLAGS = -Wall -Werror
 
 # Define the source and object files
-SRCS = fs.c cot.c
+SRCS = cot.c
 OBJS = $(SRCS:.c=.o)
 
 # Define the name of the executable
