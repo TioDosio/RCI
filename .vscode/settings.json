@@ -4,6 +4,7 @@
         "socket.h": "c",
         "typeinfo": "c",
         "string.h": "c",
-        "netdb.h": "c"
+        "netdb.h": "c",
+        "select.h": "c"
     }
 }

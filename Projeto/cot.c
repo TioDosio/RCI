@@ -7,6 +7,14 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
+char a[10], b[20], c[10]; ////// depois meter na struct
+/*typedef struct UDP
+{
+    char IDv[3];
+    char IPv[20];
+    char Portv[6];
+} UDP;
+UDP ban;*/
 void help()
 {
     printf("Usage: ./cot <IP> <TCP> <regIP> <regUDP>\n");
@@ -82,16 +90,18 @@ char *Com_UDP(int PauloBranco, char *net, char *id, char *IP, char *TCP)
     buffer[n] = '\0'; // adiciona terminador de string
     printf("received: %s\n\n", buffer);
     // meter argumentos do buffer nos arrays
-    char *saveptr, IDv[100], IPv[100], Portv[100];
+    char *saveptr;
     char *line = strtok_r(buffer, "\n", &saveptr);
+
     while (line != NULL)
     {
-        sscanf(line, "%s %s %s", IDv, IPv, Portv);
+        sscanf(line, "%s %s %s", a, b, c);
         line = strtok_r(NULL, "\n", &saveptr);
     }
     if (line == NULL)
     {
-        printf("\n%s %s %s\n", IDv, IPv, Portv);
+        printf("\n%s %s %s\n", a, b, c);
+        // printf("\n%s %s %s\n", &ban.IDv, &ban.IPv, &ban.Portv);
     }
     close(fd);
     freeaddrinfo(res);
