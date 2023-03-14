@@ -7,7 +7,7 @@ SRCS = main.c UDP.c
 OBJS = $(SRCS:.c=.o)
 
 # Define the name of the executable
-TARGET = cot.out
+TARGET = cot
 
 # Define the build rule
 all: $(TARGET)
