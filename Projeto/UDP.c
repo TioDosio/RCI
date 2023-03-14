@@ -42,12 +42,12 @@ void Reg(int PauloBranco, char *net, char *id, char *IP, char *TCP)
     if (errcode != 0) /*error*/
         exit(1);
 
-    if (PauloBranco == 1)
+    if (PauloBranco == 1) // UnResgistar
     {
         // sscanf(sendV, "%s %s %s", PauloBranco, net, id);  // UNREG net id
         sprintf(sendV, "UNREG %s %s", net, id); // NODES net
     }
-    else if (PauloBranco == 0)
+    else if (PauloBranco == 0) // Registar mas pergunta pelos nós antes
     {
         // NODES net
         n = sendto(fd, sendS, strlen(sendS), 0, res->ai_addr, res->ai_addrlen);
@@ -65,10 +65,29 @@ void Reg(int PauloBranco, char *net, char *id, char *IP, char *TCP)
     }
     else if (PauloBranco == 2)
     {
-        sprintf(sendV, "NODES %s", net); // NODES net
+        sprintf(sendS, "NODES %s", net); // NODES net
     }
+    char *saveptr, IDv[3], IPv[20], Portv[6]; // not array
+    char *line = strtok_r(buffer, "\n", &saveptr);
+    while (line != NULL)
+    {
+        sscanf(line, "%s %s %s", IDv, IPv, Portv);
+        srand(time(NULL));
+        int auxIDv = atoi(IDv);
+        int auxid = atoi(id);
+        while (auxIDv == auxid)
+        {
+            id = rand() % 100;
+            printf("ID repetido, novo ID: %d\n", auxid);
+        }
+        printf("NOVO: %d\n", auxid);
 
-    sprintf(sendS, "NODES %s", net); // NODES net
+        line = strtok_r(NULL, "\n", &saveptr);
+    }
+    if (line == NULL)
+    {
+        printf("\n%s %s %s\n", IDv, IPv, Portv);
+    }
 
     printf("sending: %s\n\n", sendV);
     n = sendto(fd, sendV, strlen(sendV), 0, res->ai_addr, res->ai_addrlen);
