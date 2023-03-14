@@ -5,6 +5,7 @@
         "typeinfo": "c",
         "string.h": "c",
         "netdb.h": "c",
-        "select.h": "c"
+        "select.h": "c",
+        "stdlib.h": "c"
     }
 }

@@ -7,14 +7,14 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
-char a[10], b[20], c[10]; ////// depois meter na struct
-/*typedef struct UDP
+typedef struct UDP
 {
     char IDv[3];
     char IPv[20];
     char Portv[6];
 } UDP;
-UDP ban;*/
+
+UDP ban;
 void help()
 {
     printf("Usage: ./cot <IP> <TCP> <regIP> <regUDP>\n");
@@ -30,7 +30,10 @@ void get(char *dest, char *name)
 {
     printf("getting\n");
 }
-char *Com_UDP(int PauloBranco, char *net, char *id, char *IP, char *TCP)
+void Com_TCP()
+{
+}
+void Com_UDP(int PauloBranco, char *net, char *id, char *IP, char *TCP)
 {
     char sendV[50];
     if (PauloBranco == 1)
@@ -92,17 +95,22 @@ char *Com_UDP(int PauloBranco, char *net, char *id, char *IP, char *TCP)
     // meter argumentos do buffer nos arrays
     char *saveptr;
     char *line = strtok_r(buffer, "\n", &saveptr);
-
+    char a[10], b[20], c[10];
     while (line != NULL)
     {
         sscanf(line, "%s %s %s", a, b, c);
         line = strtok_r(NULL, "\n", &saveptr);
     }
+    strcpy(ban.IDv, a);
+    strcpy(ban.IPv, b);
+    strcpy(ban.Portv, c);
+
+    /* debug para saber que o nó ta a ser lido
     if (line == NULL)
     {
         printf("\n%s %s %s\n", a, b, c);
-        // printf("\n%s %s %s\n", &ban.IDv, &ban.IPv, &ban.Portv);
-    }
+        printf("\n%s %s %s\n", &ban.IDv, &ban.IPv, &ban.Portv);
+    }*/
     close(fd);
     freeaddrinfo(res);
 }

@@ -5,13 +5,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
-char a[3], b[20], c[10];
-int main(void)
+int mains()
 {
-    sprintf(a, "47");
-    sprintf(b, "193.136.138.142"); // servidor de nos a testar apenas
-    sprintf(c, "58001");           //  porto echo
-    printf("%s %s %s\n", a, b, c);
     ssize_t nbytes, nleft, nwritten, nread;
     char *ptr, buffer[128 + 1];
     struct addrinfo hints, *res;
@@ -31,7 +26,6 @@ int main(void)
     //////////////////////////////
     ptr = strcpy(buffer, "Hello!\n");
     nbytes = strlen(buffer);
-    nleft = nbytes;
     while (nleft > 0)
     {
         nwritten = write(fd, ptr, nleft);
