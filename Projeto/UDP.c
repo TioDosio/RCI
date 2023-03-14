@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <time.h>
 #include "UDP.h"
 
 void Reg(int PauloBranco, char *net, char *id, char *IP, char *TCP)
@@ -68,7 +69,7 @@ void Reg(int PauloBranco, char *net, char *id, char *IP, char *TCP)
         sprintf(sendS, "NODES %s", net); // NODES net
     }
     char *saveptr, IDv[3], IPv[20], Portv[6]; // not array
-    char *line = strtok_r(buffer, "\n", &saveptr);
+    char *line = strtok_r(bufNodes, "\n", &saveptr);
     while (line != NULL)
     {
         sscanf(line, "%s %s %s", IDv, IPv, Portv);
@@ -77,7 +78,7 @@ void Reg(int PauloBranco, char *net, char *id, char *IP, char *TCP)
         int auxid = atoi(id);
         while (auxIDv == auxid)
         {
-            id = rand() % 100;
+            auxid = rand() % 100;
             printf("ID repetido, novo ID: %d\n", auxid);
         }
         printf("NOVO: %d\n", auxid);
