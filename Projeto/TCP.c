@@ -21,10 +21,10 @@ void cona(char *IP, char *TCP)
     if (fd == -1)
         exit(1); // error
     memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_INET;       // IPv4
-    hints.ai_socktype = SOCK_STREAM; // TCP socket
-    n = getaddrinfo("193.136.138.142", "58001", &hints, &res);
-    if (n != 0) /*error*/
+    hints.ai_family = AF_INET;                                 // IPv4
+    hints.ai_socktype = SOCK_STREAM;                           // TCP socket
+    n = getaddrinfo("193.136.138.142", "58001", &hints, &res); // meter IP e TCP do nó
+    if (n != 0)                                                /*error*/
         exit(1);
     n = connect(fd, res->ai_addr, res->ai_addrlen);
     if (n == -1) /*error*/
@@ -56,5 +56,4 @@ void cona(char *IP, char *TCP)
     buffer[nread] = '\0';
     printf("TCP: %s\n", buffer);
     close(fd);
-    exit(0);
 }

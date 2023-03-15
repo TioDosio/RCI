@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
         regIP = "193.136.138.142";
         regUDP = "59000";
         IP = "95.95.75.236"; // argv[1];
-        TCP = "59001";       // atoi(argv[2]);
+        TCP = argv[2];       //"59001";       // atoi(argv[2]);
         printf("IP: %s\n", IP);
         printf("TCP: %s\n", TCP);
         printf("RegIp: %s\n", regIP);

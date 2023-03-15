@@ -23,7 +23,7 @@ void reg(char *net, char *id, char *IP, char *TCP)
     else if (F >= 10 && F <= 99)
     {
         strcpy(id, "");
-        sprintf(id, "%d\n", F);
+        sprintf(id, "%d", F);
         printf("id: %s\n", id);
     }
     sprintf(sendV, "REG %s %s %s %s", net, id, IP, TCP); // REG net id IP TCP
@@ -182,7 +182,7 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
             while (intID == intIDv)
             {
                 intID = rand() % 100;
-                printf("ID already exists, new ID: %d", intID);
+                // printf("ID already exists, new ID: %d", intID);
             }
         }
         if (line == NULL)
