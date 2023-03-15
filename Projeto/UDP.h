@@ -3,6 +3,8 @@
 
 #include "UDP.h"
 
-void Reg(int PauloBranco, char *net, char *id, char *IP, char *TCP);
+void reg(char *net, char *id, char *IP, char *TCP);
+void unreg(char *net, char *id, char *IP, char *TCP);
+int show(int flagS, char *net, char *id, char *IP, char *TCP);
 
 #endif

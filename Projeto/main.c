@@ -117,16 +117,14 @@ int main(int argc, char *argv[])
         }
         fgets(buf, sizeof(buf), stdin);
         char strV[10]; // guardar o 1º comando
-        int PauloBranco = 2;
         sscanf(buf, "%s ", strV);
         if (FD_ISSET(STDIN_FILENO, &readfds))
         {
             if (strcmp(strV, "join") == 0) // join net id
             {
                 char id[3], net[4];
-                PauloBranco = 0;
                 sscanf(buf, "%s %s %s", strV, net, id);
-                Reg(PauloBranco, net, id, IP, TCP);
+                reg(net, id, IP, TCP);
             }
             else if (strcmp(strV, "djoin") == 0) // djoin net id bootid bootIP bootTCP
             {
@@ -165,15 +163,14 @@ int main(int argc, char *argv[])
             else if (strcmp(strV, "leave") == 0) // leave
             {
                 char id[3], net[4];
-                PauloBranco = 1;
                 sscanf(buf, "%s %s %s", strV, net, id);
-                Reg(PauloBranco, net, id, IP, TCP);
+                unreg(net, id, IP, TCP);
             }
             else if (strcmp(strV, "show") == 0) // exit
             {
                 char id[3], net[4];
                 sscanf(buf, "%s %s %s", strV, net, id);
-                Reg(PauloBranco, net, id, IP, TCP);
+                show(0, net, id, IP, TCP);
             }
             else if (strcmp(strV, "exit") == 0) // exit
             {
