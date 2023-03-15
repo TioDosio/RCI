@@ -80,8 +80,8 @@ int main(int argc, char *argv[])
         printf("Com 2 argumentos\n");
         regIP = "193.136.138.142";
         regUDP = "59000";
-        IP = "95.95.75.236"; // argv[1];
-        TCP = argv[2];       //"59001";       // atoi(argv[2]);
+        IP = "127.0.0.1"; // argv[1]; 95.95.75.236
+        TCP = argv[2];    //"59001";       // atoi(argv[2]);
         printf("IP: %s\n", IP);
         printf("TCP: %s\n", TCP);
         printf("RegIp: %s\n", regIP);
@@ -118,19 +118,21 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
         fgets(buf, sizeof(buf), stdin);
-        char strV[10]; // guardar o 1º comando
+        char strV[10], id[3], net[4]; // guardar o 1º comando
         sscanf(buf, "%s ", strV);
+
         if (FD_ISSET(STDIN_FILENO, &readfds))
         {
             if (strcmp(strV, "join") == 0) // join net id
             {
-                char id[3], net[4];
                 sscanf(buf, "%s %s %s", strV, net, id);
-                reg(net, id, IP, TCP);
+                clitTCP(IP, TCP);
+                /*sscanf(buf, "%s %s %s", strV, net, id);
+                reg(net, id, IP, TCP);*/
             }
             else if (strcmp(strV, "djoin") == 0) // djoin net id bootid bootIP bootTCP
             {
-                char id[3], net[4], bootid[3], bootIP[16], bootTCP[5];
+                char bootid[3], bootIP[16], bootTCP[5];
                 sscanf(buf, "%s %s %s %s %s %s", strV, net, id, bootid, bootIP, bootTCP);
                 djoin(net, id, bootid, bootIP, bootTCP);
             }
@@ -154,25 +156,25 @@ int main(int argc, char *argv[])
             {
                 st();
             }
-            else if ((strcmp(strV, "show names") == 0) || (strcmp(strV, "sn\n") == 0)) // show names (sn)
+            else if ((strcmp(strV, "show names") == 0) || (strcmp(strV, "server\n") == 0)) // show names (sn)
             {
-                sn();
+                servTCP();
+                // sn();
             }
-            else if ((strcmp(strV, "show routing") == 0) || (strcmp(strV, "sr\n") == 0)) // show routing (sr)
+            else if ((strcmp(strV, "show routing") == 0) || (strcmp(strV, "cliente\n") == 0)) // show routing (sr)
             {
-                sr();
+
+                // sr();
             }
             else if (strcmp(strV, "leave") == 0) // leave
             {
-                char id[3], net[4];
                 sscanf(buf, "%s %s %s", strV, net, id);
                 unreg(net, id, IP, TCP);
             }
             else if (strcmp(strV, "show") == 0) // exit
             {
-                char id[3], net[4];
-                sscanf(buf, "%s %s %s", strV, net, id);
-                show(0, net, id, IP, TCP);
+                /*sscanf(buf, "%s %s %s", strV, net, id);
+                show(0, net, id, IP, TCP);*/
                 clitTCP(IP, TCP);
             }
             else if (strcmp(strV, "exit") == 0) // exit
