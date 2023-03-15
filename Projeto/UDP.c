@@ -11,8 +11,8 @@
 
 void Reg(int PauloBranco, char *net, char *id, char *IP, char *TCP)
 {
-    char sendV[50];
-    char sendS[10];
+    char sendV[50]; // ver tamanhos depois
+    char sendS[20];
     char bufReg[2500], bufNodes[2500]; // bufReg[]= "OKREG" or "OKUNREG" bufNodes[]= todos os nós e info
     struct addrinfo hints, *res;
     int fd, errcode;
@@ -51,6 +51,7 @@ void Reg(int PauloBranco, char *net, char *id, char *IP, char *TCP)
     else if (PauloBranco == 0) // Registar mas pergunta pelos nós antes
     {
         // NODES net
+        sprintf(sendS, "NODES %s", net); // NODES net
         n = sendto(fd, sendS, strlen(sendS), 0, res->ai_addr, res->ai_addrlen);
         if (n == -1) /*error*/
             exit(1);
@@ -60,34 +61,40 @@ void Reg(int PauloBranco, char *net, char *id, char *IP, char *TCP)
         { /*error*/
             exit(1);
         }
-        bufNodes[n] = '\0'; // adiciona terminador de string
-        printf("received: %s\n", bufNodes);
+        bufNodes[n] = '\0';                       // adiciona terminador de string
+        printf("received: %s\n", bufNodes);       // receber lista dos nos
+        char *saveptr, IDv[3], IPv[20], Portv[6]; // not array
+        char *line = strtok_r(bufNodes, "\n", &saveptr);
+        while (line != NULL)
+        {
+            sscanf(line, "%s %s %s", IDv, IPv, Portv);
+            srand(time(NULL));
+            int auxIDv = atoi(IDv);
+            int auxid = atoi(id);
+            while (auxIDv == auxid)
+            {
+                auxid = rand() % 100;
+                printf("ID repetido, novo ID: %d\n", auxid);
+            }
+            printf("NOVO: %d\n", auxid);
+
+            line = strtok_r(NULL, "\n", &saveptr);
+            printf("flag1");
+        }
+        if (line == NULL)
+        {
+            printf("\n%s %s %s\n", IDv, IPv, Portv);
+        }
+
         sprintf(sendV, "REG %s %s %s %s", net, id, IP, TCP); // REG net id IP TCP
     }
     else if (PauloBranco == 2)
     {
         sprintf(sendS, "NODES %s", net); // NODES net
-    }
-    char *saveptr, IDv[3], IPv[20], Portv[6]; // not array
-    char *line = strtok_r(bufNodes, "\n", &saveptr);
-    while (line != NULL)
-    {
-        sscanf(line, "%s %s %s", IDv, IPv, Portv);
-        srand(time(NULL));
-        int auxIDv = atoi(IDv);
-        int auxid = atoi(id);
-        while (auxIDv == auxid)
-        {
-            auxid = rand() % 100;
-            printf("ID repetido, novo ID: %d\n", auxid);
-        }
-        printf("NOVO: %d\n", auxid);
-
-        line = strtok_r(NULL, "\n", &saveptr);
-    }
-    if (line == NULL)
-    {
-        printf("\n%s %s %s\n", IDv, IPv, Portv);
+        n = sendto(fd, sendS, strlen(sendS), 0, res->ai_addr, res->ai_addrlen);
+        n = recvfrom(fd, bufNodes, 2500, 0, &addr, &addrlen); // Recebe NOS
+        bufNodes[n] = '\0';                                   // adiciona terminador de string
+        printf("received: %s\n", bufNodes);                   // receber lista dos nos
     }
 
     printf("sending: %s\n\n", sendV);
