@@ -125,10 +125,10 @@ int main(int argc, char *argv[])
         {
             if (strcmp(strV, "join") == 0) // join net id
             {
-                sscanf(buf, "%s %s %s", strV, net, id);
-                clitTCP(IP, TCP);
                 /*sscanf(buf, "%s %s %s", strV, net, id);
-                reg(net, id, IP, TCP);*/
+                clitTCP(IP, TCP);*/
+                sscanf(buf, "%s %s %s", strV, net, id);
+                reg(net, id, IP, TCP);
             }
             else if (strcmp(strV, "djoin") == 0) // djoin net id bootid bootIP bootTCP
             {
@@ -173,9 +173,9 @@ int main(int argc, char *argv[])
             }
             else if (strcmp(strV, "show") == 0) // exit
             {
-                /*sscanf(buf, "%s %s %s", strV, net, id);
-                show(0, net, id, IP, TCP);*/
-                clitTCP(IP, TCP);
+                sscanf(buf, "%s %s %s", strV, net, id);
+                show(0, net, id, IP, TCP);
+                // clitTCP(IP, TCP);
             }
             else if (strcmp(strV, "exit") == 0) // exit
             {
