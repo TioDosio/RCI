@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     if (fd0 == -1)
     {
         perror("fileno");
-        exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE); // teste
     }
     char *IP = NULL;     // IP do TCP que é dado
     char *TCP = NULL;    // Porto do TCP que é dado
