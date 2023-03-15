@@ -9,7 +9,7 @@
 #include "UDP.h"
 #include "TCP.h"
 
-void cona(char *IP, char *TCP)
+void clitTCP(char *IP, char *TCP)
 {
     struct addrinfo hints, *res;
     int fd, n;
@@ -56,4 +56,7 @@ void cona(char *IP, char *TCP)
     buffer[nread] = '\0';
     printf("TCP: %s\n", buffer);
     close(fd);
+}
+void servTCP(char *IP, char *TCP)
+{
 }
