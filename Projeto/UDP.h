@@ -1,6 +1,6 @@
 #ifndef UDP_H
 #define UDP_H
-
+#include "TCP.h"
 #include "UDP.h"
 
 void reg(char *net, char *id, char *IP, char *TCP);

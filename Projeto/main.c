@@ -8,6 +8,8 @@
 #include <netdb.h>
 #include <unistd.h>
 #include "UDP.h"
+#include "TCP.h"
+
 typedef struct UDP
 {
     char IDv[3];
@@ -171,6 +173,7 @@ int main(int argc, char *argv[])
                 char id[3], net[4];
                 sscanf(buf, "%s %s %s", strV, net, id);
                 show(0, net, id, IP, TCP);
+                cona(IP, TCP);
             }
             else if (strcmp(strV, "exit") == 0) // exit
             {
