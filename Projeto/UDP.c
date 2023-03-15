@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <time.h>
 #include "UDP.h"
+#include "TCP.h"
 
 void reg(char *net, char *id, char *IP, char *TCP)
 {
