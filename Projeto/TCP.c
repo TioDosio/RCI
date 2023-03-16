@@ -11,25 +11,13 @@
 
 void clitTCP(TCPS *tcpV, char *IP, char *TCP)
 {
-    struct addrinfo hints, *res;
     int n;
     // char send[100],
     char buffer[129], *ptr; // ???tamanhos???
-    // sprintf(send, "send %s %s", IP, Port);
-    ssize_t nbytes, nleft, nwritten, nread;
+                            // sprintf(send, "send %s %s", IP, Port);
     tcpV->flagNFD += 1;
-    tcpV->fdArray[tcpV->flagNFD] = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
-    if (tcpV->fdArray[tcpV->flagNFD] == -1)
-        exit(1); // error
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_INET;                          // IPv4
-    hints.ai_socktype = SOCK_STREAM;                    // TCP socket
-    n = getaddrinfo("95.95.75.236", TCP, &hints, &res); // meter IP e TCP do nó
-    if (n != 0)                                         /*error*/
-        exit(1);
-    n = connect(tcpV->fdArray[tcpV->flagNFD], res->ai_addr, res->ai_addrlen);
-    if (n == -1) /*error*/
-        exit(1);
+    tcpV->fdArray[tcpV->flagNFD] = ligar();
+    ssize_t nbytes, nleft, nwritten, nread;
     ptr = strcpy(buffer, "Bananinhas das boas\n");
     nbytes = strlen(ptr);
     nleft = nbytes;
@@ -101,4 +89,22 @@ void servTCP(TCPS *tcpV, char *TCP)
     freeaddrinfo(res);
     close(fd);
     exit(0);
+}
+int ligar()
+{
+    struct addrinfo hints, *res;
+    int n, fd;
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_INET; // IPv4
+    hints.ai_socktype = SOCK_STREAM;
+    fd = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
+    if (tcpV->fdArray[tcpV->flagNFD] == -1)
+        exit(1);                                            // error
+    n = getaddrinfo("95.95.75.236", "59000", &hints, &res); // meter IP e TCP do nó que nos queremos ligar
+    if (n != 0)                                             /*error*/
+        exit(1);
+    n = connect(tcpV->fdArray[tcpV->flagNFD], res->ai_addr, res->ai_addrlen);
+    if (n == -1) /*error*/
+        exit(1);
+    return fd;
 }
