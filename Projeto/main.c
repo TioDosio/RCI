@@ -16,8 +16,15 @@ typedef struct UDP
     char IPv[20];
     char Portv[6];
 } UDP;
-
 UDP ban;
+// não usado??
+typedef struct TCP
+{
+    int fdArray[100];
+    // int flagNFD;
+} TCP;
+TCP tcpV;
+
 void help()
 {
     printf("Usage: ./cot <IP> <TCP> <regIP> <regUDP>\n");
@@ -60,18 +67,18 @@ void sr()
 }
 int main(int argc, char *argv[])
 {
-    int fd0;
-    fd0 = fileno(stdin);
-    if (fd0 == -1)
+    int flagNFD = 1;
+    char *IP = NULL;                 // IP do TCP que é dado
+    char *TCP = NULL;                // Porto do TCP que é dado
+    char *regIP = NULL;              // IP do UDP pode ou não ser dado
+    char *regUDP = NULL;             // Porto do UDP que pode ou não ser dado
+    tcpV.fdArray[0] = fileno(stdin); // stdin=entrada do teclado
+    if (tcpV.fdArray[0] == -1)
     {
         perror("fileno");
         exit(EXIT_FAILURE);
     }
-    char *IP = NULL;     // IP do TCP que é dado
-    char *TCP = NULL;    // Porto do TCP que é dado
-    char *regIP = NULL;  // IP do UDP pode ou não ser dado
-    char *regUDP = NULL; // Porto do UDP que pode ou não ser dado
-    switch (argc)
+    switch (argc) // leitura dos argumentos de entrada
     {
     case 1:
         printf("Sem argumentos\n"); // Não tem argumentos
@@ -80,8 +87,8 @@ int main(int argc, char *argv[])
         printf("Com 2 argumentos\n");
         regIP = "193.136.138.142";
         regUDP = "59000";
-        IP = "127.0.0.1"; // argv[1]; 95.95.75.236
-        TCP = argv[2];    //"59001";       // atoi(argv[2]);
+        IP = "95.95.75.236"; //    "127.0.0.1"; ou "95.95.75.236"; ou argv[1]; // pode ser int??????????
+        TCP = "59001";       //"59001";       // atoi(argv[2]);               // pode ser int??????????
         printf("IP: %s\n", IP);
         printf("TCP: %s\n", TCP);
         printf("RegIp: %s\n", regIP);
@@ -91,8 +98,8 @@ int main(int argc, char *argv[])
         printf("Com 4 argumentos\n");
         IP = argv[1];
         regIP = argv[3];
-        // TCP = atoi(argv[2]);
-        // regUDP = atoi(argv[4]);
+        TCP = argv[2];    // pode ser int??????????
+        regUDP = argv[4]; // pode ser int??????????
         printf("IP: %s\n", IP);
         printf("TCP: %s\n", TCP);
         printf("RegIp: %s\n", regIP);
@@ -105,12 +112,17 @@ int main(int argc, char *argv[])
     }
     while (1)
     {
-        // for com fdset com todos os fd's
         fd_set readfds;
-        FD_ZERO(&readfds);
-        FD_SET(STDIN_FILENO, &readfds);
         char buf[100];
-        int rval = select(2, &readfds, NULL, NULL, NULL);
+        for (int i = 0; i < flagNFD; i++) // for com fdset com todos os fd's
+        {
+            FD_ZERO(&readfds);
+            FD_SET(tcpV.fdArray[i], &readfds);
+        }
+        // FD_ZERO(&readfds);
+        // FD_SET(STDIN_FILENO, &readfds);
+
+        int rval = select(flagNFD + 1, &readfds, NULL, NULL, NULL);
         if (rval == -1)
         {
             perror("select");
@@ -187,8 +199,6 @@ int main(int argc, char *argv[])
                 printf("Invalid command\n");
             }
         }
-        FD_ZERO(&readfds);
-        FD_SET(STDIN_FILENO, &readfds);
     }
     return 0;
 }

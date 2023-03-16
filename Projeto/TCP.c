@@ -9,15 +9,16 @@
 #include "UDP.h"
 #include "TCP.h"
 
-void clitTCP(char *IP, char *TCP)
-{
+void clitTCP(int flagNFD, char *IP, char *TCP)
+{   
     struct addrinfo hints, *res;
     int fd, n;
     // char send[100],
     char buffer[129], *ptr; // ???tamanhos???
     // sprintf(send, "send %s %s", IP, Port);
     ssize_t nbytes, nleft, nwritten, nread;
-    fd = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
+    flagNFD += 1;
+    tcpV.tcpArray[flagNFD] = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
     if (fd == -1)
         exit(1); // error
     memset(&hints, 0, sizeof hints);
