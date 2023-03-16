@@ -9,17 +9,17 @@
 #include "UDP.h"
 #include "TCP.h"
 
-void clitTCP(int flagNFD, char *IP, char *TCP)
-{   
+void clitTCP(TCPS *tcpV, char *IP, char *TCP)
+{
     struct addrinfo hints, *res;
-    int fd, n;
+    int n;
     // char send[100],
     char buffer[129], *ptr; // ???tamanhos???
     // sprintf(send, "send %s %s", IP, Port);
     ssize_t nbytes, nleft, nwritten, nread;
-    flagNFD += 1;
-    tcpV.tcpArray[flagNFD] = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
-    if (fd == -1)
+    tcpV->flagNFD += 1;
+    tcpV->fdArray[tcpV->flagNFD] = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
+    if (tcpV->fdArray[tcpV->flagNFD] == -1)
         exit(1); // error
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;                          // IPv4
@@ -27,7 +27,7 @@ void clitTCP(int flagNFD, char *IP, char *TCP)
     n = getaddrinfo("95.95.75.236", TCP, &hints, &res); // meter IP e TCP do nó
     if (n != 0)                                         /*error*/
         exit(1);
-    n = connect(fd, res->ai_addr, res->ai_addrlen);
+    n = connect(tcpV->fdArray[tcpV->flagNFD], res->ai_addr, res->ai_addrlen);
     if (n == -1) /*error*/
         exit(1);
     ptr = strcpy(buffer, "Bananinhas das boas\n");
@@ -35,7 +35,7 @@ void clitTCP(int flagNFD, char *IP, char *TCP)
     nleft = nbytes;
     while (nleft > 0)
     {
-        nwritten = write(fd, ptr, nleft);
+        nwritten = write(tcpV->fdArray[tcpV->flagNFD], ptr, nleft);
         if (nwritten <= 0) /*error*/
             exit(1);
         nleft -= nwritten;
@@ -45,7 +45,7 @@ void clitTCP(int flagNFD, char *IP, char *TCP)
     ptr = buffer;
     while (nleft > 0)
     {
-        nread = read(fd, ptr, nleft);
+        nread = read(tcpV->fdArray[tcpV->flagNFD], ptr, nleft);
         if (nread == -1) /*error*/
             exit(1);
         else if (nread == 0)
@@ -56,9 +56,9 @@ void clitTCP(int flagNFD, char *IP, char *TCP)
     nread = nbytes - nleft;
     buffer[nread] = '\0';
     printf("TCP: %s\n", buffer);
-    close(fd);
+    close(tcpV->fdArray[tcpV->flagNFD]);
 }
-void servTCP(char *TCP)
+void servTCP(TCPS *tcpV, char *TCP)
 {
     struct addrinfo hints, *res;
     int fd, newfd, errcode;

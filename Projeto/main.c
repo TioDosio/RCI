@@ -10,20 +10,13 @@
 #include "UDP.h"
 #include "TCP.h"
 
-typedef struct UDP
+struct UDP
 {
     char IDv[3];
     char IPv[20];
     char Portv[6];
-} UDP;
-UDP ban;
-// não usado??
-typedef struct TCP
-{
-    int fdArray[100];
-    // int flagNFD;
-} TCP;
-TCP tcpV;
+}; // não usado??
+
 
 void help()
 {
@@ -40,18 +33,10 @@ void get(char *dest, char *name)
 {
     printf("getting\n");
 }
-void Com_TCP()
-{
-}
 
-void djoin(char *net, char *id, char *bootid, char *bootIP, char *bootTCP) //                    djoin(net, id, bootid, bootIP, bootTCP);
-
+void djoin(char *net, char *id, char *bootid, char *bootIP, char *bootTCP) // djoin(net, id, bootid, bootIP, bootTCP);
 {
     printf("djoining...\n");
-}
-void sair()
-{
-    printf("saíndo...\n");
 }
 void st()
 {
@@ -67,18 +52,13 @@ void sr()
 }
 int main(int argc, char *argv[])
 {
-    int flagNFD = 1;
-    char *IP = NULL;                 // IP do TCP que é dado
-    char *TCP = NULL;                // Porto do TCP que é dado
-    char *regIP = NULL;              // IP do UDP pode ou não ser dado
-    char *regUDP = NULL;             // Porto do UDP que pode ou não ser dado
-    tcpV.fdArray[0] = fileno(stdin); // stdin=entrada do teclado
-    if (tcpV.fdArray[0] == -1)
-    {
-        perror("fileno");
-        exit(EXIT_FAILURE);
-    }
-    switch (argc) // leitura dos argumentos de entrada
+    TCPS tcpV;
+    tcpV.flagNFD = 1;
+    char *IP = NULL;     // IP do TCP que é dado
+    char *TCP = NULL;    // Porto do TCP que é dado
+    char *regIP = NULL;  // IP do UDP pode ou não ser dado
+    char *regUDP = NULL; // Porto do UDP que pode ou não ser dado
+    switch (argc)        // leitura dos argumentos de entrada
     {
     case 1:
         printf("Sem argumentos\n"); // Não tem argumentos
@@ -110,11 +90,17 @@ int main(int argc, char *argv[])
         printf("argc %d\n", argc);
         help();
     }
+    tcpV.fdArray[0] = fileno(stdin); // stdin=entrada do teclado
+    if (tcpV.fdArray[0] == -1)
+    {
+        perror("fileno");
+        exit(EXIT_FAILURE);
+    }
     while (1)
     {
         fd_set readfds;
         char buf[100];
-        for (int i = 0; i < flagNFD; i++) // for com fdset com todos os fd's
+        for (int i = 0; i < tcpV.flagNFD; i++) // for com fdset com todos os fd's
         {
             FD_ZERO(&readfds);
             FD_SET(tcpV.fdArray[i], &readfds);
@@ -122,7 +108,7 @@ int main(int argc, char *argv[])
         // FD_ZERO(&readfds);
         // FD_SET(STDIN_FILENO, &readfds);
 
-        int rval = select(flagNFD + 1, &readfds, NULL, NULL, NULL);
+        int rval = select(tcpV.flagNFD + 1, &readfds, NULL, NULL, NULL);
         if (rval == -1)
         {
             perror("select");
@@ -156,7 +142,7 @@ int main(int argc, char *argv[])
             }
             else if (strcmp(strV, "delete") == 0) // delete name
             {
-                // char name[] = "";
+                // char name[idk] =""; -> strcpy(name[idk], "");
             }
             else if (strcmp(strV, "get") == 0) // get dest name
             {
@@ -170,13 +156,13 @@ int main(int argc, char *argv[])
             }
             else if ((strcmp(strV, "show names") == 0) || (strcmp(strV, "server\n") == 0)) // show names (sn)
             {
-                servTCP();
+                servTCP(&tcpV, TCP);
                 // sn();
             }
             else if ((strcmp(strV, "show routing") == 0) || (strcmp(strV, "cliente\n") == 0)) // show routing (sr)
             {
 
-                // sr();
+                sr();
             }
             else if (strcmp(strV, "leave") == 0) // leave
             {
@@ -187,7 +173,7 @@ int main(int argc, char *argv[])
             {
                 sscanf(buf, "%s %s %s", strV, net, id);
                 show(0, net, id, IP, TCP);
-                // clitTCP(IP, TCP);
+                clitTCP(&tcpV, IP, TCP);
             }
             else if (strcmp(strV, "exit") == 0) // exit
             {

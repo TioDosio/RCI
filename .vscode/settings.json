@@ -8,6 +8,7 @@
         "select.h": "c",
         "stdlib.h": "c",
         "tcp.h": "c",
-        "udp.h": "c"
+        "udp.h": "c",
+        "stdio.h": "c"
     }
 }

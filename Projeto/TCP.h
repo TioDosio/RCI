@@ -2,9 +2,13 @@
 #define TCP_H
 
 #include "TCP.h"
+typedef struct TCPS
+{
+    int fdArray[100];
+    int flagNFD;
+} TCPS;
 
-void clitTCP(char *IP, char *TCP);
-void servTCP();
-void clitTCP(char *IP, char *TCP);
+void clitTCP(TCPS *tcpV, char *IP, char *TCP);
+void servTCP(TCPS *tcpV, char *TCP);
 
 #endif
