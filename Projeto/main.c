@@ -17,7 +17,6 @@ struct UDP
     char Portv[6];
 }; // não usado??
 
-
 void help()
 {
     printf("Usage: ./cot <IP> <TCP> <regIP> <regUDP>\n");
@@ -104,6 +103,7 @@ int main(int argc, char *argv[])
         {
             FD_ZERO(&readfds);
             FD_SET(tcpV.fdArray[i], &readfds);
+            printf("fdArray[%d] = %d", i, tcpV.fdArray[i]);
         }
         // FD_ZERO(&readfds);
         // FD_SET(STDIN_FILENO, &readfds);
@@ -185,6 +185,8 @@ int main(int argc, char *argv[])
                 printf("Invalid command\n");
             }
         }
+
+        close(tcpV.fdArray[tcpV.flagNFD]);
     }
     return 0;
 }
