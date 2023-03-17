@@ -1,5 +1,6 @@
 #ifndef functions
 #define functions
+#include "fs.h"
 
 typedef struct node
 {
@@ -7,6 +8,5 @@ typedef struct node
     int ext;
     char name[100][50];
 } node;
-#include "fs.h"
 
 #endif

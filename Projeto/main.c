@@ -9,13 +9,21 @@
 #include <unistd.h>
 #include "UDP.h"
 #include "TCP.h"
+#include "fs.h"
 
-struct UDP
+struct infoNO
 {
     char IDv[3];
     char IPv[20];
     char Portv[6];
-}; // não usado??
+};
+struct NO
+{
+    struct infoNO vizExt;
+    struct infoNO vizInt[10];
+    struct infoNO vizBackup;
+    char names[20][100];
+};
 
 void help()
 {
@@ -48,6 +56,34 @@ void sn()
 void sr()
 {
     printf("show routing\n");
+}
+void serverTCP()
+{
+    int Port = 59000; // PORTO
+    int server_fd, client_fds[10], max_clients = 0;
+    struct sockaddr_in address;
+    int addrlen = sizeof(address);
+    // create TCP server
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
+    {
+        perror("socket failed");
+        exit(EXIT_FAILURE);
+    }
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(Port); // port 59000
+
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
+    {
+        perror("bind failed");
+        exit(EXIT_FAILURE);
+    }
+
+    if (listen(server_fd, 3) < 0)
+    {
+        perror("listen");
+        exit(EXIT_FAILURE);
+    }
 }
 int main(int argc, char *argv[])
 {
@@ -98,7 +134,7 @@ int main(int argc, char *argv[])
     while (1)
     {
         fd_set readfds;
-        char buf[100];
+        char buf[100] = {0};
         for (int i = 0; i < tcpV.flagNFD; i++) // for com fdset com todos os fd's
         {
             FD_ZERO(&readfds);
@@ -107,7 +143,7 @@ int main(int argc, char *argv[])
         }
         // FD_ZERO(&readfds);
         // FD_SET(STDIN_FILENO, &readfds);
-
+        serverTCP();
         int rval = select(tcpV.flagNFD + 1, &readfds, NULL, NULL, NULL);
         if (rval == -1)
         {

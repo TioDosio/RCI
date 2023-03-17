@@ -37,4 +37,3 @@ void names()
         printf("%d %s\n", i, joaquim.name[i]);
     }
 }
-// função para join
