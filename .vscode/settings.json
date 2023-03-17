@@ -10,5 +10,6 @@
         "tcp.h": "c",
         "udp.h": "c",
         "stdio.h": "c"
-    }
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

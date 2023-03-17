@@ -2,11 +2,19 @@
 #define functions
 #include "fs.h"
 
-typedef struct node
+struct infoNO
 {
-    int id;
-    int ext;
-    char name[100][50];
-} node;
+    char IDv[3];
+    char IPv[20];
+    char Portv[6];
+};
+struct NO
+{
+    struct infoNO vizExt;
+    struct infoNO vizInt[10];
+    struct infoNO vizBackup;
+    char names[20][100];
+    int flagVaz;
+};
 
 #endif

@@ -9,6 +9,9 @@
 #include <time.h>
 #include "UDP.h"
 #include "TCP.h"
+#include "fs.h"
+
+extern struct NO node; // ter variavel global em varios ficheiros
 
 void reg(char *net, char *id, char *IP, char *TCP)
 {
@@ -37,17 +40,6 @@ void reg(char *net, char *id, char *IP, char *TCP)
     ssize_t sendto(int s, const void *buf, size_t len, int flags,
                    const struct sockaddr *dest_addr, socklen_t addrlen);
     socklen_t addrlen;
-    struct addrinfo
-    {                             // (item in a linked list)
-        int ai_flags;             // additional options
-        int ai_family;            // address family
-        int ai_socktype;          // socket type
-        int ai_protocol;          // protocol
-        socklen_t ai_addrlen;     // address length (bytes)
-        struct sockaddr *ai_addr; // socket address
-        char *ai_canonname;       // canonical hostname
-        struct addrinfo *ai_next; // next item
-    };
     fd = socket(AF_INET, SOCK_DGRAM, 0); // UDP socket
     if (fd == -1)                        /*error*/
         exit(1);
@@ -69,7 +61,11 @@ void reg(char *net, char *id, char *IP, char *TCP)
     }
     buffOKs[n] = '\0'; // adiciona terminador de string
     printf("received: %s\n\n", buffOKs);
-    close(fd);
+    if (node.flagVaz != 1)
+    {
+        client_tcp();
+    }
+
     freeaddrinfo(res);
 }
 void unreg(char *net, char *id, char *IP, char *TCP)
@@ -83,20 +79,8 @@ void unreg(char *net, char *id, char *IP, char *TCP)
     struct sockaddr addr;
     char buffer[2500];
     int socket(int domain, int type, int protocol);
-    ssize_t sendto(int s, const void *buf, size_t len, int flags,
-                   const struct sockaddr *dest_addr, socklen_t addrlen);
+    ssize_t sendto(int s, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
     socklen_t addrlen;
-    struct addrinfo
-    {                             // (item in a linked list)
-        int ai_flags;             // additional options
-        int ai_family;            // address family
-        int ai_socktype;          // socket type
-        int ai_protocol;          // protocol
-        socklen_t ai_addrlen;     // address length (bytes)
-        struct sockaddr *ai_addr; // socket address
-        char *ai_canonname;       // canonical hostname
-        struct addrinfo *ai_next; // next item
-    };
     fd = socket(AF_INET, SOCK_DGRAM, 0); // UDP socket
     if (fd == -1)                        /*error*/
         exit(1);
@@ -132,20 +116,8 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
     struct sockaddr addr;
     char buffer[2500];
     int socket(int domain, int type, int protocol);
-    ssize_t sendto(int s, const void *buf, size_t len, int flags,
-                   const struct sockaddr *dest_addr, socklen_t addrlen);
+    ssize_t sendto(int s, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
     socklen_t addrlen;
-    struct addrinfo
-    {                             // (item in a linked list)
-        int ai_flags;             // additional options
-        int ai_family;            // address family
-        int ai_socktype;          // socket type
-        int ai_protocol;          // protocol
-        socklen_t ai_addrlen;     // address length (bytes)
-        struct sockaddr *ai_addr; // socket address
-        char *ai_canonname;       // canonical hostname
-        struct addrinfo *ai_next; // next item
-    };
     fd = socket(AF_INET, SOCK_DGRAM, 0); // UDP socket
     if (fd == -1)                        /*error*/
         exit(1);
@@ -169,6 +141,8 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
     printf("received: %s\n\n", buffer);
     // meter argumentos do buffer nos arrays
     int intIDv, intID;
+    node.flagVaz = 0;
+
     if (flagS == 1)
     {
         intID = atoi(id);
@@ -184,11 +158,15 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
                 intID = rand() % 100;
                 // printf("ID already exists, new ID: %d", intID);
             }
+            node.flagVaz += 1;
         }
         if (line == NULL)
         {
             printf("\n%s %s %s\n", IDv, IPv, Portv);
         }
+        strcpy(node.vizExt.IDv, IDv);
+        strcpy(node.vizExt.IPv, IPv);
+        strcpy(node.vizExt.Portv, Portv);
     }
     else
     {
