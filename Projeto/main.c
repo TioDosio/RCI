@@ -13,7 +13,7 @@
 // usar o getaddrinfo para o TCP client em que metemos o IP e Port como char e no servidor o IP como null
 // ver
 struct NO node;
-char TCP[50];
+//char TCP[50];
 
 void help()
 {
@@ -51,7 +51,7 @@ void sr()
 int main(int argc, char *argv[])
 {
     char IP[20]; // IP do TCP que é dado
-    // char TCP[20];    // Porto do TCP que é dado
+    char TCP[20];    // Porto do TCP que é dado
     char regIP[20];  // IP do UDP pode ou não ser dado
     char regUDP[20]; // Porto do UDP que pode ou não ser dado
     switch (argc)    // leitura dos argumentos de entrada
@@ -60,59 +60,49 @@ int main(int argc, char *argv[])
         printf("Sem argumentos\n"); // Não tem argumentos
         exit(1);
     case 3: // Recebe apenas o IP e o TCP
-        printf("Com 2 argumentos\n");
         strcpy(regIP, "193.136.138.142");
         strcpy(regUDP, "59000");
-        strcpy(IP, "127.0.0.1"); //    "127.0.0.1"; ou "95.95.75.236"; ou argv[1]; // pode ser int??????????
-        strcpy(TCP, argv[2]);    //"59001";       // atoi(argv[2]);               // pode ser int??????????
+        strcpy(IP, argv[1]);  //"127.0.0.1"; ou "127.0.1.1";
+        strcpy(TCP, argv[2]); //"59001";
         printf("IP: %s\n", IP);
         printf("TCP: %s\n", TCP);
-        printf("RegIp: %s\n", regIP);
-        printf("RegUDP: %s\n", regUDP);
+
         break;
     case 5: // Recebe o IP e o TCP e o IP e o UDP
         printf("Com 4 argumentos\n");
-        strcpy(IP, argv[1]);
+        strcpy(IP, argv[1]); //"127.0.0.1"; ou "127.0.1.1";
         strcpy(regIP, argv[3]);
-        strcpy(TCP, argv[2]);    //"59001";       // atoi(argv[2]);               // pode ser int??????????                 // pode ser int??????????
-        strcpy(regUDP, argv[4]); // pode ser int??????????
+        strcpy(regUDP, argv[4]);
         printf("IP: %s\n", IP);
         printf("TCP: %s\n", TCP);
-        printf("RegIp: %s\n", regIP);
-        printf("RegUDP: %s\n", regUDP);
         break;
     default:
         printf("Argumentos invalidos\n");
         printf("argc %d\n", argc);
         help();
     }
-    int server_fd, client_fds[10], max_clients = 0;
-    struct sockaddr_in address;
-    int addrlen = sizeof(address);
-    char buffer[1024] = {0};
-
+    struct addrinfo hints, *res;
+    int server_fd, newfd, errcode, maxclits = 0, clitFDs[10];
+    ssize_t n, nw;
+    struct sockaddr addr;
+    socklen_t addrlen;
+    char *ptr, buffer[500]; // ver melhor o tamanho do buffer
     // create TCP server
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
     {
         perror("socket failed");
         exit(EXIT_FAILURE);
     }
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(atoi(node.vizExt.Portv)); // port 59000 porque o client é o 59001
-
-    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
-    {
-        perror("bind failed");
-        exit(EXIT_FAILURE);
-    }
-
-    if (listen(server_fd, 5) < 0)
-    {
-        perror("listen");
-        exit(EXIT_FAILURE);
-    }
-
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_INET;       // IPv4
+    hints.ai_socktype = SOCK_STREAM; // TCP socket
+    hints.ai_flags = AI_PASSIVE;
+    if ((errcode = getaddrinfo(NULL, TCP, &hints, &res)) != 0)
+        exit(1);                                              /*error*/
+    if (bind(server_fd, res->ai_addr, res->ai_addrlen) == -1) // conecta o socket ao endereço
+        exit(1);                                              /*error*/
+    if (listen(server_fd, 5) == -1)                           // 5 é o numero de conexões que podem estar em espera
+        exit(1);                                              /*error*/
     // create file descriptors set
     fd_set fds;
     FD_ZERO(&fds);
@@ -217,46 +207,65 @@ int main(int argc, char *argv[])
     // check if server socket is ready for accepting new connections
     if (FD_ISSET(server_fd, &fds))
     {
-        // if (max_clients < 10)
-        //{
-        if ((client_fds[max_clients] = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
+        addrlen = sizeof(addr);
+        if ((newfd = accept(fd, &addr, &addrlen)) == -1)
+            /*error*/ exit(1);
+        while ((n = read(newfd, buffer, 128)) != 0)
         {
-            perror("accept");
-            exit(EXIT_FAILURE);
+            if (n == -1) /*error*/
+                exit(1);
+            ptr = &buffer[0];
+            while (n > 0)
+            {
+                if ((nw = write(newfd, ptr, n)) <= 0) /*error*/
+                    exit(1);
+                n -= nw;
+                ptr += nw;
+            }
         }
+        close(newfd);
+    }
 
-        printf("New client connected: ");
+    /*// if (max_clients < 10)
+    //{
+    if ((client_fds[max_clients] = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
+    {
+        perror("accept");
+        exit(EXIT_FAILURE);
+    }
 
-        // add new client socket to set
-        FD_SET(client_fds[max_clients], &fds);
-        max_clients++;
-        /*}
+    printf("New client connected: ");
+
+    // add new client socket to set
+    FD_SET(client_fds[max_clients], &fds);
+    max_clients++;
+    /*}
+    else
+    {
+        printf("Max clients reached\n");
+    }*/
+}
+
+// check if any client socket is ready for reading
+for (int i = 0; i < max_clients; i++)
+{
+    if (FD_ISSET(client_fds[i], &fds))
+    {
+        int valread = read(client_fds[i], buffer, sizeof(buffer));
+        if (valread == 0)
+        {
+            // client disconnected
+            close(client_fds[i]);
+            FD_CLR(client_fds[i], &fds);
+            printf("Client disconnected\n");
+            max_clients--;
+            client_fds[i] = client_fds[max_clients];
+        }
         else
         {
-            printf("Max clients reached\n");
-        }*/
-    }
-
-    // check if any client socket is ready for reading
-    for (int i = 0; i < max_clients; i++)
-    {
-        if (FD_ISSET(client_fds[i], &fds))
-        {
-            int valread = read(client_fds[i], buffer, sizeof(buffer));
-            if (valread == 0)
-            {
-                // client disconnected
-                close(client_fds[i]);
-                FD_CLR(client_fds[i], &fds);
-                printf("Client disconnected\n");
-                max_clients--;
-                client_fds[i] = client_fds[max_clients];
-            }
-            else
-            {
-                // process client message
-                printf("Client message: %s", buffer);
-            }
+            // process client message
+            printf("Client message: %s", buffer);
         }
     }
+}
 }

@@ -12,7 +12,7 @@
 #include "fs.h"
 
 extern struct NO node; // ter variavel global em varios ficheiros
-extern char TCP[50];   // ter variavel global em varios ficheiros
+//extern char TCP[50];   // ter variavel global em varios ficheiros
 
 void client_tcp()
 {
