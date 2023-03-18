@@ -62,8 +62,8 @@ int main(int argc, char *argv[])
     case 3: // Recebe apenas o IP e o TCP
         strcpy(regIP, "193.136.138.142");
         strcpy(regUDP, "59000");
-        strcpy(IP, argv[1]);  //"127.0.0.1"; ou "127.0.1.1";
-        strcpy(TCP, argv[2]); //"59001";
+        strcpy(IP, argv[1]); //"127.0.0.1"; ou "127.0.1.1";
+        strcpy(TCP, argv[2]);
         printf("IP: %s\n", IP);
         printf("TCP: %s\n", TCP);
 
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
         help();
     }
     struct addrinfo hints, *res;
-    int server_fd, newfd, errcode, maxclits = 0, client_fds[10];
+    int server_fd, errcode, maxclits = 0, client_fds[10];
     ssize_t n, nw;
     struct sockaddr addr;
     socklen_t addrlen;
@@ -90,6 +90,7 @@ int main(int argc, char *argv[])
     // create TCP server
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
     {
+        printf("erro socket main.c");
         perror("socket failed");
         exit(EXIT_FAILURE);
     }
@@ -98,11 +99,20 @@ int main(int argc, char *argv[])
     hints.ai_socktype = SOCK_STREAM; // TCP socket
     hints.ai_flags = AI_PASSIVE;
     if ((errcode = getaddrinfo(NULL, TCP, &hints, &res)) != 0)
-        exit(1);                                              /*error*/
+    {
+        printf("erro get addrinfo main.c");
+        exit(1);
+    }                                                         /*error*/
     if (bind(server_fd, res->ai_addr, res->ai_addrlen) == -1) // conecta o socket ao endereço
-        exit(1);                                              /*error*/
-    if (listen(server_fd, 5) == -1)                           // 5 é o numero de conexões que podem estar em espera
-        exit(1);                                              /*error*/
+    {
+        printf("erro bind main.c");
+        exit(1);
+    }                               /*error*/
+    if (listen(server_fd, 5) == -1) // 5 é o numero de conexões que podem estar em espera
+    {
+        printf("erro get addrinfo main.c");
+        exit(1);
+    } /*error*/
     // create file descriptors set
     fd_set fds;
     FD_ZERO(&fds);
@@ -129,6 +139,7 @@ int main(int argc, char *argv[])
 
         if (select(max_fd + 1, &fds, NULL, NULL, NULL) < 0)
         {
+            printf("erro select main.c");
             perror("error select");
             exit(EXIT_FAILURE);
         }
@@ -207,22 +218,42 @@ int main(int argc, char *argv[])
     // check if server socket is ready for accepting new connections
     if (FD_ISSET(server_fd, &fds))
     {
+        char RWbuffer[100];
         addrlen = sizeof(addr);
         if ((client_fds[maxclits] = accept(server_fd, &addr, &addrlen)) == -1)
-            /*error*/ exit(1);
-        while ((n = read(newfd, buffer, strlen(buffer))) != 0)
+        { /*error*/
+            printf("erro accept main.c");
+            exit(1);
+        }
+        else
+        {
+            printf("server accepted\n");
+        }
+        while ((n = read(client_fds[maxclits], RWbuffer, strlen(RWbuffer))) != 0)
         {
             if (n == -1) /*error*/
+            {
+                printf("erro read");
                 exit(1);
-            ptr = &buffer[0];
+            }
+            RWbuffer[n] = '\0'; /*null terminate the string*/
+            printf("server received: %s\n", RWbuffer);
+
+            ptr = &RWbuffer[0];
+            sprintf(ptr, "echo: %s", RWbuffer);
             while (n > 0)
             {
-                if ((nw = write(newfd, ptr, n)) <= 0) /*error*/
+                if ((nw = write(client_fds[maxclits], ptr, n)) <= 0) /*error*/
+                {
+                    printf("erro write main.c");
                     exit(1);
+                }
+
                 n -= nw;
                 ptr += nw;
             }
         }
-        close(newfd);
+        maxclits++;
+        // close(client_fds[maxclits]);
     }
 }
