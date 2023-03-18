@@ -3,7 +3,7 @@ CC = gcc
 CFLAGS = -Wall -Werror
 
 # Define the source and object files
-SRCS = main.c UDP.c TCP.c
+SRCS = main.c UDP.c TCP.c fs.c
 OBJS = $(SRCS:.c=.o)
 
 # Define the name of the executable

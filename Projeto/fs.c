@@ -6,8 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 
-
-void names()
+/*void names()
 {
     node joaquim;
     int i = 0, j = 0;
@@ -36,4 +35,4 @@ void names()
     {
         printf("%d %s\n", i, joaquim.name[i]);
     }
-}
+}*/

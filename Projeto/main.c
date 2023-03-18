@@ -13,7 +13,7 @@
 // usar o getaddrinfo para o TCP client em que metemos o IP e Port como char e no servidor o IP como null
 // ver
 struct NO node;
-//char TCP[50];
+// char TCP[50];
 
 void help()
 {
@@ -50,7 +50,7 @@ void sr()
 
 int main(int argc, char *argv[])
 {
-    char IP[20]; // IP do TCP que é dado
+    char IP[20];     // IP do TCP que é dado
     char TCP[20];    // Porto do TCP que é dado
     char regIP[20];  // IP do UDP pode ou não ser dado
     char regUDP[20]; // Porto do UDP que pode ou não ser dado
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
         help();
     }
     struct addrinfo hints, *res;
-    int server_fd, newfd, errcode, maxclits = 0, clitFDs[10];
+    int server_fd, newfd, errcode, maxclits = 0, client_fds[10];
     ssize_t n, nw;
     struct sockaddr addr;
     socklen_t addrlen;
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     {
         // wait for activity on one of the file descriptors
         int max_fd = (STDIN_FILENO > server_fd) ? STDIN_FILENO : server_fd;
-        for (int i = 0; i < max_clients; i++)
+        for (int i = 0; i < maxclits; i++)
         {
             if (client_fds[i] > 0)
             {
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 
         if (select(max_fd + 1, &fds, NULL, NULL, NULL) < 0)
         {
-            perror("select");
+            perror("error select");
             exit(EXIT_FAILURE);
         }
 
@@ -208,9 +208,9 @@ int main(int argc, char *argv[])
     if (FD_ISSET(server_fd, &fds))
     {
         addrlen = sizeof(addr);
-        if ((newfd = accept(fd, &addr, &addrlen)) == -1)
+        if ((client_fds[maxclits] = accept(server_fd, &addr, &addrlen)) == -1)
             /*error*/ exit(1);
-        while ((n = read(newfd, buffer, 128)) != 0)
+        while ((n = read(newfd, buffer, strlen(buffer))) != 0)
         {
             if (n == -1) /*error*/
                 exit(1);
@@ -225,47 +225,4 @@ int main(int argc, char *argv[])
         }
         close(newfd);
     }
-
-    /*// if (max_clients < 10)
-    //{
-    if ((client_fds[max_clients] = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
-    {
-        perror("accept");
-        exit(EXIT_FAILURE);
-    }
-
-    printf("New client connected: ");
-
-    // add new client socket to set
-    FD_SET(client_fds[max_clients], &fds);
-    max_clients++;
-    /*}
-    else
-    {
-        printf("Max clients reached\n");
-    }*/
-}
-
-// check if any client socket is ready for reading
-for (int i = 0; i < max_clients; i++)
-{
-    if (FD_ISSET(client_fds[i], &fds))
-    {
-        int valread = read(client_fds[i], buffer, sizeof(buffer));
-        if (valread == 0)
-        {
-            // client disconnected
-            close(client_fds[i]);
-            FD_CLR(client_fds[i], &fds);
-            printf("Client disconnected\n");
-            max_clients--;
-            client_fds[i] = client_fds[max_clients];
-        }
-        else
-        {
-            // process client message
-            printf("Client message: %s", buffer);
-        }
-    }
-}
 }
