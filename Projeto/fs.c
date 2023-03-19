@@ -18,11 +18,11 @@ void create(char *name, int flagName)
 
 void delete(char *name, int flagName)
 {
-    for (int i = 0; i < flagName; i++)
+    for (int i = 0; i < flagName; i++) // passa por todos os nomes já criados
     {
-        if (strcmp(node.names[i], name) == 0)
+        if (strcmp(node.names[i], name) == 0) // procura o nome
         {
-            strcpy(node.names[i], "\0");
+            strcpy(node.names[i], "\0");       // apaga o nome
             for (int j = i; j < flagName; j++) // shift left
             {
                 strcpy(node.names[j], node.names[j + 1]);
