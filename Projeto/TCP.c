@@ -47,7 +47,8 @@ void client_tcp()
     {
         printf("connect bem sucedido\n");
     }
-    ptr = strcpy(buffer, "Hello teste TCP\n");
+    char aux[] = sprintf(variable, "NEW %s %s %s ", IDv, IPv, Portv); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
+    ptr = strcpy(buffer, aux\n");
     nbytes = strlen(buffer);
     nleft = nbytes;
     printf("enviado pelo CLIT: %s\n", buffer);
