@@ -16,7 +16,7 @@ extern struct NO node; // ter variavel global em varios ficheiros
 
 void client_tcp()
 {
-    ssize_t nbytes, nleft, nwritten, nread;
+    ssize_t nbytes, nleft, nread;
     char *ptr, buffer[128 + 1];
     struct addrinfo hints, *res;
     int fd, n;
@@ -47,37 +47,11 @@ void client_tcp()
     {
         printf("connect bem sucedido\n");
     }
-    char aux[] = sprintf(variable, "NEW %s %s %s ", IDv, IPv, Portv); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
-    ptr = strcpy(buffer, aux\n");
-    nbytes = strlen(buffer);
-    nleft = nbytes;
+    char aux[] = sprintf(buffer, "NEW %s %s %s ", IDv, IPv, Portv); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
+    strcpy(buffer, aux);
     printf("enviado pelo CLIT: %s\n", buffer);
-    while (nleft > 0)
-    {
-        nwritten = write(fd, ptr, nleft);
-        if (nwritten <= 0) /*error*/
-        {
-            printf("erro write tcp.c");
-            exit(1);
-        }
-        nleft -= nwritten;
-        ptr += nwritten;
-    }
-    nleft = nbytes;
-    ptr = buffer;
-    while (nleft > 0)
-    {
-        nread = read(fd, ptr, nleft);
-        if (nread == -1) /*error*/
-        {
-            printf("erro read tcp.c");
-            exit(1);
-        }
-        else if (nread == 0)
-            break; // closed by peer
-        nleft -= nread;
-        ptr += nread;
-    }
+    write(fd, ptr, strlen(buffer)); /*////// envia mensagem para o servidor*/
+    read(fd, ptr, nleft);
     nread = nbytes - nleft;
     buffer[nread] = '\0';
     printf("echo: %s\n", buffer);

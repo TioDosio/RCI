@@ -37,3 +37,7 @@ void showNames(int flagName)
         printf("Posição:%d, name:%s\n", i, node.names[i]);
     }
 }
+void get(char *dest, char *name)
+{
+    printf("getting\n");
+}

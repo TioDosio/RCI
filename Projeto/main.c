@@ -20,10 +20,6 @@ void help()
     printf("Usage: ./cot\n");
     exit(1);
 }
-void get(char *dest, char *name)
-{
-    printf("getting\n");
-}
 void st()
 {
     printf("show topology\n");
@@ -134,7 +130,6 @@ int main(int argc, char *argv[])
             sscanf(buffer, "%s", strV);
             if (strcmp(strV, "join") == 0) // join net id
             {
-                // clitTCP(IP, TCP);
                 sscanf(buffer, "%s %s %s", strV, net, id);
                 reg(net, id, IP, TCP); // inet
             }
@@ -144,7 +139,7 @@ int main(int argc, char *argv[])
                 sscanf(buffer, "%s %s %s %s %s %s", strV, net, id, bootid, bootIP, bootTCP);
                 djoin(net, id, bootid, bootIP, bootTCP);
             }
-            else if (strcmp(strV, "create") == 0)
+            else if (strcmp(strV, "create") == 0) // create name
             {
                 char name[101];
                 sscanf(buffer, "%s %s", strV, name);
@@ -172,20 +167,19 @@ int main(int argc, char *argv[])
             {
                 showNames(flagName);
             }
-            else if ((strcmp(strV, "show routing") == 0) || (strcmp(strV, "cliente") == 0)) // show routing (sr)
+            else if ((strcmp(strV, "show routing") == 0) || (strcmp(strV, "sr") == 0)) // show routing (sr)
             {
                 sr();
             }
             else if (strcmp(strV, "leave") == 0) // leave
             {
                 sscanf(buffer, "%s %s %s", strV, net, id);
-                unreg(net, id, IP, TCP);
+                leave(net, id, IP, TCP);
             }
             else if (strcmp(strV, "show") == 0) // exit
             {
                 sscanf(buffer, "%s %s %s", strV, net, id);
                 show(0, net, id, IP, TCP);
-                // clitTCP(&tcpV, IP, TCP);
             }
             else if (strcmp(strV, "exit") == 0) // exit
             {
