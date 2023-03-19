@@ -5,34 +5,35 @@
 #include <netdb.h>
 #include <string.h>
 #include <unistd.h>
+#include "UDP.h"
+#include "TCP.h"
+#include "fs.h"
+extern struct NO node;
 
-/*void names()
+void create(char *name, int flagName)
 {
-    node joaquim;
-    int i = 0, j = 0;
-    char camboja[30];
-    while (i <= 100)
-    {
-        strcpy(joaquim.name[i], "\0");
-        i = i + 1;
-    }
-    i = 0;
-    while (i < 34)
-    {
-        printf("%d ", i);
-        scanf("%s\n", camboja);
-        while ((strcmp(joaquim.name[j], "\0") != 0))
-        {
-            j = j + 1;
-        }
-        strcpy(joaquim.name[j], camboja);
-        j = j + 1;
-        i = i + 1;
-    }
+    strcpy(node.names[flagName], name);
+    printf("Posição:%d, name:%s\n", flagName, node.names[flagName]);
+}
 
-    printf("------------------BINDEPAKIPA--------------\n");
-    for (i = 0; i < 34; i++)
+void delete(char *name, int flagName)
+{
+    for (int i = 0; i < flagName; i++)
     {
-        printf("%d %s\n", i, joaquim.name[i]);
+        if (strcmp(node.names[i], name) == 0)
+        {
+            strcpy(node.names[i], "\0");
+            for (int j = i; j < flagName; j++) // shift left
+            {
+                strcpy(node.names[j], node.names[j + 1]);
+            }
+        }
     }
-}*/
+}
+void showNames(int flagName)
+{
+    for (int i = 0; i < flagName; i++)
+    {
+        printf("Posição:%d, name:%s\n", i, node.names[i]);
+    }
+}

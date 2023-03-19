@@ -10,10 +10,8 @@
 #include "UDP.h"
 #include "TCP.h"
 #include "fs.h"
-// usar o getaddrinfo para o TCP client em que metemos o IP e Port como char e no servidor o IP como null
-// ver
+
 struct NO node;
-// char TCP[50];
 
 void help()
 {
@@ -22,26 +20,13 @@ void help()
     printf("Usage: ./cot\n");
     exit(1);
 }
-void delete()
-{
-    printf("deleting\n");
-}
 void get(char *dest, char *name)
 {
     printf("getting\n");
 }
-
-void djoin(char *net, char *id, char *bootid, char *bootIP, char *bootTCP) // djoin(net, id, bootid, bootIP, bootTCP);
-{
-    printf("djoining...\n");
-}
 void st()
 {
     printf("show topology\n");
-}
-void sn()
-{
-    printf("show names\n");
 }
 void sr()
 {
@@ -54,7 +39,8 @@ int main(int argc, char *argv[])
     char TCP[20];    // Porto do TCP que é dado
     char regIP[20];  // IP do UDP pode ou não ser dado
     char regUDP[20]; // Porto do UDP que pode ou não ser dado
-    switch (argc)    // leitura dos argumentos de entrada
+    int flagName = 0;
+    switch (argc) // leitura dos argumentos de entrada
     {
     case 1:
         printf("Sem argumentos\n"); // Não tem argumentos
@@ -66,11 +52,11 @@ int main(int argc, char *argv[])
         strcpy(TCP, argv[2]);
         printf("IP: %s\n", IP);
         printf("TCP: %s\n", TCP);
-
         break;
     case 5: // Recebe o IP e o TCP e o IP e o UDP
         printf("Com 4 argumentos\n");
         strcpy(IP, argv[1]); //"127.0.0.1"; ou "127.0.1.1";
+        strcpy(TCP, argv[2]);
         strcpy(regIP, argv[3]);
         strcpy(regUDP, argv[4]);
         printf("IP: %s\n", IP);
@@ -78,15 +64,15 @@ int main(int argc, char *argv[])
         break;
     default:
         printf("Argumentos invalidos\n");
-        printf("argc %d\n", argc);
         help();
     }
     struct addrinfo hints, *res;
     int server_fd, errcode, maxclits = 0, client_fds[10];
-    ssize_t n, nw;
+    ssize_t n, nw; // n é o numero de bytes lidos e nw é o numero de bytes escritos ?????????????????????????????????
     struct sockaddr addr;
     socklen_t addrlen;
     char *ptr, buffer[500]; // ver melhor o tamanho do buffer
+    fd_set rfds;            // create file descriptors set
     // create TCP server
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
     {
@@ -113,31 +99,27 @@ int main(int argc, char *argv[])
         printf("erro get addrinfo main.c");
         exit(1);
     } /*error*/
-    // create file descriptors set
-    fd_set fds;
-    FD_ZERO(&fds);
-
-    // add stdin, server socket to set
-    FD_SET(STDIN_FILENO, &fds);
-    FD_SET(server_fd, &fds);
     char strV[20], net[20], id[20];
     while (1)
     {
+        FD_ZERO(&rfds);
+        // add stdin, server socket to set
+        FD_SET(STDIN_FILENO, &rfds);
+        FD_SET(server_fd, &rfds);
         // wait for activity on one of the file descriptors
         int max_fd = (STDIN_FILENO > server_fd) ? STDIN_FILENO : server_fd;
         for (int i = 0; i < maxclits; i++)
         {
             if (client_fds[i] > 0)
             {
-                FD_SET(client_fds[i], &fds);
+                FD_SET(client_fds[i], &rfds);
                 if (client_fds[i] > max_fd)
                 {
                     max_fd = client_fds[i];
                 }
             }
         }
-
-        if (select(max_fd + 1, &fds, NULL, NULL, NULL) < 0)
+        if (select(max_fd + 1, &rfds, NULL, NULL, NULL) < 0)
         {
             printf("erro select main.c");
             perror("error select");
@@ -145,7 +127,7 @@ int main(int argc, char *argv[])
         }
 
         // check if stdin is ready for reading
-        if (FD_ISSET(STDIN_FILENO, &fds))
+        if (FD_ISSET(STDIN_FILENO, &rfds))
         {
             fgets(buffer, sizeof(buffer), stdin);
             printf("User input: %s", buffer);
@@ -162,15 +144,19 @@ int main(int argc, char *argv[])
                 sscanf(buffer, "%s %s %s %s %s %s", strV, net, id, bootid, bootIP, bootTCP);
                 djoin(net, id, bootid, bootIP, bootTCP);
             }
-            else if (strcmp(strV, "create") == 0) //////////////////////////////////////////// create name -> Criar vários nomes
+            else if (strcmp(strV, "create") == 0)
             {
                 char name[101];
                 sscanf(buffer, "%s %s", strV, name);
-                printf("created name: %s\n", name);
+                create(name, flagName);
+                flagName++;
             }
             else if (strcmp(strV, "delete") == 0) // delete name
             {
-                // char name[idk] =""; -> strcpy(name[idk], "");
+                char name[101];
+                sscanf(buffer, "%s %s", strV, name);
+                delete (name, flagName);
+                flagName--;
             }
             else if (strcmp(strV, "get") == 0) // get dest name
             {
@@ -178,18 +164,16 @@ int main(int argc, char *argv[])
                 sscanf(buffer, "%s %s %s", strV, dest, name);
                 get(dest, name);
             }
-            else if ((strcmp(strV, "show topology") == 0) || (strcmp(strV, "st\n") == 0)) // show topology (st)
+            else if ((strcmp(strV, "show topology") == 0) || (strcmp(strV, "st") == 0)) // show topology (st)
             {
                 st();
             }
-            else if ((strcmp(strV, "show names") == 0) || (strcmp(strV, "server\n") == 0)) // show names (sn)
+            else if ((strcmp(strV, "show names") == 0) || (strcmp(strV, "sn") == 0)) // show names (sn)
             {
-                // servTCP(&tcpV, TCP);
-                //  sn();
+                showNames(flagName);
             }
-            else if ((strcmp(strV, "show routing") == 0) || (strcmp(strV, "cliente\n") == 0)) // show routing (sr)
+            else if ((strcmp(strV, "show routing") == 0) || (strcmp(strV, "cliente") == 0)) // show routing (sr)
             {
-
                 sr();
             }
             else if (strcmp(strV, "leave") == 0) // leave
@@ -216,8 +200,9 @@ int main(int argc, char *argv[])
     }
 
     // check if server socket is ready for accepting new connections
-    if (FD_ISSET(server_fd, &fds))
+    if (FD_ISSET(server_fd, &rfds))
     {
+        printf("server_fd is ready\n");
         char RWbuffer[100];
         addrlen = sizeof(addr);
         if ((client_fds[maxclits] = accept(server_fd, &addr, &addrlen)) == -1)
@@ -233,7 +218,7 @@ int main(int argc, char *argv[])
         {
             if (n == -1) /*error*/
             {
-                printf("erro read");
+                printf("erro read main.c");
                 exit(1);
             }
             RWbuffer[n] = '\0'; /*null terminate the string*/
@@ -241,6 +226,7 @@ int main(int argc, char *argv[])
 
             ptr = &RWbuffer[0];
             sprintf(ptr, "echo: %s", RWbuffer);
+            printf("eecho: %s\n", RWbuffer);
             while (n > 0)
             {
                 if ((nw = write(client_fds[maxclits], ptr, n)) <= 0) /*error*/
@@ -256,4 +242,12 @@ int main(int argc, char *argv[])
         maxclits++;
         // close(client_fds[maxclits]);
     }
+    for (int i = 0; i < maxclits; i++)
+    {
+        if (FD_ISSET(client_fds[i], &rfds))
+        {
+            printf("client %d is ready\n", i);
+        }
+    }
+    return 0;
 }

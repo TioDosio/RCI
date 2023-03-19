@@ -17,4 +17,8 @@ struct NO
     int flagVaz;
 };
 
+void create(char *name, int flagName);
+void delete(char *name, int flagName);
+void showNames();
+
 #endif
