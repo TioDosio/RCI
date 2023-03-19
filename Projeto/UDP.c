@@ -61,7 +61,7 @@ void reg(char *net, char *id, char *IP, char *TCP)
     }
     buffOKs[n] = '\0'; // adiciona terminador de string
     printf("received: %s\n\n", buffOKs);
-    if (node.flagVaz != 1)
+    if (node.flagVaz > 1)
     {
         client_tcp();
     }
@@ -141,7 +141,7 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
     int intIDv, intID;
     node.flagVaz = 0;
 
-    if (flagS == 1)
+    if (flagS == 1) // so entra se for o join
     {
         intID = atoi(id);
         char *saveptr, IDv[11], IPv[20], Portv[6];
@@ -156,7 +156,7 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
                 intID = rand() % 100;
                 // printf("ID already exists, new ID: %d", intID);
             }
-            node.flagVaz += 1;
+            node.flagVaz++;
         }
         if (line == NULL)
         {
