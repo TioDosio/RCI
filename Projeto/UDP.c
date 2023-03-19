@@ -63,7 +63,7 @@ void reg(char *net, char *id, char *IP, char *TCP)
     printf("received: %s\n\n", buffOKs);
     if (node.flagVaz > 1)
     {
-        client_tcp();
+        client_tcp(id, IP, TCP);
     }
 
     freeaddrinfo(res);

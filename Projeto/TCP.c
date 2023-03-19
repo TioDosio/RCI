@@ -14,10 +14,9 @@
 extern struct NO node; // ter variavel global em varios ficheiros
 // extern char TCP[50];   // ter variavel global em varios ficheiros
 
-void client_tcp()
+void client_tcp(char *id, char *IP, char *TCP)
 {
-    ssize_t nbytes, nleft, nread;
-    char *ptr, buffer[128 + 1];
+    char buffer[128 + 1];
     struct addrinfo hints, *res;
     int fd, n;
     fd = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
@@ -26,7 +25,6 @@ void client_tcp()
         printf("erro socket tcp.c");
         exit(1); // error
     }
-
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET; // IPv4
     hints.ai_socktype = SOCK_STREAM;
@@ -47,14 +45,10 @@ void client_tcp()
     {
         printf("connect bem sucedido\n");
     }
-    char aux[] = sprintf(buffer, "NEW %s %s %s ", IDv, IPv, Portv); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
-    strcpy(buffer, aux);
+
+    sprintf(buffer, "NEW %s %s %s ", id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
     printf("enviado pelo CLIT: %s\n", buffer);
-    write(fd, ptr, strlen(buffer)); /*////// envia mensagem para o servidor*/
-    read(fd, ptr, nleft);
-    nread = nbytes - nleft;
-    buffer[nread] = '\0';
-    printf("echo: %s\n", buffer);
+    write(fd, buffer, strlen(buffer)); // envia mensagem para o servidor
     freeaddrinfo(res);
 }
 void djoin(char *net, char *id, char *bootid, char *bootIP, char *bootTCP) // djoin(net, id, bootid, bootIP, bootTCP);

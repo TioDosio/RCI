@@ -8,7 +8,7 @@ typedef struct TCPS
     int flagNFD;
 } TCPS;
 
-void client_tcp();
+void client_tcp(char *id, char *IP, char *TCP);
 void djoin(char *net, char *id, char *bootid, char *bootIP, char *bootTCP); // djoin(net, id, bootid, bootIP, bootTCP);
 
 #endif
