@@ -63,19 +63,19 @@ int main(int argc, char *argv[])
         help();
     }
     struct addrinfo hints, *res;
-    int server_fd, errcode, maxclits = 0, client_fds[10], j = 0, k = 0; /*j->count array client_fds[]*/ /*k->counter VizInternos*/
+    int errcode, maxclits = 1, client_fds[98], j = 0, k = 0; /*j->count array client_fds[]*/ /*k->counter VizInternos*/ /*client_fds[0]->serverFD*/
     struct sockaddr addr;
     socklen_t addrlen;
     char buffer[500]; // ver melhor o tamanho do buffer
     fd_set rfds;      // create file descriptors set
     // create TCP server
-    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
+    if ((client_fds[0] = socket(AF_INET, SOCK_STREAM, 0)) == 0)
     {
         printf("erro socket main.c");
         perror("socket failed");
         exit(EXIT_FAILURE);
     }
-    printf("socket serverfd:%d\n", server_fd);
+    printf("socket serverfd:%d\n", client_fds[0]);
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;       // IPv4
     hints.ai_socktype = SOCK_STREAM; // TCP socket
@@ -84,19 +84,19 @@ int main(int argc, char *argv[])
     {
         printf("erro get addrinfo main.c");
         exit(1);
-    }                                                         /*error*/
-    if (bind(server_fd, res->ai_addr, res->ai_addrlen) == -1) // conecta o socket ao endereço
+    }                                                             /*error*/
+    if (bind(client_fds[0], res->ai_addr, res->ai_addrlen) == -1) // conecta o socket ao endereço
     {
         printf("erro bind main.c");
         exit(1);
-    }                               /*error*/
-    if (listen(server_fd, 5) == -1) // 5 é o numero de conexões que podem estar em espera
+    }                                   /*error*/
+    if (listen(client_fds[0], 5) == -1) // 5 é o numero de conexões que podem estar em espera
     {
         printf("erro get addrinfo main.c");
         exit(1);
     } /*error*/
     char strV[20], net[20], id[20];
-    for (int i = 0; i < 10; i++)
+    for (int i = 1; i < 98; i++)
     {
         client_fds[i] = -1;
     }
@@ -105,10 +105,10 @@ int main(int argc, char *argv[])
         FD_ZERO(&rfds);
         // add stdin, server socket to set
         FD_SET(STDIN_FILENO, &rfds);
-        FD_SET(server_fd, &rfds);
+        FD_SET(client_fds[0], &rfds);
         // wait for activity on one of the file descriptors
-        int max_fd = (STDIN_FILENO > server_fd) ? STDIN_FILENO : server_fd, Nsel = 0;
-        for (int i = 0; i < maxclits; i++)
+        int max_fd = (STDIN_FILENO > client_fds[0]) ? STDIN_FILENO : client_fds[0], Nsel = 0;
+        for (int i = 1; i < maxclits; i++)
         {
             if (client_fds[i] > 0)
             {
@@ -119,136 +119,140 @@ int main(int argc, char *argv[])
                 }
             }
         }
-        if (Nsel = select(max_fd + 1, &rfds, NULL, NULL, NULL) < 0)
+        if ((Nsel = select(max_fd + 1, &rfds, NULL, NULL, NULL)) < 0)
         {
             printf("erro select main.c");
             perror("error select");
             exit(EXIT_FAILURE);
         }
-        // check if stdin is ready for reading
-        if (FD_ISSET(STDIN_FILENO, &rfds))
+        for (int ns = 0; ns < Nsel; ns++)
         {
-            fgets(buffer, sizeof(buffer), stdin);
-            printf("User input: %s", buffer);
-            sscanf(buffer, "%s", strV);
-            if (strcmp(strV, "join") == 0) // join net id
+
+            // check if stdin is ready for reading
+            if (FD_ISSET(STDIN_FILENO, &rfds))
             {
-                sscanf(buffer, "%s %s %s", strV, net, id);
-                reg(net, id, IP, TCP); // inet
-            }
-            else if (strcmp(strV, "djoin") == 0) // djoin net id bootid bootIP bootTCP
-            {
-                char bootid[3], bootIP[16], bootTCP[5];
-                sscanf(buffer, "%s %s %s %s %s %s", strV, net, id, bootid, bootIP, bootTCP);
-                djoin(net, id, IP, TCP, bootid, bootIP, bootTCP);
-            }
-            else if (strcmp(strV, "create") == 0) // create name
-            {
-                char name[101];
-                sscanf(buffer, "%s %s", strV, name);
-                create(name, flagName);
-                flagName++;
-            }
-            else if (strcmp(strV, "delete") == 0) // delete name
-            {
-                char name[101];
-                sscanf(buffer, "%s %s", strV, name);
-                delete (name, flagName);
-                flagName--;
-            }
-            else if (strcmp(strV, "get") == 0) // get dest name
-            {
-                char dest[4], name[101];
-                sscanf(buffer, "%s %s %s", strV, dest, name); // falta mandar a mensagem para os outros nós
-                get(dest, name);
-            }
-            else if ((strcmp(strV, "show topology") == 0) || (strcmp(strV, "st") == 0)) // show topology (st)
-            {
-                st(); // nao feito
-            }
-            else if ((strcmp(strV, "show names") == 0) || (strcmp(strV, "sn") == 0)) // show names (sn)
-            {
-                showNames(flagName);
-            }
-            else if ((strcmp(strV, "show routing") == 0) || (strcmp(strV, "sr") == 0)) // show routing (sr)
-            {
-                sr(); // nao feito
-            }
-            else if (strcmp(strV, "leave") == 0) // leave net id
-            {
-                sscanf(buffer, "%s %s %s", strV, net, id);
-                leave(net, id, IP, TCP, client_fds);
-            }
-            else if (strcmp(strV, "show") == 0) // exit
-            {
-                sscanf(buffer, "%s %s %s", strV, net, id);
-                show(0, net, id, IP, TCP);
-            }
-            else if (strcmp(strV, "exit") == 0) // exit
-            {
-                printf("See yaa soon...\n");
-                exit(0);
-            }
-            else
-            {
-                printf("Invalid command\n");
-            }
-        }
-        for (int i = 0; i < maxclits; i++)
-        {
-            if (FD_ISSET(client_fds[i], &rfds))
-            {
-                int n = 0;
-                char Wbuffer[100], cmd[10];
-                n = read(client_fds[i], Wbuffer, 100); //  vai ser 0 quando o cliente fechar a ligação
-                if (n == -1)
+                fgets(buffer, sizeof(buffer), stdin);
+                printf("User input: %s", buffer);
+                sscanf(buffer, "%s", strV);
+                if (strcmp(strV, "join") == 0) // join net id
                 {
-                    printf("erro read main.c");
-                    exit(1);
+                    sscanf(buffer, "%s %s %s", strV, net, id);
+                    reg(net, id, IP, TCP); // inet
                 }
-                printf("recebido:%s\n", Wbuffer);
-                sscanf(buffer, "%s", cmd);
-                if (strcmp(cmd, "NEW") == 0)
+                else if (strcmp(strV, "djoin") == 0) // djoin net id bootid bootIP bootTCP
                 {
-                    sscanf(cmd, "%s %s %s %s", cmd, node.vizInt[k].IDv, node.vizInt[k].IPv, node.vizInt[k].Portv);
-                    sprintf(Wbuffer, "EXTERN %s %s %s", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                    n = write(client_fds[i], Wbuffer, strlen(Wbuffer));
+                    char bootid[3], bootIP[16], bootTCP[5];
+                    sscanf(buffer, "%s %s %s %s %s %s", strV, net, id, bootid, bootIP, bootTCP);
+                    djoin(net, id, IP, TCP, bootid, bootIP, bootTCP);
+                }
+                else if (strcmp(strV, "create") == 0) // create name
+                {
+                    char name[101];
+                    sscanf(buffer, "%s %s", strV, name);
+                    create(name, flagName);
+                    flagName++;
+                }
+                else if (strcmp(strV, "delete") == 0) // delete name
+                {
+                    char name[101];
+                    sscanf(buffer, "%s %s", strV, name);
+                    delete (name, flagName);
+                    flagName--;
+                }
+                else if (strcmp(strV, "get") == 0) // get dest name
+                {
+                    char dest[4], name[101];
+                    sscanf(buffer, "%s %s %s", strV, dest, name); // falta mandar a mensagem para os outros nós
+                    get(dest, name);
+                }
+                else if ((strcmp(strV, "show topology") == 0) || (strcmp(strV, "st") == 0)) // show topology (st)
+                {
+                    st(); // nao feito
+                }
+                else if ((strcmp(strV, "show names") == 0) || (strcmp(strV, "sn") == 0)) // show names (sn)
+                {
+                    showNames(flagName);
+                }
+                else if ((strcmp(strV, "show routing") == 0) || (strcmp(strV, "sr") == 0)) // show routing (sr)
+                {
+                    sr(); // nao feito
+                }
+                else if (strcmp(strV, "leave") == 0) // leave net id
+                {
+                    sscanf(buffer, "%s %s %s", strV, net, id);
+                    leave(net, id, IP, TCP, client_fds);
+                }
+                else if (strcmp(strV, "show") == 0) // exit
+                {
+                    sscanf(buffer, "%s %s %s", strV, net, id);
+                    show(0, net, id, IP, TCP);
+                }
+                else if (strcmp(strV, "exit") == 0) // exit
+                {
+                    printf("See yaa soon...\n");
+                    exit(0);
+                }
+                else
+                {
+                    printf("Invalid command\n");
+                }
+            }
+            for (int i = 1; i < maxclits; i++)
+            {
+                if (FD_ISSET(client_fds[i], &rfds))
+                {
+                    int n = 0;
+                    char Wbuffer[100], cmd[10];
+                    n = read(client_fds[i], Wbuffer, 100); //  vai ser 0 quando o cliente fechar a ligação
                     if (n == -1)
                     {
-                        printf("erro write main.c");
+                        printf("erro read main.c");
                         exit(1);
                     }
-                    k++; /*passa para a próxima posição dos vizInt[]*/
+                    printf("recebido:%s\n", Wbuffer);
+                    sscanf(buffer, "%s", cmd);
+                    if (strcmp(cmd, "NEW") == 0)
+                    {
+                        sscanf(cmd, "%s %s %s %s", cmd, node.vizInt[k].IDv, node.vizInt[k].IPv, node.vizInt[k].Portv);
+                        sprintf(Wbuffer, "EXTERN %s %s %s", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                        n = write(client_fds[i], Wbuffer, strlen(Wbuffer));
+                        if (n == -1)
+                        {
+                            printf("erro write main.c");
+                            exit(1);
+                        }
+                        k++; /*passa para a próxima posição dos vizInt[]*/
+                    }
+                    else if (strcmp(cmd, "EXTERN") == 0)
+                    {
+                        sscanf(cmd, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
+                    }
                 }
-                else if (strcmp(cmd, "EXTERN") == 0)
-                {
-                    sscanf(cmd, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
-                }
+                FD_CLR(client_fds[i], &rfds);
             }
-            FD_CLR(client_fds[i], &rfds);
-        }
-        // check if server socket is ready for accepting new connections
-        if (FD_ISSET(server_fd, &rfds))
-        {
-            printf("server_fd is ready\n");
-            addrlen = sizeof(addr);
-            client_fds[j] = accept(server_fd, &addr, &addrlen);
-            printf("socket accept:%d\n", client_fds[j]);
-            if (client_fds[j] == -1)
-            { /*error*/
-                printf("erro accept main.c");
-                exit(1);
-            }
-            else
+            // check if server socket is ready for accepting new connections
+            if (FD_ISSET(client_fds[0], &rfds))
             {
-                printf("server accepted\n");
+                printf("client_fds[0] is ready\n");
+                addrlen = sizeof(addr);
+                client_fds[j] = accept(client_fds[0], &addr, &addrlen);
+                printf("socket accept:%d\n", client_fds[j]);
+                if (client_fds[j] == -1)
+                { /*error*/
+                    printf("erro accept main.c");
+                    exit(1);
+                }
+                else
+                {
+                    printf("server accepted\n");
+                }
+                printf("client fd: %d \n\n", client_fds[j]);
+                maxclits++;
+                j++;
+                FD_CLR(client_fds[0], &rfds);
             }
-            printf("client fd: %d \n\n", client_fds[j]);
-            maxclits++;
-            j++;
+            FD_CLR(STDIN_FILENO, &rfds);
         }
-        FD_CLR(server_fd, &rfds);
-        FD_CLR(STDIN_FILENO, &rfds);
     }
     return 0;
 }

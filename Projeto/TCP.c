@@ -139,8 +139,8 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
 }
 void leave(char *net, char *id, char *IP, char *TCP, int *client_fds)
 {
-    unreg(char *net, char *id, char *IP, char *TCP);
-    for (int i = 0; i < 10; i++)
+    unreg(net, id, IP, TCP);
+    for (int i = 0; i < 98; i++)
     {
         if (client_fds[i] != 0)
         {
