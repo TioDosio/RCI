@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
                 char RWbuffer[100], cmd[10];
                 // printf("client %d is ready\n", i);
                 // printf("client fd: %d \n", client_fds[i]);
-                read(client_fds[i], RWbuffer, sizeof(RWbuffer));
+                read(client_fds[i], RWbuffer, strlen(RWbuffer));
                 // printf("%s\n", RWbuffer);
                 sscanf(buffer, "%s", cmd);
                 if (strcmp(cmd, "NEW") == 0)
@@ -229,7 +229,7 @@ int main(int argc, char *argv[])
                     sscanf(cmd, "%s %s %s %s", cmd, node.vizInt[k].IDv, node.vizInt[k].IPv, node.vizInt[k].Portv);
                     sprintf(RWbuffer, "EXTERN %s %s %s", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                     write(client_fds[i], RWbuffer, strlen(RWbuffer));
-                    k++; /*passa para a próxima posição dos vizInt[]*/ 
+                    k++; /*passa para a próxima posição dos vizInt[]*/
                 }
                 else if (strcmp(cmd, "EXTERN") == 0)
                 {

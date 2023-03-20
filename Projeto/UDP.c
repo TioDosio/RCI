@@ -36,9 +36,6 @@ void reg(char *net, char *id, char *IP, char *TCP)
     ssize_t n;
     struct sockaddr addr;
     char buffOKs[8]; // max = OKUNREG
-    int socket(int domain, int type, int protocol);
-    ssize_t sendto(int s, const void *buf, size_t len, int flags,
-                   const struct sockaddr *dest_addr, socklen_t addrlen);
     socklen_t addrlen;
     fd = socket(AF_INET, SOCK_DGRAM, 0); // UDP socket
     if (fd == -1)                        /*error*/
@@ -48,15 +45,22 @@ void reg(char *net, char *id, char *IP, char *TCP)
     hints.ai_socktype = SOCK_DGRAM; // UDP socket
     errcode = getaddrinfo("tejo.tecnico.ulisboa.pt", "59000", &hints, &res);
     if (errcode != 0) /*error*/
+    {
+        printf("erro get addrinfo reg.c");
         exit(1);
+    }
     n = sendto(fd, sendV, strlen(sendV), 0, res->ai_addr, res->ai_addrlen);
     if (n == -1) /*error*/
+    {
+        printf("erro send reg.c");
         exit(1);
+    }
     addrlen = sizeof(addr);
 
     n = recvfrom(fd, buffOKs, sizeof(buffOKs), 0, &addr, &addrlen); // Recebe a resposta do servidor
     if (n == -1)
-    { /*error*/
+    {
+        printf("erro recv reg.c");
         exit(1);
     }
     buffOKs[n] = '\0'; // adiciona terminador de string
@@ -70,9 +74,9 @@ void reg(char *net, char *id, char *IP, char *TCP)
 }
 void leave(char *net, char *id, char *IP, char *TCP)
 {
-    char sendV[50], buffer[2500];
+    char sendV[50], bufOKs[10];
     sprintf(sendV, "UNREG %s %s", net, id); // NODES net
-    printf("sending: %s\n\n", sendV);
+    printf("sending: %s\n", sendV);
     struct addrinfo hints, *res;
     int fd, errcode;
     ssize_t n;
@@ -80,25 +84,35 @@ void leave(char *net, char *id, char *IP, char *TCP)
     socklen_t addrlen;
     fd = socket(AF_INET, SOCK_DGRAM, 0); // UDP socket
     if (fd == -1)                        /*error*/
+    {
+        printf("erro socket leave.c\n");
         exit(1);
+    }
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;      // IPv4
     hints.ai_socktype = SOCK_DGRAM; // UDP socket
     errcode = getaddrinfo("tejo.tecnico.ulisboa.pt", "59000", &hints, &res);
     if (errcode != 0) /*error*/
-        exit(1);
-    n = sendto(fd, sendV, strlen(sendV), 0, res->ai_addr, res->ai_addrlen);
-    if (n == -1) /*error*/
-        exit(1);
-    addrlen = sizeof(addr);
-
-    n = recvfrom(fd, buffer, sizeof(buffer), 0, &addr, &addrlen); // Recebe a resposta do servidor
-    if (n == -1)
-    { /*error*/
+    {
+        printf("erro get addrinfo leave.c\n");
         exit(1);
     }
-    buffer[n] = '\0'; // adiciona terminador de string
-    printf("received: %s\n\n", buffer);
+    n = sendto(fd, sendV, strlen(sendV), 0, res->ai_addr, res->ai_addrlen);
+    if (n == -1) /*error*/
+    {
+        printf("erro send leave.c\n");
+        exit(1);
+    }
+    addrlen = sizeof(addr);
+
+    n = recvfrom(fd, bufOKs, 10, 0, &addr, &addrlen); // Recebe a resposta do servidor
+    if (n == -1)                                      /*error*/
+    {
+        printf("erro recv leave.c\n");
+        exit(1);
+    }
+    bufOKs[n] = '\0'; // adiciona terminador de string
+    printf("received: %s\n\n", bufOKs);
     close(fd);
     freeaddrinfo(res);
 }
@@ -115,21 +129,31 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
     socklen_t addrlen;
     fd = socket(AF_INET, SOCK_DGRAM, 0); // UDP socket
     if (fd == -1)                        /*error*/
+    {
+        printf("erro socket show\n");
         exit(1);
+    }
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;      // IPv4
     hints.ai_socktype = SOCK_DGRAM; // UDP socket
     errcode = getaddrinfo("tejo.tecnico.ulisboa.pt", "59000", &hints, &res);
     if (errcode != 0) /*error*/
+    {
+        printf("erro get addrinfo show\n");
         exit(1);
+    }
     n = sendto(fd, sendV, strlen(sendV), 0, res->ai_addr, res->ai_addrlen);
     if (n == -1) /*error*/
+    {
+        printf("erro send show\n");
         exit(1);
+    }
     addrlen = sizeof(addr);
 
-    n = recvfrom(fd, buffer, sizeof(buffer), 0, &addr, &addrlen); // Recebe a resposta do servidor
+    n = recvfrom(fd, buffer, 2500, 0, &addr, &addrlen); // Recebe a resposta do servidor
     if (n == -1)
     { /*error*/
+        printf("erro read show\n");
         exit(1);
     }
     buffer[n] = '\0'; // adiciona terminador de string
@@ -139,7 +163,7 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
     node.flagVaz = 0;
 
     if (flagS == 1) // so entra se for o join
-    {
+    {               /*Dá para fazer isto com strings mudar*/
         intID = atoi(id);
         char *saveptr, IDv[11], IPv[20], Portv[6];
         char *line = strtok_r(buffer, "\n", &saveptr);
