@@ -9,6 +9,6 @@ typedef struct TCPS
 } TCPS;
 
 void client_tcp(char *id, char *IP, char *TCP);
-void djoin(char *net, char *id, char *bootid, char *bootIP, char *bootTCP); // djoin(net, id, bootid, bootIP, bootTCP);
+void djoin(char *net, char *id, char *bootID, char *bootIP, char *bootTCP); // djoin(net, id, bootID, bootIP, bootTCP);
 
 #endif

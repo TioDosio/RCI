@@ -70,14 +70,13 @@ void reg(char *net, char *id, char *IP, char *TCP)
 }
 void leave(char *net, char *id, char *IP, char *TCP)
 {
-    char sendV[50];
+    char sendV[50], buffer[2500];
     sprintf(sendV, "UNREG %s %s", net, id); // NODES net
     printf("sending: %s\n\n", sendV);
     struct addrinfo hints, *res;
     int fd, errcode;
     ssize_t n;
     struct sockaddr addr;
-    char buffer[2500];
     socklen_t addrlen;
     fd = socket(AF_INET, SOCK_DGRAM, 0); // UDP socket
     if (fd == -1)                        /*error*/
@@ -93,7 +92,7 @@ void leave(char *net, char *id, char *IP, char *TCP)
         exit(1);
     addrlen = sizeof(addr);
 
-    n = recvfrom(fd, buffer, 2500, 0, &addr, &addrlen); // Recebe a resposta do servidor
+    n = recvfrom(fd, buffer, strlen(buffer), 0, &addr, &addrlen); // Recebe a resposta do servidor
     if (n == -1)
     { /*error*/
         exit(1);
@@ -130,7 +129,7 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
         exit(1);
     addrlen = sizeof(addr);
 
-    n = recvfrom(fd, buffer, 2500, 0, &addr, &addrlen); // Recebe a resposta do servidor
+    n = recvfrom(fd, buffer, strlen(buffer), 0, &addr, &addrlen); // Recebe a resposta do servidor
     if (n == -1)
     { /*error*/
         exit(1);
