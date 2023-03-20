@@ -16,13 +16,12 @@ extern struct NO node; // ter variavel global em varios ficheiros
 
 void client_tcp(char *id, char *IP, char *TCP)
 {
-    printf("ENTROU NO CLIENT TCP\n");
     char buffer[128 + 1];
     struct addrinfo hints, *res;
-    int fd, n;
-    fd = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
-    printf("socket clientTCP:%d\n", fd);
-    if (fd == -1)
+    int fd_ext, n;
+    fd_ext = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
+    printf("socket clientTCP:%d\n", fd_ext);
+    if (fd_ext == -1)
     {
         printf("erro socket tcp.c");
         exit(1); // error
@@ -37,7 +36,7 @@ void client_tcp(char *id, char *IP, char *TCP)
         printf("erro getaddrinfo tcp.c");
         exit(1);
     }
-    n = connect(fd, res->ai_addr, res->ai_addrlen);
+    n = connect(fd_ext, res->ai_addr, res->ai_addrlen);
     if (n == -1) /*error*/
     {
         printf("error connect tcp.c\n");
@@ -47,10 +46,9 @@ void client_tcp(char *id, char *IP, char *TCP)
     {
         printf("connect bem sucedido\n");
     }
-
     sprintf(buffer, "NEW %s %s %s ", id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
     printf("enviado pelo CLIT: %s\n", buffer);
-    write(fd, buffer, strlen(buffer)); // envia mensagem para o servidor
+    write(fd_ext, buffer, strlen(buffer)); // envia mensagem para o servidor
     freeaddrinfo(res);
 }
 void client_tcp_djoin(char *id, char *IP, char *TCP, char *bootID, char *bootIP, char *bootTCP)
@@ -138,4 +136,15 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
     client_tcp_djoin(id, IP, TCP, bootID, bootIP, bootTCP);
     close(fd);
     freeaddrinfo(res);
+}
+void leave(char *net, char *id, char *IP, char *TCP, int *client_fds)
+{
+    unreg(char *net, char *id, char *IP, char *TCP);
+    for (int i = 0; i < 10; i++)
+    {
+        if (client_fds[i] != 0)
+        {
+            close(client_fds[i]);
+        }
+    }
 }

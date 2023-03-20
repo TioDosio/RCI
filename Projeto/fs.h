@@ -12,7 +12,7 @@ struct NO
 {
     struct infoNO vizBackup;
     struct infoNO vizExt;
-    struct infoNO vizInt[10];
+    struct infoNO vizInt[98];
     char names[20][100];
     int flagVaz;
 };

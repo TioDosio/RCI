@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
         FD_SET(STDIN_FILENO, &rfds);
         FD_SET(server_fd, &rfds);
         // wait for activity on one of the file descriptors
-        int max_fd = (STDIN_FILENO > server_fd) ? STDIN_FILENO : server_fd;
+        int max_fd = (STDIN_FILENO > server_fd) ? STDIN_FILENO : server_fd, Nsel = 0;
         for (int i = 0; i < maxclits; i++)
         {
             if (client_fds[i] > 0)
@@ -119,13 +119,12 @@ int main(int argc, char *argv[])
                 }
             }
         }
-        if (select(max_fd + 1, &rfds, NULL, NULL, NULL) < 0)
+        if (Nsel = select(max_fd + 1, &rfds, NULL, NULL, NULL) < 0)
         {
             printf("erro select main.c");
             perror("error select");
             exit(EXIT_FAILURE);
         }
-
         // check if stdin is ready for reading
         if (FD_ISSET(STDIN_FILENO, &rfds))
         {
@@ -175,10 +174,10 @@ int main(int argc, char *argv[])
             {
                 sr(); // nao feito
             }
-            else if (strcmp(strV, "leave") == 0) // le// nao feitoave
+            else if (strcmp(strV, "leave") == 0) // leave net id
             {
-                sscanf(buffer, "%s %s %s", strV, net, id); // é preccido rever, falam coisas
-                leave(net, id, IP, TCP);
+                sscanf(buffer, "%s %s %s", strV, net, id);
+                leave(net, id, IP, TCP, client_fds);
             }
             else if (strcmp(strV, "show") == 0) // exit
             {
@@ -200,22 +199,20 @@ int main(int argc, char *argv[])
             if (FD_ISSET(client_fds[i], &rfds))
             {
                 int n = 0;
-                char RWbuffer[100], cmd[10];
-                // printf("client %d is ready\n", i);
-                // printf("client fd: %d \n", client_fds[i]);
-                n = read(client_fds[i], RWbuffer, 100);
+                char Wbuffer[100], cmd[10];
+                n = read(client_fds[i], Wbuffer, 100); //  vai ser 0 quando o cliente fechar a ligação
                 if (n == -1)
                 {
                     printf("erro read main.c");
                     exit(1);
                 }
-                printf("recebido:%s\n", RWbuffer);
+                printf("recebido:%s\n", Wbuffer);
                 sscanf(buffer, "%s", cmd);
                 if (strcmp(cmd, "NEW") == 0)
                 {
                     sscanf(cmd, "%s %s %s %s", cmd, node.vizInt[k].IDv, node.vizInt[k].IPv, node.vizInt[k].Portv);
-                    sprintf(RWbuffer, "EXTERN %s %s %s", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                    n = write(client_fds[i], RWbuffer, strlen(RWbuffer));
+                    sprintf(Wbuffer, "EXTERN %s %s %s", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                    n = write(client_fds[i], Wbuffer, strlen(Wbuffer));
                     if (n == -1)
                     {
                         printf("erro write main.c");

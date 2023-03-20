@@ -72,7 +72,7 @@ void reg(char *net, char *id, char *IP, char *TCP)
 
     freeaddrinfo(res);
 }
-void leave(char *net, char *id, char *IP, char *TCP)
+void unreg(char *net, char *id, char *IP, char *TCP)
 {
     char sendV[50], bufOKs[10];
     sprintf(sendV, "UNREG %s %s", net, id); // NODES net
