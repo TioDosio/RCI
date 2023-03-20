@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
         perror("socket failed");
         exit(EXIT_FAILURE);
     }
+    printf("socket serverfd:%d\n", server_fd);
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;       // IPv4
     hints.ai_socktype = SOCK_STREAM; // TCP socket
@@ -140,7 +141,7 @@ int main(int argc, char *argv[])
             {
                 char bootid[3], bootIP[16], bootTCP[5];
                 sscanf(buffer, "%s %s %s %s %s %s", strV, net, id, bootid, bootIP, bootTCP);
-                djoin(net, id, bootid, bootIP, bootTCP);
+                djoin(net, id, IP, TCP, bootid, bootIP, bootTCP);
             }
             else if (strcmp(strV, "create") == 0) // create name
             {
@@ -200,6 +201,7 @@ int main(int argc, char *argv[])
             printf("server_fd is ready\n");
             addrlen = sizeof(addr);
             client_fds[j] = accept(server_fd, &addr, &addrlen);
+            printf("socket accept:%d\n", client_fds[j]);
             if (client_fds[j] == -1)
             { /*error*/
                 printf("erro accept main.c");

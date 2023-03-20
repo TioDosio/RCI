@@ -16,10 +16,12 @@ extern struct NO node; // ter variavel global em varios ficheiros
 
 void client_tcp(char *id, char *IP, char *TCP)
 {
+    printf("ENTROU NO CLIENT TCP\n");
     char buffer[128 + 1];
     struct addrinfo hints, *res;
     int fd, n;
     fd = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
+    printf("socket clientTCP:%d\n", fd);
     if (fd == -1)
     {
         printf("erro socket tcp.c");
@@ -57,6 +59,8 @@ void client_tcp_djoin(char *id, char *IP, char *TCP, char *bootID, char *bootIP,
     struct addrinfo hints, *res;
     int fd, n;
     fd = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
+    printf("socket client tcp djoin:%d\n", fd);
+
     if (fd == -1)
     {
         printf("erro socket tcp.c");
@@ -100,7 +104,8 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
     struct sockaddr addr;
     socklen_t addrlen;
     fd = socket(AF_INET, SOCK_DGRAM, 0); // UDP socket
-    if (fd == -1)                        /*error*/
+    printf("socket djoin:%d\n", fd);
+    if (fd == -1) /*error*/
     {
         printf("error socket djoin");
         exit(1);
