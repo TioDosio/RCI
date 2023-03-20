@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
         help();
     }
     struct addrinfo hints, *res;
-    int server_fd, errcode, maxclits = 0, client_fds[10], j = 0;
+    int server_fd, errcode, maxclits = 0, client_fds[10], j = 0, k = 0; /*j->count array client_fds[]*/ /*k->counter VizInternos*/
     struct sockaddr addr;
     socklen_t addrlen;
     char buffer[500]; // ver melhor o tamanho do buffer
@@ -199,10 +199,8 @@ int main(int argc, char *argv[])
         {
             printf("server_fd is ready\n");
             addrlen = sizeof(addr);
-            int a = accept(server_fd, &addr, &addrlen);
-            client_fds[j] = a;
-            printf("BANANAAAA : %d\n", a);
-            if (a == -1)
+            client_fds[j] = accept(server_fd, &addr, &addrlen);
+            if (client_fds[j] == -1)
             { /*error*/
                 printf("erro accept main.c");
                 exit(1);
@@ -211,7 +209,7 @@ int main(int argc, char *argv[])
             {
                 printf("server accepted\n");
             }
-            printf("1client fd: %d \n\n", client_fds[j]);
+            printf("client fd: %d \n\n", client_fds[j]);
             maxclits++;
             j++;
         }
@@ -223,13 +221,15 @@ int main(int argc, char *argv[])
                 char RWbuffer[100], cmd[10];
                 // printf("client %d is ready\n", i);
                 // printf("client fd: %d \n", client_fds[i]);
-                read(client_fds[i], RWbuffer, strlen(RWbuffer));
+                read(client_fds[i], RWbuffer, sizeof(RWbuffer));
                 // printf("%s\n", RWbuffer);
                 sscanf(buffer, "%s", cmd);
                 if (strcmp(cmd, "NEW") == 0)
                 {
+                    sscanf(cmd, "%s %s %s %s", cmd, node.vizInt[k].IDv, node.vizInt[k].IPv, node.vizInt[k].Portv);
                     sprintf(RWbuffer, "EXTERN %s %s %s", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                     write(client_fds[i], RWbuffer, strlen(RWbuffer));
+                    k++; /*passa para a próxima posição dos vizInt[]*/ 
                 }
                 else if (strcmp(cmd, "EXTERN") == 0)
                 {

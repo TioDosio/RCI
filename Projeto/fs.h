@@ -10,12 +10,11 @@ struct infoNO
 };
 struct NO
 {
+    struct infoNO vizBackup;
     struct infoNO vizExt;
     struct infoNO vizInt[10];
-    struct infoNO vizBackup;
     char names[20][100];
     int flagVaz;
-    // char AID[3], AIP[20], APort[6]; // Present node information
 };
 
 void create(char *name, int flagName);

@@ -54,7 +54,7 @@ void reg(char *net, char *id, char *IP, char *TCP)
         exit(1);
     addrlen = sizeof(addr);
 
-    n = recvfrom(fd, buffOKs, 8, 0, &addr, &addrlen); // Recebe a resposta do servidor
+    n = recvfrom(fd, buffOKs, sizeof(buffOKs), 0, &addr, &addrlen); // Recebe a resposta do servidor
     if (n == -1)
     { /*error*/
         exit(1);
@@ -92,7 +92,7 @@ void leave(char *net, char *id, char *IP, char *TCP)
         exit(1);
     addrlen = sizeof(addr);
 
-    n = recvfrom(fd, buffer, strlen(buffer), 0, &addr, &addrlen); // Recebe a resposta do servidor
+    n = recvfrom(fd, buffer, sizeof(buffer), 0, &addr, &addrlen); // Recebe a resposta do servidor
     if (n == -1)
     { /*error*/
         exit(1);
@@ -112,8 +112,6 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
     ssize_t n;
     struct sockaddr addr;
     char buffer[2500];
-    int socket(int domain, int type, int protocol);
-    ssize_t sendto(int s, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
     socklen_t addrlen;
     fd = socket(AF_INET, SOCK_DGRAM, 0); // UDP socket
     if (fd == -1)                        /*error*/
@@ -129,7 +127,7 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
         exit(1);
     addrlen = sizeof(addr);
 
-    n = recvfrom(fd, buffer, strlen(buffer), 0, &addr, &addrlen); // Recebe a resposta do servidor
+    n = recvfrom(fd, buffer, sizeof(buffer), 0, &addr, &addrlen); // Recebe a resposta do servidor
     if (n == -1)
     { /*error*/
         exit(1);
