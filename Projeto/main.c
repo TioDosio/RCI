@@ -195,6 +195,41 @@ int main(int argc, char *argv[])
                 printf("Invalid command\n");
             }
         }
+        for (int i = 0; i < maxclits; i++)
+        {
+            if (FD_ISSET(client_fds[i], &rfds))
+            {
+                int n = 0;
+                char RWbuffer[100], cmd[10];
+                // printf("client %d is ready\n", i);
+                // printf("client fd: %d \n", client_fds[i]);
+                n = read(client_fds[i], RWbuffer, 100);
+                if (n == -1)
+                {
+                    printf("erro read main.c");
+                    exit(1);
+                }
+                printf("recebido:%s\n", RWbuffer);
+                sscanf(buffer, "%s", cmd);
+                if (strcmp(cmd, "NEW") == 0)
+                {
+                    sscanf(cmd, "%s %s %s %s", cmd, node.vizInt[k].IDv, node.vizInt[k].IPv, node.vizInt[k].Portv);
+                    sprintf(RWbuffer, "EXTERN %s %s %s", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                    n = write(client_fds[i], RWbuffer, strlen(RWbuffer));
+                    if (n == -1)
+                    {
+                        printf("erro write main.c");
+                        exit(1);
+                    }
+                    k++; /*passa para a próxima posição dos vizInt[]*/
+                }
+                else if (strcmp(cmd, "EXTERN") == 0)
+                {
+                    sscanf(cmd, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
+                }
+            }
+            FD_CLR(client_fds[i], &rfds);
+        }
         // check if server socket is ready for accepting new connections
         if (FD_ISSET(server_fd, &rfds))
         {
@@ -215,30 +250,8 @@ int main(int argc, char *argv[])
             maxclits++;
             j++;
         }
-
-        for (int i = 0; i < maxclits; i++)
-        {
-            if (FD_ISSET(client_fds[i], &rfds))
-            {
-                char RWbuffer[100], cmd[10];
-                // printf("client %d is ready\n", i);
-                // printf("client fd: %d \n", client_fds[i]);
-                read(client_fds[i], RWbuffer, strlen(RWbuffer));
-                // printf("%s\n", RWbuffer);
-                sscanf(buffer, "%s", cmd);
-                if (strcmp(cmd, "NEW") == 0)
-                {
-                    sscanf(cmd, "%s %s %s %s", cmd, node.vizInt[k].IDv, node.vizInt[k].IPv, node.vizInt[k].Portv);
-                    sprintf(RWbuffer, "EXTERN %s %s %s", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                    write(client_fds[i], RWbuffer, strlen(RWbuffer));
-                    k++; /*passa para a próxima posição dos vizInt[]*/
-                }
-                else if (strcmp(cmd, "EXTERN") == 0)
-                {
-                    sscanf(cmd, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
-                }
-            }
-        }
+        FD_CLR(server_fd, &rfds);
+        FD_CLR(STDIN_FILENO, &rfds);
     }
     return 0;
 }
