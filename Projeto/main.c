@@ -225,15 +225,16 @@ int main(int argc, char *argv[])
                     exit(1);
                 }
                 sscanf(Wbuffer, "%s", cmd);
-                if (strcmp(cmd, "NEW") == 0)
+                if (strcmp(cmd, "NEW") == 0) // se alguém se ligar ao server
                 {
-
-                    if (node.flagVaz == 1)
+                    sscanf(Wbuffer, "%s %s %s %s", cmd, node.vizInt[k].IDv, node.vizInt[k].IPv, node.vizInt[k].Portv);
+                    printf("IDv: %s, IPv: %s Portv: %s\n", node.vizInt[k].IDv, node.vizInt[k].IPv, node.vizInt[k].Portv);
+                    if (node.flagVaz == 1) // Apenas 2 nós na rede
                     {
                         sscanf(Wbuffer, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         g = sprintf(bufsend, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                     }
-                    else
+                    else // + de 2 nós na rede
                     {
                         g = sprintf(bufsend, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                     }
@@ -246,7 +247,7 @@ int main(int argc, char *argv[])
                     k++; /*passa para a próxima posição dos vizInt[]*/
                     printf("enviado ao cliente: %s\n", bufsend);
                 }
-                else if (strcmp(cmd, "EXTERN") == 0)
+                else if (strcmp(cmd, "EXTERN") == 0) /*Acho que o servidor numca entra aqui ?apagar?*/
                 {
                     sscanf(cmd, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
                 }

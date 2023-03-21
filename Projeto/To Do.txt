@@ -1,2 +1,4 @@
 coisas a fazer:
 1-Loop inf depois depois de alguns joins e leaves;
+2- Não pode haver 2 nomes iguais;
+3- se node.vizBackup==node.vizExt => ancora;

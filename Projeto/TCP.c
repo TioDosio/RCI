@@ -56,6 +56,8 @@ int client_tcp(char *id, char *IP, char *TCP)
         printf("errooooooo\n");
     }
     printf("recebido do server:%s\n", buf);
+    sscanf(buf, "EXTERN %s %s %s", node.vizBackup.IPv, node.vizBackup.Portv, node.vizBackup.IDv);
+    printf("BACKUP IP:%s PORTO:%s ID:%s\n", node.vizBackup.IPv, node.vizBackup.Portv, node.vizBackup.IDv);
     freeaddrinfo(res);
     return fd_ext;
 }
