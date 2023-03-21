@@ -231,6 +231,9 @@ int main(int argc, char *argv[])
                     printf("IDv: %s, IPv: %s Portv: %s\n", node.vizInt[k].IDv, node.vizInt[k].IPv, node.vizInt[k].Portv);
                     if (node.flagVaz == 1) // Apenas 2 nós na rede
                     {
+                        strcpy(node.vizBackup.IDv, id);
+                        strcpy(node.vizBackup.IPv, IP);
+                        strcpy(node.vizBackup.Portv, TCP);
                         sscanf(Wbuffer, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         g = sprintf(bufsend, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                     }

@@ -56,8 +56,8 @@ int client_tcp(char *id, char *IP, char *TCP)
         printf("errooooooo\n");
     }
     printf("recebido do server:%s\n", buf);
-    sscanf(buf, "EXTERN %s %s %s", node.vizBackup.IPv, node.vizBackup.Portv, node.vizBackup.IDv);
-    printf("BACKUP IP:%s PORTO:%s ID:%s\n", node.vizBackup.IPv, node.vizBackup.Portv, node.vizBackup.IDv);
+    sscanf(buf, "EXTERN %s %s %s", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
+    printf("BACKUP IP:%s PORTO:%s ID:%s\n", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
     freeaddrinfo(res);
     return fd_ext;
 }
@@ -144,7 +144,23 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
 }
 void leave(char *net, char *id, char *IP, char *TCP, int *client_fds, int fd_ext, int maxclits)
 {
+    close(fd_ext);
+    fd_ext = -2;
+    if (node.vizExt.IDv == node.vizBackup.IDv)
+    {
+        printf("Ancora\n");
+    }
+    else
+    {
+        printf("Nao e ancora\n");
+        strcpy(node.vizExt.IDv, node.vizBackup.IDv);
+        strcpy(node.vizExt.IPv, node.vizBackup.IPv);
+        strcpy(node.vizExt.Portv, node.vizBackup.Portv);
+        /* client_tcp(id, IP, TCP);
+        printf("depois do client TCP\n");*/
+    }
     unreg(net, id, IP, TCP);
+
     for (int i = 0; i < maxclits; i++) // fecha todos os sockets que se estavam a usar
     {
         if (client_fds[i] != 0)
@@ -153,6 +169,4 @@ void leave(char *net, char *id, char *IP, char *TCP, int *client_fds, int fd_ext
             client_fds[i] = -2;
         }
     }
-    close(fd_ext);
-    fd_ext = -2;
 }
