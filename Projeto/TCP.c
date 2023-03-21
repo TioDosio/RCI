@@ -48,15 +48,14 @@ void client_tcp(char *id, char *IP, char *TCP)
     }
     char buf[100] = "";
     sprintf(buffer, "NEW %s %s %s ", id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
-    printf("enviado pelo CLIT: %s\n", buffer);
+    printf("enviado por mim: %s\n", buffer);
     write(fd_ext, buffer, strlen(buffer));
-    printf("CHEHUEI\n");
     n = read(fd_ext, buf, 100);
     if (n == -1)
     {
         printf("errooooooo\n");
     }
-    printf("reads novo:%s\n", buf);
+    printf("recebido do server:%s\n", buf);
     freeaddrinfo(res);
 }
 void client_tcp_djoin(char *id, char *IP, char *TCP, char *bootID, char *bootIP, char *bootTCP)
@@ -88,14 +87,9 @@ void client_tcp_djoin(char *id, char *IP, char *TCP, char *bootID, char *bootIP,
         printf("error connect tcp.c\n");
         exit(1);
     }
-    else
-    {
-        printf("connect bem sucedido\n");
-    }
-
     sprintf(buffer, "NEW %s %s %s ", id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
+    write(fd, buffer, strlen(buffer));             // envia mensagem para o servidor
     printf("enviado pelo CLIT: %s\n", buffer);
-    write(fd, buffer, strlen(buffer)); // envia mensagem para o servidor
     freeaddrinfo(res);
 }
 
