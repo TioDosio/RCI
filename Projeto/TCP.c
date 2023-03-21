@@ -140,15 +140,17 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
     close(fd);
     freeaddrinfo(res);
 }
-void leave(char *net, char *id, char *IP, char *TCP, int *client_fds, int fd_ext)
+void leave(char *net, char *id, char *IP, char *TCP, int *client_fds, int fd_ext, int maxclits)
 {
     unreg(net, id, IP, TCP);
-    close(fd_ext);
-    /*for (int i = 0; i < 98; i++) // fecha todos os sockets que se estavam a usar
+    for (int i = 0; i < maxclits; i++) // fecha todos os sockets que se estavam a usar
     {
         if (client_fds[i] != 0)
         {
             close(client_fds[i]);
+            client_fds[i] = -2;
         }
-    }*/
+    }
+    close(fd_ext);
+    fd_ext = -2;
 }

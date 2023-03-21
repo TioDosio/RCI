@@ -1,2 +1,2 @@
 coisas a fazer:
-1-nao responde depois de alguns joins e leaves;
+1-Loop inf depois depois de alguns joins e leaves;

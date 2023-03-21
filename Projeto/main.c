@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
                 else if (strcmp(strV, "leave") == 0) // leave net id
                 {
                     sscanf(buffer, "%s %s %s", strV, net, id);
-                    leave(net, id, IP, TCP, client_fds, fd_ext);
+                    leave(net, id, IP, TCP, client_fds, fd_ext, maxclits);
                 }
                 else if (strcmp(strV, "show") == 0) // exit
                 {
