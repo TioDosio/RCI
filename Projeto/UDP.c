@@ -167,6 +167,7 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
         intID = atoi(id);
         char *saveptr, IDv[11], IPv[20], Portv[6];
         char *line = strtok_r(buffer, "\n", &saveptr);
+        printf("line: %s\n", line);
         while (line != NULL)
         {
             sscanf(line, "%s %s %s", IDv, IPv, Portv);
@@ -178,19 +179,24 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
                 // printf("ID already exists, new ID: %d", intID);
             }
             node.flagVaz++;
+            printf("flagVaz: %d", node.flagVaz);
         }
         if (line == NULL)
         {
             printf("\n%s %s %s\n", IDv, IPv, Portv);
         }
-        strcpy(node.vizExt.IDv, IDv);
-        strcpy(node.vizExt.IPv, IPv);
-        strcpy(node.vizExt.Portv, Portv);
+        if (node.flagVaz > 1)
+        {
+            strcpy(node.vizExt.IDv, IDv);
+            strcpy(node.vizExt.IPv, IPv);
+            strcpy(node.vizExt.Portv, Portv);
+        }
+        else
+        {
+            intID = 111; // para nao dar erro
+        }
     }
-    else
-    {
-        intID = 111; // para nao dar erro
-    }
+
     close(fd);
     freeaddrinfo(res);
     return intID;

@@ -46,9 +46,17 @@ void client_tcp(char *id, char *IP, char *TCP)
     {
         printf("connect bem sucedido\n");
     }
+    char buf[100] = "";
     sprintf(buffer, "NEW %s %s %s ", id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
     printf("enviado pelo CLIT: %s\n", buffer);
-    write(fd_ext, buffer, strlen(buffer)); // envia mensagem para o servidor
+    write(fd_ext, buffer, strlen(buffer));
+    printf("CHEHUEI\n");
+    n = read(fd_ext, buf, 100);
+    if (n == -1)
+    {
+        printf("errooooooo\n");
+    }
+    printf("reads novo:%s\n", buf);
     freeaddrinfo(res);
 }
 void client_tcp_djoin(char *id, char *IP, char *TCP, char *bootID, char *bootIP, char *bootTCP)
@@ -140,11 +148,11 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
 void leave(char *net, char *id, char *IP, char *TCP, int *client_fds)
 {
     unreg(net, id, IP, TCP);
-    for (int i = 0; i < 98; i++)
+    /*for (int i = 0; i < 98; i++) // fecha todos os sockets que se estavam a usar
     {
         if (client_fds[i] != 0)
         {
             close(client_fds[i]);
         }
-    }
+    }*/
 }
