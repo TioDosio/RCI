@@ -13,10 +13,10 @@
 
 extern struct NO node; // ter variavel global em varios ficheiros
 
-void reg(char *net, char *id, char *IP, char *TCP)
+int reg(char *net, char *id, char *IP, char *TCP)
 {
     char sendV[50];
-    int F = show(1, net, id, IP, TCP);
+    int F = show(1, net, id, IP, TCP), fd_ext = -1;
     if (F >= 0 && F <= 9)
     {
         strcpy(id, "");
@@ -67,9 +67,9 @@ void reg(char *net, char *id, char *IP, char *TCP)
     printf("received: %s\n\n", buffOKs);
     if (node.flagVaz > 1)
     {
-        client_tcp(id, IP, TCP);
+        fd_ext = client_tcp(id, IP, TCP);
     }
-
+    return fd_ext;
     freeaddrinfo(res);
 }
 void unreg(char *net, char *id, char *IP, char *TCP)

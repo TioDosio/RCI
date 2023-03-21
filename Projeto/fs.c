@@ -41,3 +41,12 @@ void get(char *dest, char *name)
 {
     printf("getting\n");
 }
+void showTopo(int maxclits) // maxclits para o for dos viz internos
+{
+    printf("Vizinho Externo:\n id:%s\nip:%s\nporto:%s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+    for (int i = 0; i < maxclits; i++)
+    {
+        printf("Vizinho Interno %d:\n id:%s\nip:%s\nporto:%s\n", i, node.vizInt[i].IDv, node.vizInt[i].IPv, node.vizInt[i].Portv);
+    }
+    printf("Vizinho Backup:\n id:%s\nip:%s\nporto:%s\n", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
+};

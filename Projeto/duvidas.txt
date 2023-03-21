@@ -1,1 +1,0 @@
-Dar close do fd_ext e tentar ver como gerir a cena shu

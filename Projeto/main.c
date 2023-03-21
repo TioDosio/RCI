@@ -63,19 +63,19 @@ int main(int argc, char *argv[])
         help();
     }
     struct addrinfo hints, *res;
-    int errcode, maxclits = 0, client_fd[0], client_fds[98], j = 0, k = 0; /*j->count array client_fds[]*/ /*k->counter VizInternos*/ /*client_fd[0]->serverFD*/
+    int errcode, maxclits = 1, fd_ext = -1, client_fds[99], j = 0, k = 0; /*j->count array client_fds[]*/ /*k->counter VizInternos*/ /*client_fds[0]->serverFD*/
     struct sockaddr addr;
     socklen_t addrlen;
     char buffer[500]; // ver melhor o tamanho do buffer
     fd_set rfds;      // create file descriptors set
     // create TCP server
-    if ((client_fd[0] = socket(AF_INET, SOCK_STREAM, 0)) == 0)
+    if ((client_fds[0] = socket(AF_INET, SOCK_STREAM, 0)) == 0)
     {
         printf("erro socket main.c");
         perror("socket failed");
         exit(EXIT_FAILURE);
     }
-    printf("socket serverfd:%d\n", client_fd[0]);
+    printf("socket serverfd:%d\n", client_fds[0]);
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;       // IPv4
     hints.ai_socktype = SOCK_STREAM; // TCP socket
@@ -84,19 +84,19 @@ int main(int argc, char *argv[])
     {
         printf("erro get addrinfo main.c");
         exit(1);
-    }                                                            /*error*/
-    if (bind(client_fd[0], res->ai_addr, res->ai_addrlen) == -1) // conecta o socket ao endereço
+    }                                                             /*error*/
+    if (bind(client_fds[0], res->ai_addr, res->ai_addrlen) == -1) // conecta o socket ao endereço
     {
         printf("erro bind main.c");
         exit(1);
-    }                                  /*error*/
-    if (listen(client_fd[0], 5) == -1) // 5 é o numero de conexões que podem estar em espera
+    }                                   /*error*/
+    if (listen(client_fds[0], 5) == -1) // 5 é o numero de conexões que podem estar em espera
     {
         printf("erro get addrinfo main.c");
         exit(1);
     } /*error*/
     char strV[20], net[20], id[20];
-    for (int i = 1; i < 98; i++)
+    for (int i = 1; i < 99; i++)
     {
         client_fds[i] = -1;
     }
@@ -105,9 +105,9 @@ int main(int argc, char *argv[])
         FD_ZERO(&rfds);
         // add stdin, server socket to set
         FD_SET(STDIN_FILENO, &rfds);
-        FD_SET(client_fd[0], &rfds);
+        FD_SET(client_fds[0], &rfds);
         // wait for activity on one of the file descriptors
-        int max_fd = (STDIN_FILENO > client_fd[0]) ? STDIN_FILENO : client_fd[0], Nsel = 1;
+        int max_fd = (STDIN_FILENO > client_fds[0]) ? STDIN_FILENO : client_fds[0], Nsel = 1;
         for (int i = 1; i < maxclits; i++)
         {
             if (client_fds[i] > 0)
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
                 if (strcmp(strV, "join") == 0) // join net id
                 {
                     sscanf(buffer, "%s %s %s", strV, net, id);
-                    reg(net, id, IP, TCP); // inet
+                    fd_ext = reg(net, id, IP, TCP);
                 }
                 else if (strcmp(strV, "djoin") == 0) // djoin net id bootid bootIP bootTCP
                 {
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
                 }
                 else if ((strcmp(strV, "show topology") == 0) || (strcmp(strV, "st") == 0)) // show topology (st)
                 {
-                    st(); // nao feito
+                    showTopo(maxclits);
                 }
                 else if ((strcmp(strV, "show names") == 0) || (strcmp(strV, "sn") == 0)) // show names (sn)
                 {
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
                 else if (strcmp(strV, "leave") == 0) // leave net id
                 {
                     sscanf(buffer, "%s %s %s", strV, net, id);
-                    leave(net, id, IP, TCP, client_fds);
+                    leave(net, id, IP, TCP, client_fds, fd_ext);
                 }
                 else if (strcmp(strV, "show") == 0) // exit
                 {
@@ -205,11 +205,11 @@ int main(int argc, char *argv[])
                 FD_CLR(client_fds[i], &rfds);
             }
             // check if server socket is ready for accepting new connections
-            if (FD_ISSET(client_fd[0], &rfds))
+            if (FD_ISSET(client_fds[0], &rfds))
             {
                 ssize_t g;
                 addrlen = sizeof(addr);
-                client_fds[j] = accept(client_fd[0], &addr, &addrlen);
+                client_fds[j] = accept(client_fds[0], &addr, &addrlen);
                 if (client_fds[j] == -1)
                 { /*error*/
                     printf("erro accept main.c");
@@ -231,11 +231,11 @@ int main(int argc, char *argv[])
                     if (node.flagVaz == 1)
                     {
                         sscanf(Wbuffer, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                        g = sprintf(bufsend, "EXTERN %s %s %s", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                        g = sprintf(bufsend, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                     }
                     else
                     {
-                        g = sprintf(bufsend, "EXTERN %s %s %s", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                        g = sprintf(bufsend, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                     }
                     n = write(client_fds[j], bufsend, g);
                     if (n == -1)
@@ -253,8 +253,8 @@ int main(int argc, char *argv[])
                 maxclits++;
                 j++;
             }
+            FD_CLR(client_fds[0], &rfds);
             FD_CLR(STDIN_FILENO, &rfds);
-            FD_CLR(client_fd[0], &rfds);
         }
     }
     return 0;

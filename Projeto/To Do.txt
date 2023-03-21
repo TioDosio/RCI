@@ -1,0 +1,2 @@
+coisas a fazer:
+1-nao responde depois de alguns joins e leaves;

@@ -14,7 +14,7 @@
 extern struct NO node; // ter variavel global em varios ficheiros
 // extern char TCP[50];   // ter variavel global em varios ficheiros
 
-void client_tcp(char *id, char *IP, char *TCP)
+int client_tcp(char *id, char *IP, char *TCP)
 {
     char buffer[128 + 1];
     struct addrinfo hints, *res;
@@ -57,6 +57,7 @@ void client_tcp(char *id, char *IP, char *TCP)
     }
     printf("recebido do server:%s\n", buf);
     freeaddrinfo(res);
+    return fd_ext;
 }
 void client_tcp_djoin(char *id, char *IP, char *TCP, char *bootID, char *bootIP, char *bootTCP)
 {
@@ -139,9 +140,10 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
     close(fd);
     freeaddrinfo(res);
 }
-void leave(char *net, char *id, char *IP, char *TCP, int *client_fds)
+void leave(char *net, char *id, char *IP, char *TCP, int *client_fds, int fd_ext)
 {
     unreg(net, id, IP, TCP);
+    close(fd_ext);
     /*for (int i = 0; i < 98; i++) // fecha todos os sockets que se estavam a usar
     {
         if (client_fds[i] != 0)
