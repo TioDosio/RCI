@@ -111,10 +111,8 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
     close(fd);
     freeaddrinfo(res);
 }
-void leave(char *net, char *id, char *IP, char *TCP, int *client_fds, int maxclits)
+void leave(char *net, char *id, char *IP, char *TCP, int maxclits)
 {
-    // close(fd_ext);
-    // fd_ext = -1;
     if (strcmp(id, node.vizBackup.IDv) == 0)
     {
         printf("Ancora\n");
@@ -131,10 +129,14 @@ void leave(char *net, char *id, char *IP, char *TCP, int *client_fds, int maxcli
     unreg(net, id, IP, TCP);
     for (int i = 1; i < maxclits; i++) // fecha todos os sockets que se estavam a usar
     {
-        if (client_fds[i] != 0)
+        if (node.vizInt[i].fd != -1)
         {
-            close(client_fds[i]);
-            client_fds[i] = -1;
+            close(node.vizInt[i].fd);
+            node.vizInt[i].fd = -1;
         }
+    }
+    if (node.vizExt.fd != -1)
+    {
+        close(node.vizExt.fd);
     }
 }

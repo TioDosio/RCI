@@ -63,19 +63,19 @@ int main(int argc, char *argv[])
         help();
     }
     struct addrinfo hints, *res;
-    int errcode, maxclits = 1, client_fds[99], j = 1, k = 0; /*j->count array client_fds[]*/ /*k->counter VizInternos*/ /*client_fds[0]->serverFD*/
+    int errcode, maxclits = 1, server_fd = -1, k = 0; /*k->counter VizInternos*/ /*server_fd->serverFD*/
     struct sockaddr addr;
     socklen_t addrlen;
     char buffer[500]; // ver melhor o tamanho do buffer
     fd_set rfds;      // create file descriptors set
     // create TCP server
-    if ((client_fds[0] = socket(AF_INET, SOCK_STREAM, 0)) == 0)
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
     {
         printf("erro socket main.c");
         perror("socket failed");
         exit(EXIT_FAILURE);
     }
-    printf("socket serverfd:%d\n", client_fds[0]);
+    printf("socket serverfd:%d\n", server_fd);
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;       // IPv4
     hints.ai_socktype = SOCK_STREAM; // TCP socket
@@ -84,38 +84,38 @@ int main(int argc, char *argv[])
     {
         printf("erro get addrinfo main.c");
         exit(1);
-    }                                                             /*error*/
-    if (bind(client_fds[0], res->ai_addr, res->ai_addrlen) == -1) // conecta o socket ao endereço
+    }                                                         /*error*/
+    if (bind(server_fd, res->ai_addr, res->ai_addrlen) == -1) // conecta o socket ao endereço
     {
         printf("erro bind main.c");
         exit(1);
-    }                                   /*error*/
-    if (listen(client_fds[0], 5) == -1) // 5 é o numero de conexões que podem estar em espera
+    }                               /*error*/
+    if (listen(server_fd, 5) == -1) // 5 é o numero de conexões que podem estar em espera
     {
         printf("erro get addrinfo main.c");
         exit(1);
     } /*error*/
     char strV[20], net[20], id[20];
-    for (int i = 1; i < 99; i++)
+    for (int i = 0; i < 99; i++)
     {
-        client_fds[i] = -1;
+        node.vizInt[i].fd = -1;
     }
     while (1)
     {
         FD_ZERO(&rfds);
         // add stdin, server socket to set
         FD_SET(STDIN_FILENO, &rfds);
-        FD_SET(client_fds[0], &rfds);
+        FD_SET(server_fd, &rfds);
         // wait for activity on one of the file descriptors
-        int max_fd = (STDIN_FILENO > client_fds[0]) ? STDIN_FILENO : client_fds[0], Nsel = 1;
-        for (int i = 1; i < maxclits; i++)
+        int max_fd = (STDIN_FILENO > server_fd) ? STDIN_FILENO : server_fd, Nsel = 1;
+        for (int i = 0; i < maxclits; i++)
         {
-            if (client_fds[i] > 0)
+            if (node.vizInt[i].fd > 0)
             {
-                FD_SET(client_fds[i], &rfds);
-                if (client_fds[i] > max_fd)
+                FD_SET(node.vizInt[i].fd, &rfds);
+                if (node.vizInt[i].fd > max_fd)
                 {
-                    max_fd = client_fds[i];
+                    max_fd = node.vizInt[i].fd;
                 }
             }
         }
@@ -137,8 +137,7 @@ int main(int argc, char *argv[])
                 if (strcmp(strV, "join") == 0) // join net id
                 {
                     sscanf(buffer, "%s %s %s", strV, net, id);
-                    client_fds[j] = reg(net, id, IP, TCP);
-                    j++;
+                    node.vizExt.fd = reg(net, id, IP, TCP);
                 }
                 else if (strcmp(strV, "djoin") == 0) // djoin net id bootid bootIP bootTCP
                 {
@@ -181,7 +180,7 @@ int main(int argc, char *argv[])
                 else if (strcmp(strV, "leave") == 0) // leave net id
                 {
                     sscanf(buffer, "%s %s %s", strV, net, id);
-                    leave(net, id, IP, TCP, client_fds, maxclits);
+                    leave(net, id, IP, TCP, maxclits);
                 }
                 else if (strcmp(strV, "show") == 0) // exit
                 {
@@ -193,35 +192,59 @@ int main(int argc, char *argv[])
                     printf("See yaa soon...\n");
                     exit(0);
                 }
+                else if (strcmp(strV, "banana") == 0)
+                {
+                    printf("ID:%s FD:%d", node.vizExt.IDv, node.vizExt.fd);
+                    for (int i = 0; i < 100; i++)
+                    {
+                        printf("ID:%s FD:%d", node.vizInt[i].IDv, node.vizInt[i].fd);
+                    }
+                }
                 else
                 {
                     printf("Invalid command\n");
                 }
             }
-            for (int i = 1; i < maxclits; i++)
+            for (int i = 0; i < maxclits; i++)
             {
-                if (FD_ISSET(client_fds[i], &rfds))
+                if (FD_ISSET(node.vizInt[i].fd, &rfds))
                 {
-                    printf("entrou no client_fds: %d\n", client_fds[i]);
+                    printf("INTERN ISSET ID:%s FD:%d\n", node.vizInt[i].IDv, node.vizInt[i].fd);
                 }
-                FD_CLR(client_fds[i], &rfds);
+                FD_CLR(node.vizInt[i].fd, &rfds);
             }
             // check if server socket is ready for accepting new connections
-            if (FD_ISSET(client_fds[0], &rfds))
+            if (FD_ISSET(server_fd, &rfds))
             {
                 printf("SERVER isSET\n");
                 ssize_t g;
                 addrlen = sizeof(addr);
-                client_fds[j] = accept(client_fds[0], &addr, &addrlen);
-                if (client_fds[j] == -1)
-                { /*error*/
-                    printf("erro accept main.c");
-                    exit(1);
-                }
                 int n = 0;
                 char Wbuffer[100], cmd[10], bufsend[100] = "";
-                n = read(client_fds[j], Wbuffer, 100); //  vai ser 0 quando o cliente fechar a ligação
-                printf("Recebido do cliente: %s\n", Wbuffer);
+                if (node.flagVaz == 1)
+                {
+                    printf("Entra no VAZIO\n");
+                    node.vizExt.fd = accept(server_fd, &addr, &addrlen);
+                    if ((node.vizExt.fd == -1))
+                    { /*error*/
+                        printf("EXT erro accept main.c");
+                        exit(1);
+                    }
+                    n = read(node.vizExt.fd, Wbuffer, 100); //  vai ser 0 quando o cliente fechar a ligação
+                    printf("VAZIO: %s\n", Wbuffer);
+                }
+                else
+                {
+                    printf("Entra no NAO VAZIO\n");
+                    node.vizInt[k].fd = accept(server_fd, &addr, &addrlen);
+                    if (node.vizInt[k].fd == -1)
+                    { /*error*/
+                        printf("INT erro accept main.c");
+                        exit(1);
+                    }
+                    n = read(node.vizInt[k].fd, Wbuffer, 100); //  vai ser 0 quando o cliente fechar a ligação
+                    printf("NOT VAZIO: %s\n", Wbuffer);
+                }
                 if (n == -1)
                 {
                     printf("erro read main.c");
@@ -239,19 +262,27 @@ int main(int argc, char *argv[])
                         strcpy(node.vizBackup.Portv, TCP);
                         sscanf(Wbuffer, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         g = sprintf(bufsend, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                        n = write(node.vizExt.fd, bufsend, g);
+                        if (n == -1)
+                        {
+                            printf("erro write main.c");
+                            exit(1);
+                        }
+                        k++; /*passa para a próxima posição dos vizInt[]*/
+                        printf("enviado ao cliente: %s\n", bufsend);
                     }
                     else // + de 2 nós na rede
                     {
                         g = sprintf(bufsend, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                        n = write(node.vizInt[k].fd, bufsend, g);
+                        if (n == -1)
+                        {
+                            printf("erro write main.c");
+                            exit(1);
+                        }
+                        k++; /*passa para a próxima posição dos vizInt[]*/
+                        printf("enviado ao cliente: %s\n", bufsend);
                     }
-                    n = write(client_fds[j], bufsend, g);
-                    if (n == -1)
-                    {
-                        printf("erro write main.c");
-                        exit(1);
-                    }
-                    k++; /*passa para a próxima posição dos vizInt[]*/
-                    printf("enviado ao cliente: %s\n", bufsend);
                 }
                 else if (strcmp(cmd, "EXTERN") == 0) /*Acho que o servidor numca entra aqui ?apagar?*/
                 {
@@ -259,10 +290,9 @@ int main(int argc, char *argv[])
                     sscanf(Wbuffer, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
                 }
                 maxclits++;
-                j++;
             }
-            FD_CLR(client_fds[0], &rfds); // fechar fd do server
-            FD_CLR(STDIN_FILENO, &rfds);  // fechar fd do stdin
+            FD_CLR(server_fd, &rfds);    // fechar fd do server
+            FD_CLR(STDIN_FILENO, &rfds); // fechar fd do stdin
         }
     }
     return 0;

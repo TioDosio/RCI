@@ -4,3 +4,4 @@ coisas a fazer:
 3- se node.vizBackup==node.vizExt => ancora;
 4- djoin;
 5- leave dá erro no fd_ext;
+6- para sair o no que sai dá isset e dá write de 0, por isso é preciso tar atento ao 0

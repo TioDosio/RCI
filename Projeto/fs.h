@@ -7,6 +7,7 @@ struct infoNO
     char IDv[3];
     char IPv[20];
     char Portv[6];
+    int fd;
 };
 struct NO
 {
