@@ -14,14 +14,14 @@
 extern struct NO node; // ter variavel global em varios ficheiros
 // extern char TCP[50];   // ter variavel global em varios ficheiros
 
-int client_tcp(char *id, char *IP, char *TCP)
+void client_tcp(char *id, char *IP, char *TCP)
 {
     char buffer[128 + 1];
     struct addrinfo hints, *res;
-    int fd_ext, n;
-    fd_ext = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
-    printf("socket clientTCP:%d\n", fd_ext);
-    if (fd_ext == -1)
+    int n;
+    node.vizExt.fd = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
+    printf("socket clientTCP:%d\n", node.vizExt.fd);
+    if (node.vizExt.fd == -1)
     {
         printf("erro socket tcp.c");
         exit(1); // error
@@ -36,7 +36,7 @@ int client_tcp(char *id, char *IP, char *TCP)
         printf("erro getaddrinfo tcp.c");
         exit(1);
     }
-    n = connect(fd_ext, res->ai_addr, res->ai_addrlen);
+    n = connect(node.vizExt.fd, res->ai_addr, res->ai_addrlen);
     if (n == -1) /*error*/
     {
         printf("error connect tcp.c\n");
@@ -49,8 +49,21 @@ int client_tcp(char *id, char *IP, char *TCP)
     char buf[100] = "";
     n = sprintf(buffer, "NEW %s %s %s ", id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
     printf("enviado por mim: %s\n", buffer);
-    write(fd_ext, buffer, n);
-    n = read(fd_ext, buf, 100);
+    n = write(node.vizExt.fd, buffer, n);
+    if (n == -1) /*error*/
+    {
+        printf("error write tcp.c\n");
+        exit(1);
+    }
+    printf("DEPOIS do WRITE\n");
+
+    n = read(node.vizExt.fd, buf, 100);
+    if (n == -1) /*error*/
+    {
+        printf("error read tcp.c\n");
+        exit(1);
+    }
+    printf("DEPOIS do READ\n");
     if (n == -1)
     {
         printf("erro read client_tcp\n");
@@ -59,7 +72,6 @@ int client_tcp(char *id, char *IP, char *TCP)
     sscanf(buf, "EXTERN %s %s %s", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
     printf("BACKUP IP:%s PORTO:%s ID:%s\n", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
     freeaddrinfo(res);
-    return fd_ext;
 }
 
 void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP, char *bootTCP)
@@ -127,7 +139,7 @@ void leave(char *net, char *id, char *IP, char *TCP, int maxclits)
         printf("depois do client TCP\n");*/
     }
     unreg(net, id, IP, TCP);
-    for (int i = 1; i < maxclits; i++) // fecha todos os sockets que se estavam a usar
+    for (int i = 0; i < maxclits; i++) // fecha todos os sockets que se estavam a usar
     {
         if (node.vizInt[i].fd != -1)
         {

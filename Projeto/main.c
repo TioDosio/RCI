@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
         exit(1);
     } /*error*/
     char strV[20], net[20], id[20];
-    for (int i = 0; i < 99; i++)
+    for (int i = 0; i < 98; i++)
     {
         node.vizInt[i].fd = -1;
     }
@@ -112,6 +112,7 @@ int main(int argc, char *argv[])
         {
             if (node.vizInt[i].fd > 0)
             {
+                printf("fdset:%d", i);
                 FD_SET(node.vizInt[i].fd, &rfds);
                 if (node.vizInt[i].fd > max_fd)
                 {
@@ -137,7 +138,7 @@ int main(int argc, char *argv[])
                 if (strcmp(strV, "join") == 0) // join net id
                 {
                     sscanf(buffer, "%s %s %s", strV, net, id);
-                    node.vizExt.fd = reg(net, id, IP, TCP);
+                    reg(net, id, IP, TCP);
                 }
                 else if (strcmp(strV, "djoin") == 0) // djoin net id bootid bootIP bootTCP
                 {
@@ -197,7 +198,7 @@ int main(int argc, char *argv[])
                     printf("ID:%s FD:%d", node.vizExt.IDv, node.vizExt.fd);
                     for (int i = 0; i < 100; i++)
                     {
-                        printf("ID:%s FD:%d", node.vizInt[i].IDv, node.vizInt[i].fd);
+                        printf("ID: %s FD: %d\n", node.vizInt[i].IDv, node.vizInt[i].fd);
                     }
                 }
                 else
@@ -205,11 +206,24 @@ int main(int argc, char *argv[])
                     printf("Invalid command\n");
                 }
             }
-            for (int i = 0; i < maxclits; i++)
+            for (int i = 0; i < 98; i++)
             {
                 if (FD_ISSET(node.vizInt[i].fd, &rfds))
                 {
+                    char conv[100];
+                    int n = -1;
                     printf("INTERN ISSET ID:%s FD:%d\n", node.vizInt[i].IDv, node.vizInt[i].fd);
+                    n = read(node.vizExt.fd, conv, 100);
+                    if (n == -1)
+                    {
+                        printf("Error read conversa");
+                        exit(1);
+                    }
+                    printf("O que recebe do que saiu:%s\n", conv);
+                    if (strcmp(conv, "0") == 0)
+                    {
+                        printf("Avisou que saiu\n");
+                    }
                 }
                 FD_CLR(node.vizInt[i].fd, &rfds);
             }
@@ -291,7 +305,8 @@ int main(int argc, char *argv[])
                 }
                 maxclits++;
             }
-            FD_CLR(server_fd, &rfds);    // fechar fd do server
+            FD_CLR(server_fd, &rfds);
+            server_fd = -1;              // fechar fd do server
             FD_CLR(STDIN_FILENO, &rfds); // fechar fd do stdin
         }
     }
