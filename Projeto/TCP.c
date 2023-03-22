@@ -55,15 +55,12 @@ void client_tcp(char *id, char *IP, char *TCP)
         printf("error write tcp.c\n");
         exit(1);
     }
-    printf("DEPOIS do WRITE\n");
-
     n = read(node.vizExt.fd, buf, 100);
     if (n == -1) /*error*/
     {
         printf("error read tcp.c\n");
         exit(1);
     }
-    printf("DEPOIS do READ\n");
     if (n == -1)
     {
         printf("erro read client_tcp\n");

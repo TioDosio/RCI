@@ -10,9 +10,9 @@
 #include "UDP.h"
 #include "TCP.h"
 #include "fs.h"
-
 struct NO node;
 int maxclits = 0; // Mudar
+
 void help()
 {
     printf("Usage: ./cot <IP> <TCP> <regIP> <regUDP>\n");
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
         printf("erro get addrinfo main.c");
         exit(1);
     }
-    char strV[20], net[20], id[20];
+    char strV[20], net[20], id[3];
     for (int i = 0; i < 98; i++)
     {
         node.vizInt[i].fd = -1;
@@ -139,23 +139,24 @@ int main(int argc, char *argv[])
                 }
                 else if (strcmp(strV, "create") == 0) // create name
                 {
-                    char name[101];
+                    char name[101] = "";
                     sscanf(bufstdin, "%s %s", strV, name);
                     create(name, flagName);
                     flagName++;
                 }
                 else if (strcmp(strV, "delete") == 0) // delete name
                 {
-                    char name[101];
+                    char name[101] = "";
                     sscanf(bufstdin, "%s %s", strV, name);
                     delete (name, flagName);
                     flagName--;
                 }
                 else if (strcmp(strV, "get") == 0) // get dest name
                 {
-                    char dest[4], name[101];
+                    char dest[4], name[101] = "";
                     sscanf(bufstdin, "%s %s %s", strV, dest, name); // falta mandar a mensagem para os outros nós
-                    get(dest, name);
+                    printf("dest:%s name:%s id:%s", dest, name, id);
+                    get(dest, id, name);
                 }
                 else if ((strcmp(strV, "show topology") == 0) || (strcmp(strV, "st") == 0)) // show topology (st)
                 {

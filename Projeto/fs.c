@@ -9,7 +9,8 @@
 #include "TCP.h"
 #include "fs.h"
 extern struct NO node;
-extern int maxclits; //Mudar
+extern int maxclits; // Mudar
+
 void create(char *name, int flagName)
 {
     strcpy(node.names[flagName], name);
@@ -37,15 +38,26 @@ void showNames(int flagName)
         printf("Posição:%d, name:%s\n", i, node.names[i]);
     }
 }
-void get(char *dest, char *name)
+void get(char *dest, char *id, char *name)
 {
     // QUERY dest orig name
     char bufsend[100];
     int n;
+    sprintf(bufsend, "QUERY %s %s %s", dest, id, name);
     n = write(node.vizExt.fd, bufsend, strlen(bufsend));
+    if (n == -1) /*error*/
+    {
+        printf("error write ext tcp.c\n");
+        exit(1);
+    }
     for (int i = 0; i < maxclits; i++)
     {
         n = write(node.vizInt[i].fd, bufsend, strlen(bufsend));
+        if (n == -1) /*error*/
+        {
+            printf("error write int tcp.c\n");
+            exit(1);
+        }
     }
 }
 void showTopo(int maxclits) // maxclits para o for dos viz internos

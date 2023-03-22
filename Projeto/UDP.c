@@ -10,9 +10,9 @@
 #include "UDP.h"
 #include "TCP.h"
 #include "fs.h"
-
 extern struct NO node; // ter variavel global em varios ficheiros
 extern int maxclits;   // Mudar
+
 int reg(char *net, char *id, char *IP, char *TCP)
 {
     char sendV[50];

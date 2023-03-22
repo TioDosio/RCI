@@ -21,7 +21,7 @@ struct NO
 void create(char *name, int flagName);
 void delete(char *name, int flagName);
 void showNames(int flagName);
-void get(char *dest, char *name);
+void get(char *dest, char *id, char *name);
 void showTopo(int maxclits);
 
 #endif
