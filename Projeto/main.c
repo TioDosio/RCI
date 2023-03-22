@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
         help();
     }
     struct addrinfo hints, *res;
-    int errcode, maxclits = 1, fd_ext = -1, client_fds[99], j = 0, k = 0; /*j->count array client_fds[]*/ /*k->counter VizInternos*/ /*client_fds[0]->serverFD*/
+    int errcode, maxclits = 1, client_fds[99], j = 1, k = 0; /*j->count array client_fds[]*/ /*k->counter VizInternos*/ /*client_fds[0]->serverFD*/
     struct sockaddr addr;
     socklen_t addrlen;
     char buffer[500]; // ver melhor o tamanho do buffer
@@ -130,13 +130,15 @@ int main(int argc, char *argv[])
             // check if stdin is ready for reading
             if (FD_ISSET(STDIN_FILENO, &rfds))
             {
+                printf("stdin isSET\n");
                 fgets(buffer, sizeof(buffer), stdin);
                 printf("User input: %s", buffer);
                 sscanf(buffer, "%s", strV);
                 if (strcmp(strV, "join") == 0) // join net id
                 {
                     sscanf(buffer, "%s %s %s", strV, net, id);
-                    fd_ext = reg(net, id, IP, TCP);
+                    client_fds[j] = reg(net, id, IP, TCP);
+                    j++;
                 }
                 else if (strcmp(strV, "djoin") == 0) // djoin net id bootid bootIP bootTCP
                 {
@@ -179,7 +181,7 @@ int main(int argc, char *argv[])
                 else if (strcmp(strV, "leave") == 0) // leave net id
                 {
                     sscanf(buffer, "%s %s %s", strV, net, id);
-                    leave(net, id, IP, TCP, client_fds, fd_ext, maxclits);
+                    leave(net, id, IP, TCP, client_fds, maxclits);
                 }
                 else if (strcmp(strV, "show") == 0) // exit
                 {
@@ -207,6 +209,7 @@ int main(int argc, char *argv[])
             // check if server socket is ready for accepting new connections
             if (FD_ISSET(client_fds[0], &rfds))
             {
+                printf("SERVER isSET\n");
                 ssize_t g;
                 addrlen = sizeof(addr);
                 client_fds[j] = accept(client_fds[0], &addr, &addrlen);
@@ -252,13 +255,14 @@ int main(int argc, char *argv[])
                 }
                 else if (strcmp(cmd, "EXTERN") == 0) /*Acho que o servidor numca entra aqui ?apagar?*/
                 {
-                    sscanf(cmd, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
+                    printf("Entrou no EXTERN server");
+                    sscanf(Wbuffer, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
                 }
                 maxclits++;
                 j++;
             }
-            FD_CLR(client_fds[0], &rfds);
-            FD_CLR(STDIN_FILENO, &rfds);
+            FD_CLR(client_fds[0], &rfds); // fechar fd do server
+            FD_CLR(STDIN_FILENO, &rfds);  // fechar fd do stdin
         }
     }
     return 0;

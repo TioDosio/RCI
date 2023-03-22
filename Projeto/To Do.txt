@@ -3,3 +3,4 @@ coisas a fazer:
 2- Não pode haver 2 nomes iguais;
 3- se node.vizBackup==node.vizExt => ancora;
 4- djoin;
+5- leave dá erro no fd_ext;

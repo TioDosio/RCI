@@ -48,5 +48,5 @@ void showTopo(int maxclits) // maxclits para o for dos viz internos
     {
         printf("Vizinho Interno %d:\nid:%s\nip:%s\nporto:%s\n", i, node.vizInt[i].IDv, node.vizInt[i].IPv, node.vizInt[i].Portv);
     }
-    printf("Vizinho Backup:\n id:%s\nip:%s\nporto:%s\n", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
+    printf("Vizinho Backup:\nid:%s\nip:%s\nporto:%s\n", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
 };
