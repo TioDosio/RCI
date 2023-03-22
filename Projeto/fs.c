@@ -16,7 +16,6 @@ void create(char *name, int flagName)
     strcpy(node.names[flagName], name);
     printf("Posição:%d, name:%s\n", flagName, node.names[flagName]);
 }
-
 void delete(char *name, int flagName)
 {
     for (int i = 0; i < flagName; i++) // passa por todos os nomes já criados
@@ -43,7 +42,7 @@ void get(char *dest, char *id, char *name)
     // QUERY dest orig name
     char bufsend[100];
     int n;
-    sprintf(bufsend, "QUERY %s %s %s", dest, id, name);
+    sprintf(bufsend, "QUERY %s %s %s\n", dest, id, name);
     n = write(node.vizExt.fd, bufsend, strlen(bufsend));
     if (n == -1) /*error*/
     {
