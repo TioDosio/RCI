@@ -12,7 +12,7 @@
 #include "fs.h"
 
 extern struct NO node; // ter variavel global em varios ficheiros
-// extern char TCP[50];   // ter variavel global em varios ficheiros
+extern int maxclits;   // Mudar
 
 void client_tcp(char *id, char *IP, char *TCP)
 {

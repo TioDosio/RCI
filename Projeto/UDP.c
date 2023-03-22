@@ -12,7 +12,7 @@
 #include "fs.h"
 
 extern struct NO node; // ter variavel global em varios ficheiros
-
+extern int maxclits;   // Mudar
 int reg(char *net, char *id, char *IP, char *TCP)
 {
     char sendV[50];
@@ -33,7 +33,7 @@ int reg(char *net, char *id, char *IP, char *TCP)
     strcpy(node.vizBackup.IPv, IP);
     strcpy(node.vizBackup.Portv, TCP);
     printf("backupifo %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv); // apagar depois
-    sprintf(sendV, "REG %s %s %s %s", net, id, IP, TCP);                                // REG net id IP TCP
+    sprintf(sendV, "REG %s %s %s %s", net, id, IP, TCP);                                 // REG net id IP TCP
     printf("sending: %s\n\n", sendV);
     struct addrinfo hints, *res;
     int fd, errcode;

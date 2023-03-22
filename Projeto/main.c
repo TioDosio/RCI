@@ -12,17 +12,13 @@
 #include "fs.h"
 
 struct NO node;
-
+int maxclits = 0; // Mudar
 void help()
 {
     printf("Usage: ./cot <IP> <TCP> <regIP> <regUDP>\n");
     printf("Usage: ./cot <IP> <TCP>\n");
     printf("Usage: ./cot\n");
     exit(1);
-}
-void st()
-{
-    printf("show topology\n");
 }
 void sr()
 {
@@ -63,7 +59,7 @@ int main(int argc, char *argv[])
         help();
     }
     struct addrinfo hints, *res;
-    int errcode, maxclits = 0, server_fd = -1, n; /*maxclits->counter VizInternos*/ /*server_fd->serverFD*/
+    int errcode, server_fd = -1, n; /*maxclits->counter VizInternos*/ /*server_fd->serverFD*/
     struct sockaddr addr;
     socklen_t addrlen;
     char bufstdin[100]; // ver melhor o tamanho do buffer
