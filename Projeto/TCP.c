@@ -125,19 +125,6 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
 }
 void leave(char *net, char *id, char *IP, char *TCP, int maxclits)
 {
-    if (strcmp(id, node.vizBackup.IDv) == 0)
-    {
-        printf("Ancora\n");
-    }
-    else
-    {
-        printf("Nao e ancora\n");
-        strcpy(node.vizExt.IDv, node.vizBackup.IDv);
-        strcpy(node.vizExt.IPv, node.vizBackup.IPv);
-        strcpy(node.vizExt.Portv, node.vizBackup.Portv);
-        /* client_tcp(id, IP, TCP);
-        printf("depois do client TCP\n");*/
-    }
     unreg(net, id, IP, TCP);
     for (int i = 0; i < maxclits; i++) // fecha todos os sockets que se estavam a usar
     {
@@ -150,5 +137,18 @@ void leave(char *net, char *id, char *IP, char *TCP, int maxclits)
     if (node.vizExt.fd != -1)
     {
         close(node.vizExt.fd);
+    }
+    strcpy(node.vizExt.IDv, "");
+    strcpy(node.vizExt.IPv, "");
+    strcpy(node.vizExt.Portv, "");
+    strcpy(node.vizBackup.IDv, "");
+    strcpy(node.vizBackup.IPv, "");
+    strcpy(node.vizBackup.Portv, "");
+    for (int i = 0; i < maxclits; i++)
+    {
+        strcpy(node.vizInt[i].IDv, "");
+        strcpy(node.vizInt[i].IPv, "");
+        strcpy(node.vizInt[i].Portv, "");
+        node.vizInt[i].fd = -1;
     }
 }

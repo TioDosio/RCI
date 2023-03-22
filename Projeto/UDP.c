@@ -29,7 +29,11 @@ int reg(char *net, char *id, char *IP, char *TCP)
         sprintf(id, "%d", F);
         printf("id: %s\n", id);
     }
-    sprintf(sendV, "REG %s %s %s %s", net, id, IP, TCP); // REG net id IP TCP
+    strcpy(node.vizBackup.IDv, id);
+    strcpy(node.vizBackup.IPv, IP);
+    strcpy(node.vizBackup.Portv, TCP);
+    printf("backupifo %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv); // apagar depois
+    sprintf(sendV, "REG %s %s %s %s", net, id, IP, TCP);                                // REG net id IP TCP
     printf("sending: %s\n\n", sendV);
     struct addrinfo hints, *res;
     int fd, errcode;
@@ -196,7 +200,6 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
             intID = 111; // para nao dar erro
         }
     }
-
     close(fd);
     freeaddrinfo(res);
     return intID;
