@@ -94,6 +94,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < 98; i++)
     {
         node.vizInt[i].fd = -2;
+        FD_SET(node.vizInt[i].fd, &rfds);
     }
     node.vizExt.fd = -2;
     strcpy(node.vizExt.IDv, "");
@@ -111,7 +112,7 @@ int main(int argc, char *argv[])
             if (node.vizInt[i].fd > 0)
             {
                 printf("INTfdset:%d", node.vizInt[i].fd);
-                FD_SET(node.vizInt[i].fd, &rfds);
+                // FD_SET(node.vizInt[i].fd, &rfds);
                 max_fd = node.vizInt[i].fd;
             }
         }
@@ -207,9 +208,9 @@ int main(int argc, char *argv[])
             {
                 if (FD_ISSET(node.vizInt[i].fd, &rfds))
                 {
-                    printf("FD INT ISSET\n");
                     char conv[100];
                     int n = 0;
+                    printf("1BAN FD:%d", node.vizInt[i].fd);
                     n = read(node.vizInt[i].fd, conv, 100);
                     if (n == -1)
                     {
@@ -222,6 +223,7 @@ int main(int argc, char *argv[])
                         printf("Avisou que saiu (0)\n");
                     }
                     FD_CLR(node.vizInt[i].fd, &rfds);
+                    node.vizInt[i].fd = -2;
                 }
             }
             if (FD_ISSET(node.vizExt.fd, &rfds)) // maybe meter o que ta ca dentro numa fs :)
@@ -229,6 +231,7 @@ int main(int argc, char *argv[])
                 printf("FD EXT ISSET\n");
                 char conv[100];
                 int n = 0;
+                printf("2BAN FD:%d", node.vizExt.fd);
                 n = read(node.vizExt.fd, conv, 100);
                 if (n == -1)
                 {

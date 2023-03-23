@@ -45,6 +45,7 @@ void get(char *dest, char *id, char *name)
     l = sprintf(bufsend, "QUERY %s %s %s\n", dest, id, name);
     printf("bufsend:%s\n", bufsend);
     printf("AAAAAAFD:%d\n", node.vizExt.fd);
+    printf("3BAN FD:%d\n", node.vizExt.fd);
     n = write(node.vizExt.fd, bufsend, l);
     if (n == -1) /*error*/
     {
@@ -53,6 +54,7 @@ void get(char *dest, char *id, char *name)
     }
     for (int i = 0; i < maxclits; i++) // maxclits só é incrementado depois de um inverno ser
     {
+        printf("4BAN FD:%d\n", node.vizInt[i].fd);
         n = write(node.vizInt[i].fd, bufsend, l);
         if (n == -1) /*error*/
         {
@@ -63,10 +65,10 @@ void get(char *dest, char *id, char *name)
 }
 void showTopo(int maxclits) // maxclits para o for dos viz internos
 {
-    printf("Vizinho Externo:\nid:%s\nip:%s\nporto:%s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+    printf("Vizinho Externo: \nid:%s ip:%s porto:%s fd:%d\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv, node.vizExt.fd);
     for (int i = 0; i < maxclits; i++)
     {
-        printf("Vizinho Interno %d:\nid:%s\nip:%s\nporto:%s\n", i, node.vizInt[i].IDv, node.vizInt[i].IPv, node.vizInt[i].Portv);
+        printf("Vizinho Interno %d:\nid:%s ip:%s porto:%s fd:%d\n", i, node.vizInt[i].IDv, node.vizInt[i].IPv, node.vizInt[i].Portv, node.vizInt[i].fd);
     }
-    printf("Vizinho Backup:\nid:%s\nip:%s\nporto:%s\n", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
+    printf("Vizinho Backup:\nid:%s ip:%s porto:%s\n", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
 };
