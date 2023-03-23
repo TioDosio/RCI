@@ -75,6 +75,7 @@ int reg(char *net, char *id, char *IP, char *TCP)
     }
     return fd_ext;
     freeaddrinfo(res);
+    close(fd);
 }
 void unreg(char *net, char *id, char *IP, char *TCP)
 {

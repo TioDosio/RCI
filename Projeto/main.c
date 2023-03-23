@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
                 }
                 FD_CLR(STDIN_FILENO, &rfds); // fechar fd do stdin
             }
-            for (int i = 0; i < maxclits; i++) // maxfd?
+            for (int i = 0; i < 99; i++)
             {
                 if (FD_ISSET(node.vizInt[i].fd, &rfds))
                 {
@@ -217,8 +217,8 @@ int main(int argc, char *argv[])
                     {
                         printf("Avisou que saiu (0)\n");
                     }
+                    FD_CLR(node.vizInt[i].fd, &rfds);
                 }
-                FD_CLR(node.vizInt[i].fd, &rfds);
             }
             if (FD_ISSET(node.vizExt.fd, &rfds)) // maybe meter o que ta ca dentro numa fs :)
             {
@@ -248,19 +248,19 @@ int main(int argc, char *argv[])
                 {
                     printf("Entra no VAZIO\n");
                     node.vizExt.fd = accept(server_fd, &addr, &addrlen);
-                    printf("AAAAAAFD:%d\n", node.vizExt.fd);
                     if ((node.vizExt.fd == -1))
                     {
                         printf("EXT erro accept main.c");
                         exit(1);
                     }
-                    n = read(node.vizExt.fd, bufRead, 100); //  vai ser 0 quando o cliente fechar a ligação
+                    n = read(node.vizExt.fd, bufRead, 100);
                     printf("VAZIO: %s\n", bufRead);
                     sscanf(bufRead, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                 }
                 else // mais de 2 nós
                 {
                     printf("Entra no NAO VAZIO\n");
+                    printf("MAXCLITS:%d\n", maxclits);
                     node.vizInt[maxclits].fd = accept(server_fd, &addr, &addrlen);
                     if (node.vizInt[maxclits].fd == -1)
                     {
@@ -280,7 +280,6 @@ int main(int argc, char *argv[])
                 {
                     if (node.flagVaz == 1) // Apenas 2 nós na rede
                     {
-                        sscanf(bufRead, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         g = sprintf(bufsend, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         n = write(node.vizExt.fd, bufsend, g);
                         if (n == -1)
@@ -292,7 +291,6 @@ int main(int argc, char *argv[])
                     }
                     else // + de 2 nós na rede
                     {
-                        sscanf(bufRead, "%s %s %s %s", cmd, node.vizInt[maxclits].IDv, node.vizInt[maxclits].IPv, node.vizInt[maxclits].Portv);
                         g = sprintf(bufsend, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         n = write(node.vizInt[maxclits].fd, bufsend, g);
                         if (n == -1)
@@ -302,6 +300,7 @@ int main(int argc, char *argv[])
                         }
                         printf("enviado ao cliente: %s\n", bufsend);
                         maxclits++; /*passa para a próxima posição dos vizInt[]*/
+                        printf("2MAXCLITS:%d\n", maxclits);
                     }
                 }
                 FD_CLR(server_fd, &rfds); // fechar fd do server

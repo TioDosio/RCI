@@ -123,7 +123,7 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
 void leave(char *net, char *id, char *IP, char *TCP, int maxclits)
 {
     unreg(net, id, IP, TCP);
-    for (int i = 0; i < maxclits; i++) // fecha todos os sockets que se estavam a usar
+    for (int i = 0; i < 99; i++) // fecha todos os sockets que se estavam a usar
     {
         if (node.vizInt[i].fd != -1)
         {
@@ -134,6 +134,7 @@ void leave(char *net, char *id, char *IP, char *TCP, int maxclits)
     if (node.vizExt.fd != -1)
     {
         close(node.vizExt.fd);
+        node.vizExt.fd = -1;
     }
     strcpy(node.vizExt.IDv, "");
     strcpy(node.vizExt.IPv, "");
@@ -146,6 +147,5 @@ void leave(char *net, char *id, char *IP, char *TCP, int maxclits)
         strcpy(node.vizInt[i].IDv, "");
         strcpy(node.vizInt[i].IPv, "");
         strcpy(node.vizInt[i].Portv, "");
-        node.vizInt[i].fd = -1;
     }
 }
