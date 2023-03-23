@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
         {
             if (node.vizInt[i].fd > 0)
             {
-                printf("fdset:%d", i);
+                printf("INTfdset:%d", node.vizInt[i].fd);
                 FD_SET(node.vizInt[i].fd, &rfds);
                 max_fd = node.vizInt[i].fd;
             }
@@ -203,6 +203,7 @@ int main(int argc, char *argv[])
             {
                 if (FD_ISSET(node.vizInt[i].fd, &rfds))
                 {
+                    printf("FD INT ISSET\n");
                     char conv[100];
                     int n = -1;
                     n = read(node.vizInt[i].fd, conv, 100);
@@ -219,6 +220,24 @@ int main(int argc, char *argv[])
                 }
                 FD_CLR(node.vizInt[i].fd, &rfds);
             }
+            if (FD_ISSET(node.vizExt.fd, &rfds)) // maybe meter o que ta ca dentro numa fs :)
+            {
+                printf("FD EXT ISSET\n");
+                char conv[100];
+                int n = -1;
+                n = read(node.vizExt.fd, conv, 100);
+                if (n == -1)
+                {
+                    printf("Error read conversa");
+                    exit(1);
+                }
+                printf("O que recebe do que saiu:%s\n", conv);
+                if (strcmp(conv, "0") == 0)
+                {
+                    printf("Avisou que saiu (0)\n");
+                }
+                FD_CLR(node.vizExt.fd, &rfds);
+            }
             if (FD_ISSET(server_fd, &rfds))
             {
                 printf("SERVER IS_SET\n");
@@ -229,6 +248,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Entra no VAZIO\n");
                     node.vizExt.fd = accept(server_fd, &addr, &addrlen);
+                    printf("AAAAAAFD:%d\n", node.vizExt.fd);
                     if ((node.vizExt.fd == -1))
                     {
                         printf("EXT erro accept main.c");
@@ -281,9 +301,9 @@ int main(int argc, char *argv[])
                             exit(1);
                         }
                         printf("enviado ao cliente: %s\n", bufsend);
+                        maxclits++; /*passa para a próxima posição dos vizInt[]*/
                     }
                 }
-                maxclits++;               /*passa para a próxima posição dos vizInt[]*/
                 FD_CLR(server_fd, &rfds); // fechar fd do server
             }
         }

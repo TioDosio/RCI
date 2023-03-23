@@ -41,9 +41,11 @@ void get(char *dest, char *id, char *name)
 {
     // QUERY dest orig name
     char bufsend[100];
-    int n;
-    sprintf(bufsend, "QUERY %s %s %s\n", dest, id, name);
-    n = write(node.vizExt.fd, bufsend, strlen(bufsend));
+    int n, l;
+    l = sprintf(bufsend, "QUERY %s %s %s\n", dest, id, name);
+    printf("bufsend:%s\n", bufsend);
+    printf("AAAAAAFD:%d\n", node.vizExt.fd);
+    n = write(node.vizExt.fd, bufsend, l);
     if (n == -1) /*error*/
     {
         printf("error write ext tcp.c\n");
@@ -51,7 +53,7 @@ void get(char *dest, char *id, char *name)
     }
     for (int i = 0; i < maxclits; i++)
     {
-        n = write(node.vizInt[i].fd, bufsend, strlen(bufsend));
+        n = write(node.vizInt[i].fd, bufsend, l);
         if (n == -1) /*error*/
         {
             printf("error write int tcp.c\n");
@@ -62,7 +64,7 @@ void get(char *dest, char *id, char *name)
 void showTopo(int maxclits) // maxclits para o for dos viz internos
 {
     printf("Vizinho Externo:\nid:%s\nip:%s\nporto:%s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-    for (int i = 0; i < (maxclits - 1); i++)
+    for (int i = 0; i < maxclits; i++)
     {
         printf("Vizinho Interno %d:\nid:%s\nip:%s\nporto:%s\n", i, node.vizInt[i].IDv, node.vizInt[i].IPv, node.vizInt[i].Portv);
     }
