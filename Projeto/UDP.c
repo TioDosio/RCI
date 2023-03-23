@@ -11,12 +11,12 @@
 #include "TCP.h"
 #include "fs.h"
 extern struct NO node; // ter variavel global em varios ficheiros
-extern int maxclits;   // Mudar
+extern int maxInter;   // Mudar
 
-int reg(char *net, char *id, char *IP, char *TCP)
+void reg(char *net, char *id, char *IP, char *TCP)
 {
     char sendV[50];
-    int F = show(1, net, id, IP, TCP), fd_ext = -2;
+    int F = show(1, net, id, IP, TCP);
     if (F >= 0 && F <= 9)
     {
         strcpy(id, "");
@@ -71,7 +71,6 @@ int reg(char *net, char *id, char *IP, char *TCP)
     {
         client_tcp(id, IP, TCP);
     }
-    return fd_ext;
     freeaddrinfo(res);
     close(fd);
 }
@@ -127,7 +126,8 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
     int fd, errcode;
     ssize_t n;
     struct sockaddr addr;
-    char buffer[2500] = "";
+    char buffer[2500];
+    strcpy(buffer, "");
     socklen_t addrlen;
     fd = socket(AF_INET, SOCK_DGRAM, 0); // UDP socket
     if (fd == -1)                        /*error*/
@@ -198,6 +198,7 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
             intID = 111; // para nao dar erro
         }
     }
+    strcpy(buffer, "");
     close(fd);
     freeaddrinfo(res);
     return intID;

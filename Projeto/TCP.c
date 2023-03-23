@@ -12,7 +12,7 @@
 #include "fs.h"
 
 extern struct NO node; // ter variavel global em varios ficheiros
-extern int maxclits;   // Mudar
+extern int maxInter;   // Mudar
 
 void client_tcp(char *id, char *IP, char *TCP)
 {
@@ -120,10 +120,10 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
     close(fd);
     freeaddrinfo(res);
 }
-void leave(char *net, char *id, char *IP, char *TCP, int maxclits)
+void leave(char *net, char *id, char *IP, char *TCP, int maxInter)
 {
     unreg(net, id, IP, TCP);
-    for (int i = 0; i < maxclits; i++) // fecha todos os sockets que se estavam a usar
+    for (int i = 0; i < maxInter; i++) // fecha todos os sockets que se estavam a usar
     {
         if (node.vizInt[i].fd != -2)
         {
@@ -143,7 +143,7 @@ void leave(char *net, char *id, char *IP, char *TCP, int maxclits)
     strcpy(node.vizBackup.IDv, "");
     strcpy(node.vizBackup.IPv, "");
     strcpy(node.vizBackup.Portv, "");
-    for (int i = 0; i < maxclits; i++)
+    for (int i = 0; i < maxInter; i++)
     {
         strcpy(node.vizInt[i].IDv, "");
         strcpy(node.vizInt[i].IPv, "");

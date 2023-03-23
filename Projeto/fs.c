@@ -9,7 +9,7 @@
 #include "TCP.h"
 #include "fs.h"
 extern struct NO node;
-extern int maxclits; // Mudar
+extern int maxInter; // Mudar
 
 void create(char *name, int flagName)
 {
@@ -52,7 +52,7 @@ void get(char *dest, char *id, char *name)
         printf("error write ext tcp.c\n");
         exit(1);
     }
-    for (int i = 0; i < maxclits; i++) // maxclits só é incrementado depois de um inverno ser
+    for (int i = 0; i < maxInter; i++) // maxInter só é incrementado depois de um inverno ser
     {
         printf("4BAN FD:%d\n", node.vizInt[i].fd);
         n = write(node.vizInt[i].fd, bufsend, l);
@@ -63,10 +63,10 @@ void get(char *dest, char *id, char *name)
         }
     }
 }
-void showTopo(int maxclits) // maxclits para o for dos viz internos
+void showTopo(int maxInter) // maxInter para o for dos viz internos
 {
     printf("Vizinho Externo: \nid:%s ip:%s porto:%s fd:%d\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv, node.vizExt.fd);
-    for (int i = 0; i < maxclits; i++)
+    for (int i = 0; i < maxInter; i++)
     {
         printf("Vizinho Interno %d:\nid:%s ip:%s porto:%s fd:%d\n", i, node.vizInt[i].IDv, node.vizInt[i].IPv, node.vizInt[i].Portv, node.vizInt[i].fd);
     }

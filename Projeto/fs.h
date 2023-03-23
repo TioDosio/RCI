@@ -22,6 +22,6 @@ void create(char *name, int flagName);
 void delete(char *name, int flagName);
 void showNames(int flagName);
 void get(char *dest, char *id, char *name);
-void showTopo(int maxclits);
+void showTopo(int maxInter);
 
 #endif

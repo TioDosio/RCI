@@ -11,7 +11,7 @@
 #include "TCP.h"
 #include "fs.h"
 struct NO node;
-int maxclits = 0; // Mudar
+int maxInter = 0; // Mudar
 
 void help()
 {
@@ -20,11 +20,6 @@ void help()
     printf("Usage: ./cot\n");
     exit(1);
 }
-void sr()
-{
-    printf("show routing\n");
-}
-
 int main(int argc, char *argv[])
 {
     char IP[20];     // IP do TCP que é dado
@@ -59,7 +54,7 @@ int main(int argc, char *argv[])
         help();
     }
     struct addrinfo hints, *res;
-    int errcode, server_fd = -2, n; /*maxclits->counter VizInternos*/ /*server_fd->serverFD*/
+    int errcode, server_fd = -2, n; /*maxInter->counter VizInternos*/ /*server_fd->serverFD*/
     struct sockaddr addr;
     socklen_t addrlen;
     char bufstdin[100]; // ver melhor o tamanho do buffer
@@ -129,7 +124,6 @@ int main(int argc, char *argv[])
             {
                 printf("stdin isSET\n");
                 fgets(bufstdin, 100, stdin);
-                printf("User input: %s", bufstdin);
                 sscanf(bufstdin, "%s", strV);
                 if (strcmp(strV, "join") == 0) // join net id
                 {
@@ -165,7 +159,7 @@ int main(int argc, char *argv[])
                 }
                 else if ((strcmp(strV, "show topology") == 0) || (strcmp(strV, "st") == 0)) // show topology (st)
                 {
-                    showTopo(maxclits);
+                    showTopo(maxInter);
                 }
                 else if ((strcmp(strV, "show names") == 0) || (strcmp(strV, "sn") == 0)) // show names (sn)
                 {
@@ -173,12 +167,12 @@ int main(int argc, char *argv[])
                 }
                 else if ((strcmp(strV, "show routing") == 0) || (strcmp(strV, "sr") == 0)) // show routing (sr)
                 {
-                    sr(); // nao feito
+                    printf("show routing não implementado\n");
                 }
                 else if (strcmp(strV, "leave") == 0) // leave net id
                 {
                     sscanf(bufstdin, "%s %s %s", strV, net, id);
-                    leave(net, id, IP, TCP, maxclits);
+                    leave(net, id, IP, TCP, maxInter);
                 }
                 else if (strcmp(strV, "show") == 0) // exit
                 {
@@ -187,16 +181,7 @@ int main(int argc, char *argv[])
                 }
                 else if (strcmp(strV, "exit") == 0) // exit
                 {
-                    printf("See yaa soon...\n");
                     exit(0);
-                }
-                else if (strcmp(strV, "banana") == 0)
-                {
-                    printf("EXT ID:%s IP:%s Port:%s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                    for (int i = 0; i < 100; i++)
-                    {
-                        printf("ID: %s FD: %d\n", node.vizInt[i].IDv, node.vizInt[i].fd);
-                    }
                 }
                 else
                 {
@@ -267,16 +252,16 @@ int main(int argc, char *argv[])
                 else // mais de 2 nós
                 {
                     printf("Entra no NAO VAZIO\n");
-                    printf("MAXCLITS:%d\n", maxclits);
-                    node.vizInt[maxclits].fd = accept(server_fd, &addr, &addrlen);
-                    if (node.vizInt[maxclits].fd == -1)
+                    printf("MAXCLITS:%d\n", maxInter);
+                    node.vizInt[maxInter].fd = accept(server_fd, &addr, &addrlen);
+                    if (node.vizInt[maxInter].fd == -1)
                     {
                         printf("INT erro accept main.c");
                         exit(1);
                     }
-                    n = read(node.vizInt[maxclits].fd, bufRead, 100);
+                    n = read(node.vizInt[maxInter].fd, bufRead, 100);
                     printf("NOT VAZIO: %s\n", bufRead);
-                    sscanf(bufRead, "%s %s %s %s", cmd, node.vizInt[maxclits].IDv, node.vizInt[maxclits].IPv, node.vizInt[maxclits].Portv);
+                    sscanf(bufRead, "%s %s %s %s", cmd, node.vizInt[maxInter].IDv, node.vizInt[maxInter].IPv, node.vizInt[maxInter].Portv);
                 }
                 if (n == -1)
                 {
@@ -299,15 +284,15 @@ int main(int argc, char *argv[])
                     else // + de 2 nós na rede
                     {
                         g = sprintf(bufsend, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                        n = write(node.vizInt[maxclits].fd, bufsend, g);
+                        n = write(node.vizInt[maxInter].fd, bufsend, g);
                         if (n == -1)
                         {
                             printf("erro write main.c");
                             exit(1);
                         }
                         printf("enviado ao cliente: %s\n", bufsend);
-                        maxclits++; /*passa para a próxima posição dos vizInt[]*/
-                        printf("2MAXCLITS:%d\n", maxclits);
+                        maxInter++; /*passa para a próxima posição dos vizInt[]*/
+                        printf("2MAXCLITS:%d\n", maxInter);
                     }
                 }
                 FD_CLR(server_fd, &rfds); // fechar fd do server
