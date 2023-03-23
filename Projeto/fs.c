@@ -51,7 +51,7 @@ void get(char *dest, char *id, char *name)
         printf("error write ext tcp.c\n");
         exit(1);
     }
-    for (int i = 0; i <= maxclits; i++)
+    for (int i = 0; i < maxclits; i++) // maxclits só é incrementado depois de um inverno ser
     {
         n = write(node.vizInt[i].fd, bufsend, l);
         if (n == -1) /*error*/

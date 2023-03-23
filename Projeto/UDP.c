@@ -16,7 +16,7 @@ extern int maxclits;   // Mudar
 int reg(char *net, char *id, char *IP, char *TCP)
 {
     char sendV[50];
-    int F = show(1, net, id, IP, TCP), fd_ext = -1;
+    int F = show(1, net, id, IP, TCP), fd_ext = -2;
     if (F >= 0 && F <= 9)
     {
         strcpy(id, "");
@@ -32,9 +32,7 @@ int reg(char *net, char *id, char *IP, char *TCP)
     strcpy(node.vizBackup.IDv, id);
     strcpy(node.vizBackup.IPv, IP);
     strcpy(node.vizBackup.Portv, TCP);
-    printf("backupifo %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv); // apagar depois
-    sprintf(sendV, "REG %s %s %s %s", net, id, IP, TCP);                                 // REG net id IP TCP
-    printf("sending: %s\n\n", sendV);
+    sprintf(sendV, "REG %s %s %s %s", net, id, IP, TCP); // REG net id IP TCP
     struct addrinfo hints, *res;
     int fd, errcode;
     ssize_t n;
@@ -68,7 +66,7 @@ int reg(char *net, char *id, char *IP, char *TCP)
         exit(1);
     }
     buffOKs[n] = '\0'; // adiciona terminador de string
-    printf("received: %s\n\n", buffOKs);
+    printf("%s\n\n", buffOKs);
     if (node.flagVaz > 1)
     {
         client_tcp(id, IP, TCP);
@@ -125,12 +123,11 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
 {
     char sendV[50];
     sprintf(sendV, "NODES %s", net); // NODES net
-    printf("sending: %s\n\n", sendV);
     struct addrinfo hints, *res;
     int fd, errcode;
     ssize_t n;
     struct sockaddr addr;
-    char buffer[2500];
+    char buffer[2500] = "";
     socklen_t addrlen;
     fd = socket(AF_INET, SOCK_DGRAM, 0); // UDP socket
     if (fd == -1)                        /*error*/
@@ -162,7 +159,7 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
         exit(1);
     }
     buffer[n] = '\0'; // adiciona terminador de string
-    printf("received: %s\n\n", buffer);
+    printf("%s\n\n", buffer);
     // meter argumentos do buffer nos arrays
     int intIDv, intID;
     node.flagVaz = 0;

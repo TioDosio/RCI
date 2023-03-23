@@ -123,18 +123,19 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
 void leave(char *net, char *id, char *IP, char *TCP, int maxclits)
 {
     unreg(net, id, IP, TCP);
-    for (int i = 0; i < 99; i++) // fecha todos os sockets que se estavam a usar
+    for (int i = 0; i < maxclits; i++) // fecha todos os sockets que se estavam a usar
     {
-        if (node.vizInt[i].fd != -1)
+        if (node.vizInt[i].fd != -2)
         {
             close(node.vizInt[i].fd);
-            node.vizInt[i].fd = -1;
+            node.vizInt[i].fd = -2;
         }
     }
-    if (node.vizExt.fd != -1)
+    if (node.vizExt.fd != -2)
     {
+        printf("EXT ID:%s IP:%s Port:%s fd:%d\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv, node.vizExt.fd);
         close(node.vizExt.fd);
-        node.vizExt.fd = -1;
+        node.vizExt.fd = -2;
     }
     strcpy(node.vizExt.IDv, "");
     strcpy(node.vizExt.IPv, "");

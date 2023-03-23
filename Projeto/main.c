@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
         help();
     }
     struct addrinfo hints, *res;
-    int errcode, server_fd = -1, n; /*maxclits->counter VizInternos*/ /*server_fd->serverFD*/
+    int errcode, server_fd = -2, n; /*maxclits->counter VizInternos*/ /*server_fd->serverFD*/
     struct sockaddr addr;
     socklen_t addrlen;
     char bufstdin[100]; // ver melhor o tamanho do buffer
@@ -93,8 +93,12 @@ int main(int argc, char *argv[])
     char strV[20], net[20], id[3];
     for (int i = 0; i < 98; i++)
     {
-        node.vizInt[i].fd = -1;
+        node.vizInt[i].fd = -2;
     }
+    node.vizExt.fd = -2;
+    strcpy(node.vizExt.IDv, "");
+    strcpy(node.vizExt.IPv, "");
+    strcpy(node.vizExt.Portv, "");
     while (1)
     {
         FD_ZERO(&rfds);
@@ -187,7 +191,7 @@ int main(int argc, char *argv[])
                 }
                 else if (strcmp(strV, "banana") == 0)
                 {
-                    printf("ID:%s FD:%d", node.vizExt.IDv, node.vizExt.fd);
+                    printf("EXT ID:%s IP:%s Port:%s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                     for (int i = 0; i < 100; i++)
                     {
                         printf("ID: %s FD: %d\n", node.vizInt[i].IDv, node.vizInt[i].fd);
@@ -205,7 +209,7 @@ int main(int argc, char *argv[])
                 {
                     printf("FD INT ISSET\n");
                     char conv[100];
-                    int n = -1;
+                    int n = 0;
                     n = read(node.vizInt[i].fd, conv, 100);
                     if (n == -1)
                     {
@@ -224,7 +228,7 @@ int main(int argc, char *argv[])
             {
                 printf("FD EXT ISSET\n");
                 char conv[100];
-                int n = -1;
+                int n = 0;
                 n = read(node.vizExt.fd, conv, 100);
                 if (n == -1)
                 {
