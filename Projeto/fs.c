@@ -71,4 +71,4 @@ void showTopo(int maxInter) // maxInter para o for dos viz internos
         printf("Vizinho Interno %d:\nid:%s ip:%s porto:%s fd:%d\n", i, node.vizInt[i].IDv, node.vizInt[i].IPv, node.vizInt[i].Portv, node.vizInt[i].fd);
     }
     printf("Vizinho Backup:\nid:%s ip:%s porto:%s\n", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
-};
+}

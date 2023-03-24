@@ -20,7 +20,6 @@ void client_tcp(char *id, char *IP, char *TCP)
     struct addrinfo hints, *res;
     int n;
     node.vizExt.fd = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
-    printf("socket clientTCP:%d\n", node.vizExt.fd);
     if (node.vizExt.fd == -1)
     {
         printf("erro socket tcp.c");
@@ -29,34 +28,28 @@ void client_tcp(char *id, char *IP, char *TCP)
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET; // IPv4
     hints.ai_socktype = SOCK_STREAM;
-    // printf("IP: %s Porto: %s", node.vizExt.IPv, node.vizExt.Portv); // verificar se o IP e o porto estão bem
-    n = getaddrinfo(node.vizExt.IPv, node.vizExt.Portv, &hints, &res); /// é preciso também meter o bootIP e bootPort quando for djoin
-    if (n != 0)                                                        /*error*/
+    n = getaddrinfo(node.vizExt.IPv, node.vizExt.Portv, &hints, &res);
+    if (n != 0) /*error*/
     {
         printf("erro getaddrinfo tcp.c");
         exit(1);
     }
-    n = connect(node.vizExt.fd, res->ai_addr, res->ai_addrlen);
-    if (n == -1) /*error*/
+    n = connect(node.vizExt.fd, res->ai_addr, res->ai_addrlen); // connect to server
+    if (n == -1)                                                /*error*/
     {
         printf("error connect tcp.c\n");
         exit(1);
     }
-    else
-    {
-        printf("connect bem sucedido\n");
-    }
     char buf[100] = "";
-    n = sprintf(buffer, "NEW %s %s %s ", id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
-    printf("enviado por mim: %s\n", buffer);
-    n = write(node.vizExt.fd, buffer, n);
-    if (n == -1) /*error*/
+    n = sprintf(buffer, "NEW %s %s %s\n", id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
+    n = write(node.vizExt.fd, buffer, n);               // escreve no socket
+    if (n == -1)                                        /*error*/
     {
         printf("error write tcp.c\n");
         exit(1);
     }
-    n = read(node.vizExt.fd, buf, 100);
-    if (n == -1) /*error*/
+    n = read(node.vizExt.fd, buf, 100); // le do socket EXTERN ID IP PORTO
+    if (n == -1)                        /*error*/
     {
         printf("error read tcp.c\n");
         exit(1);
@@ -65,9 +58,7 @@ void client_tcp(char *id, char *IP, char *TCP)
     {
         printf("erro read client_tcp\n");
     }
-    printf("recebido do server:%s\n", buf);
-    sscanf(buf, "EXTERN %s %s %s", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
-    printf("BACKUP IP:%s PORTO:%s ID:%s\n", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
+    sscanf(buf, "EXTERN %s %s %s", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv); // guarda o vizinho externo do externo
     freeaddrinfo(res);
 }
 
@@ -75,15 +66,13 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
 {
     char sendV[50], buffer[10];
     sprintf(sendV, "REG %s %s %s %s", net, bootID, bootIP, bootTCP); // REG net id IP TCP
-    printf("sending: %s\n\n", sendV);
     struct addrinfo hints, *res;
     int fd, errcode;
     ssize_t n;
     struct sockaddr addr;
     socklen_t addrlen;
     fd = socket(AF_INET, SOCK_DGRAM, 0); // UDP socket
-    printf("socket djoin:%d\n", fd);
-    if (fd == -1) /*error*/
+    if (fd == -1)                        /*error*/
     {
         printf("error socket djoin");
         exit(1);
@@ -97,7 +86,7 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
         printf("error getaddrinfo djoin");
         exit(1);
     }
-    n = sendto(fd, sendV, strlen(sendV), 0, res->ai_addr, res->ai_addrlen);
+    n = sendto(fd, sendV, strlen(sendV), 0, res->ai_addr, res->ai_addrlen); // Envia a mensagem ao servidor
     if (n == -1)
     {
         printf("error send djoin"); /*error*/
@@ -111,9 +100,8 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
         printf("error recvfrom djoin\n");
         exit(1);
     }
-    buffer[n] = '\0'; // adiciona terminador de string
-    printf("received djoin: %s\n\n", buffer);
-    strcpy(node.vizExt.IDv, bootID);
+    buffer[n] = '\0';                // adiciona terminador de string
+    strcpy(node.vizExt.IDv, bootID); // assume que é o primmeiro/segundo da rede
     strcpy(node.vizExt.IPv, bootIP);
     strcpy(node.vizExt.Portv, bootTCP);
     client_tcp(id, IP, TCP);
@@ -133,7 +121,6 @@ void leave(char *net, char *id, char *IP, char *TCP, int maxInter)
     }
     if (node.vizExt.fd != -2)
     {
-        printf("EXT ID:%s IP:%s Port:%s fd:%d\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv, node.vizExt.fd);
         close(node.vizExt.fd);
         node.vizExt.fd = -2;
     }

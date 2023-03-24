@@ -21,13 +21,11 @@ void reg(char *net, char *id, char *IP, char *TCP)
     {
         strcpy(id, "");
         sprintf(id, "0%d", F);
-        printf("id: %s\n", id);
     }
     else if (F >= 10 && F <= 99)
     {
         strcpy(id, "");
         sprintf(id, "%d", F);
-        printf("id: %s\n", id);
     }
     strcpy(node.vizBackup.IDv, id);
     strcpy(node.vizBackup.IPv, IP);
@@ -78,7 +76,6 @@ void unreg(char *net, char *id, char *IP, char *TCP)
 {
     char sendV[50], bufOKs[10];
     sprintf(sendV, "UNREG %s %s", net, id); // NODES net
-    printf("sending: %s\n", sendV);
     struct addrinfo hints, *res;
     int fd, errcode;
     ssize_t n;
@@ -114,7 +111,7 @@ void unreg(char *net, char *id, char *IP, char *TCP)
         exit(1);
     }
     bufOKs[n] = '\0'; // adiciona terminador de string
-    printf("received: %s\n\n", bufOKs);
+    printf("%s\n\n", bufOKs);
     close(fd);
     freeaddrinfo(res);
 }
@@ -136,23 +133,22 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
         exit(1);
     }
     memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_INET;      // IPv4
-    hints.ai_socktype = SOCK_DGRAM; // UDP socket
-    errcode = getaddrinfo("tejo.tecnico.ulisboa.pt", "59000", &hints, &res);
-    if (errcode != 0) /*error*/
+    hints.ai_family = AF_INET;                                               // IPv4
+    hints.ai_socktype = SOCK_DGRAM;                                          // UDP socket
+    errcode = getaddrinfo("tejo.tecnico.ulisboa.pt", "59000", &hints, &res); // Infos do servidor de nós
+    if (errcode != 0)                                                        /*error*/
     {
         printf("erro get addrinfo show\n");
         exit(1);
     }
-    n = sendto(fd, sendV, strlen(sendV), 0, res->ai_addr, res->ai_addrlen);
-    if (n == -1) /*error*/
+    n = sendto(fd, sendV, strlen(sendV), 0, res->ai_addr, res->ai_addrlen); // Pede para mostrar os nós da rede
+    if (n == -1)                                                            /*error*/
     {
         printf("erro send show\n");
         exit(1);
     }
     addrlen = sizeof(addr);
-
-    n = recvfrom(fd, buffer, 2500, 0, &addr, &addrlen); // Recebe a resposta do servidor
+    n = recvfrom(fd, buffer, 2500, 0, &addr, &addrlen); // Recebe a resposta do servidor que mostra os nós da rede
     if (n == -1)
     { /*error*/
         printf("erro read show\n");
@@ -163,7 +159,6 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
     // meter argumentos do buffer nos arrays
     int intIDv, intID;
     node.flagVaz = 0;
-
     if (flagS == 1) // so entra se for o join
     {               /*Dá para fazer isto com strings mudar*/
         intID = atoi(id);
