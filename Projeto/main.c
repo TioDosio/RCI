@@ -89,7 +89,6 @@ int main(int argc, char *argv[])
     for (int i = 0; i < 98; i++)
     {
         node.vizInt[i].fd = -2;
-        FD_SET(node.vizInt[i].fd, &rfds);
     }
     node.vizExt.fd = -2;
     strcpy(node.vizExt.IDv, "");
@@ -100,18 +99,22 @@ int main(int argc, char *argv[])
         FD_ZERO(&rfds);
         FD_SET(STDIN_FILENO, &rfds);
         FD_SET(server_fd, &rfds);
-        int max_fd = (STDIN_FILENO > server_fd) ? STDIN_FILENO : server_fd;
+        if (node.vizExt.fd > 0)
+        {
+            FD_SET(node.vizExt.fd, &rfds);
+        }
+        // int max_fd = (STDIN_FILENO > server_fd) ? STDIN_FILENO : server_fd;
         int Nsel = 1;
         for (int i = 0; i < 98; i++)
         {
             if (node.vizInt[i].fd > 0)
             {
                 printf("INTfdset:%d", node.vizInt[i].fd);
-                // FD_SET(node.vizInt[i].fd, &rfds);
-                max_fd = node.vizInt[i].fd;
+                FD_SET(node.vizInt[i].fd, &rfds);
+                // max_fd = node.vizInt[i].fd;
             }
         }
-        if ((Nsel = select(max_fd + 1, &rfds, NULL, NULL, NULL)) < 0)
+        if ((Nsel = select(99 + 1 /*MUDAR!!!!!!!!!!!!!*/, &rfds, NULL, NULL, NULL)) < 0)
         {
             printf("erro select main.c");
             perror("error select");
@@ -187,48 +190,48 @@ int main(int argc, char *argv[])
                 {
                     printf("Invalid command\n");
                 }
-                FD_CLR(STDIN_FILENO, &rfds); // fechar fd do stdin
             }
-            for (int i = 0; i < 99; i++)
+            for (int i = 0; i < 98; i++)
             {
                 if (FD_ISSET(node.vizInt[i].fd, &rfds))
                 {
-                    char conv[100];
                     int n = 0;
-                    printf("1BAN FD:%d", node.vizInt[i].fd);
-                    n = read(node.vizInt[i].fd, conv, 100);
-                    if (n == -1)
+                    printf("FD Int isSET[%d] %d\n", i, node.vizInt[i].fd);
+                    char bufR[100], cmd[20], bufW[100];
+                    n = read(node.vizInt[i].fd, bufR, 100);
+                    if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
                     {
-                        printf("Error read conversa");
-                        exit(1);
+                        sscanf(bufR, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                        sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                        write(node.vizExt.fd, bufW, 3);
                     }
-                    printf("O que recebe do que saiu:%s\n", conv);
-                    if (strcmp(conv, "0") == 0)
+                    if (strcmp(cmd, "EXTERN") == 0)
                     {
-                        printf("Avisou que saiu (0)\n");
+                        sscanf(bufR, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
                     }
-                    FD_CLR(node.vizInt[i].fd, &rfds);
-                    node.vizInt[i].fd = -2;
                 }
             }
             if (FD_ISSET(node.vizExt.fd, &rfds)) // maybe meter o que ta ca dentro numa fs :)
             {
-                printf("FD EXT ISSET\n");
-                char conv[100];
                 int n = 0;
-                printf("2BAN FD:%d", node.vizExt.fd);
-                n = read(node.vizExt.fd, conv, 100);
-                if (n == -1)
+                printf("FD EXT ISSET %d\n", node.vizExt.fd);
+                char bufR[100], cmd[20], bufW[100];
+                strcpy(bufR, "");
+                strcpy(bufW, "");
+                strcpy(cmd, "");
+                read(node.vizExt.fd, bufR, 100);
+                printf("bufR:%s\n", bufR);
+                sscanf(bufR, "%s", cmd);
+                if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
                 {
-                    printf("Error read conversa");
-                    exit(1);
+                    sscanf(bufR, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                    sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                    write(node.vizExt.fd, bufW, strlen(bufW));
                 }
-                printf("O que recebe do que saiu:%s\n", conv);
-                if (strcmp(conv, "0") == 0)
+                if (strcmp(cmd, "EXTERN") == 0)
                 {
-                    printf("Avisou que saiu (0)\n");
+                    sscanf(bufR, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
                 }
-                FD_CLR(node.vizExt.fd, &rfds);
             }
             if (FD_ISSET(server_fd, &rfds))
             {
@@ -236,18 +239,15 @@ int main(int argc, char *argv[])
                 ssize_t g;
                 addrlen = sizeof(addr);
                 char bufRead[100], cmd[10], bufsend[100] = "";
-                if (node.flagVaz == 1) // apenas 2 nós
+                if (node.flagVaz == 1) // Sou o único da rede e ligam-se a mim
                 {
-                    printf("Entra no VAZIO\n");
+                    printf("Sou o único da rede e ligam-se a mim\n");
                     node.vizExt.fd = accept(server_fd, &addr, &addrlen);
                     if ((node.vizExt.fd == -1))
                     {
                         printf("EXT erro accept main.c");
                         exit(1);
                     }
-                    n = read(node.vizExt.fd, bufRead, 100);
-                    printf("VAZIO: %s\n", bufRead);
-                    sscanf(bufRead, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                 }
                 else // mais de 2 nós
                 {
@@ -295,7 +295,6 @@ int main(int argc, char *argv[])
                         printf("2MAXCLITS:%d\n", maxInter);
                     }
                 }
-                FD_CLR(server_fd, &rfds); // fechar fd do server
             }
         }
     }

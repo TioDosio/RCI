@@ -42,12 +42,7 @@ void client_tcp(char *id, char *IP, char *TCP)
         printf("error connect tcp.c\n");
         exit(1);
     }
-    else
-    {
-        printf("connect bem sucedido\n");
-    }
-    char buf[100] = "";
-    n = sprintf(buffer, "NEW %s %s %s ", id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
+    n = sprintf(buffer, "NEW %s %s %s\n", id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
     printf("enviado por mim: %s\n", buffer);
     n = write(node.vizExt.fd, buffer, n);
     if (n == -1) /*error*/
@@ -55,19 +50,6 @@ void client_tcp(char *id, char *IP, char *TCP)
         printf("error write tcp.c\n");
         exit(1);
     }
-    n = read(node.vizExt.fd, buf, 100);
-    if (n == -1) /*error*/
-    {
-        printf("error read tcp.c\n");
-        exit(1);
-    }
-    if (n == -1)
-    {
-        printf("erro read client_tcp\n");
-    }
-    printf("recebido do server:%s\n", buf);
-    sscanf(buf, "EXTERN %s %s %s", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);st
-    printf("BACKUP IP:%s PORTO:%s ID:%s\n", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
     freeaddrinfo(res);
 }
 

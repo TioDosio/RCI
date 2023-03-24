@@ -45,7 +45,6 @@ void get(char *dest, char *id, char *name)
     l = sprintf(bufsend, "QUERY %s %s %s\n", dest, id, name);
     printf("bufsend:%s\n", bufsend);
     printf("AAAAAAFD:%d\n", node.vizExt.fd);
-    printf("3BAN FD:%d\n", node.vizExt.fd);
     n = write(node.vizExt.fd, bufsend, l);
     if (n == -1) /*error*/
     {
