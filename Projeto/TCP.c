@@ -12,7 +12,6 @@
 #include "fs.h"
 
 extern struct NO node; // ter variavel global em varios ficheiros
-extern int node.maxInter;
 void client_tcp(char *id, char *IP, char *TCP)
 {
     char buffer[128 + 1];
@@ -101,7 +100,7 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
     close(fd);
     freeaddrinfo(res);
 }
-void leave(char *net, char *id, char *IP, char *TCP, int node.maxInter)
+void leave(char *net, char *id, char *IP, char *TCP)
 {
     unreg(net, id, IP, TCP);
     for (int i = 0; i < node.maxInter; i++) // fecha todos os sockets que se estavam a usar

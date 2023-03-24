@@ -9,20 +9,19 @@
 #include "TCP.h"
 #include "fs.h"
 extern struct NO node;
-extern int node.maxInter;
 
-void create(char *name, int node.flagName)
+void create(char *name)
 {
     strcpy(node.names[node.flagName], name);
     printf("Posição:%d, name:%s\n", node.flagName, node.names[node.flagName]);
 }
-void delete(char *name, int node.flagName)
+void delete(char *name)
 {
     for (int i = 0; i < node.flagName; i++) // passa por todos os nomes já criados
     {
         if (strcmp(node.names[i], name) == 0) // procura o nome
         {
-            strcpy(node.names[i], "\0");       // apaga o nome
+            strcpy(node.names[i], "\0");            // apaga o nome
             for (int j = i; j < node.flagName; j++) // shift left
             {
                 strcpy(node.names[j], node.names[j + 1]);
@@ -30,7 +29,7 @@ void delete(char *name, int node.flagName)
         }
     }
 }
-void showNames(int node.flagName)
+void showNames()
 {
     for (int i = 0; i < node.flagName; i++)
     {
@@ -62,7 +61,7 @@ void get(char *dest, char *id, char *name)
         }
     }
 }
-void showTopo(int node.maxInter) // node.maxInter para o for dos viz internos
+void showTopo() // node.maxInter para o for dos viz internos
 {
     printf("Vizinho Externo: \nid:%s ip:%s porto:%s fd:%d\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv, node.vizExt.fd);
     for (int i = 0; i < node.maxInter; i++)

@@ -19,10 +19,10 @@ struct NO
     int flagVaz, flagName, maxInter;
 };
 
-void create(char *name, int flagName);
-void delete(char *name, int flagName);
-void showNames(int flagName);
+void create(char *name);
+void delete(char *name);
+void showNames();
 void get(char *dest, char *id, char *name);
-void showTopo(int maxInter);
+void showTopo();
 
 #endif

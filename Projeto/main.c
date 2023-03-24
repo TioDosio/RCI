@@ -141,14 +141,14 @@ int main(int argc, char *argv[])
                 {
                     char name[101] = "";
                     sscanf(bufstdin, "%s %s", strV, name);
-                    create(name, node.flagName);
+                    create(name);
                     node.flagName++;
                 }
                 else if (strcmp(strV, "delete") == 0) // delete name
                 {
                     char name[101] = "";
                     sscanf(bufstdin, "%s %s", strV, name);
-                    delete (name, node.flagName);
+                    delete (name);
                     node.flagName--;
                 }
                 else if (strcmp(strV, "get") == 0) // get dest name
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
                 }
                 else if ((strcmp(strV, "show names") == 0) || (strcmp(strV, "sn") == 0)) // show names (sn)
                 {
-                    showNames(node.flagName);
+                    showNames();
                 }
                 else if ((strcmp(strV, "show routing") == 0) || (strcmp(strV, "sr") == 0)) // show routing (sr)
                 {
@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
                 else if (strcmp(strV, "leave") == 0) // leave net id
                 {
                     sscanf(bufstdin, "%s %s %s", strV, net, id);
-                    leave(net, id, IP, TCP, node.maxInter);
+                    leave(net, id, IP, TCP);
                 }
                 else if (strcmp(strV, "show") == 0) // exit
                 {
