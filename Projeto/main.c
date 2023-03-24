@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     strcpy(node.vizExt.Portv, "");
     while (1)
     {
-        // FD_ZERO(&rfds); // para que serve?
+        FD_ZERO(&rfds);                                                     // para que serve?
         FD_SET(STDIN_FILENO, &rfds);                                        // add stdin to set
         FD_SET(server_fd, &rfds);                                           // add server_fd to set
         int max_fd = (STDIN_FILENO > server_fd) ? STDIN_FILENO : server_fd; // max_fd é o maior fd
@@ -133,6 +133,15 @@ int main(int argc, char *argv[])
                 {
                     char bootid[3], bootIP[16], bootTCP[5];
                     sscanf(bufstdin, "%s %s %s %s %s %s", strV, net, id, bootid, bootIP, bootTCP);
+                    if (strcmp(bootid, id) == 0)
+                    {
+                        reg(net, id, IP, TCP);
+                    }
+                    else
+                    {
+                        djoin(net, id, IP, TCP, bootid, bootIP, bootTCP);
+                    }
+
                     djoin(net, id, IP, TCP, bootid, bootIP, bootTCP);
                 }
                 else if (strcmp(strV, "create") == 0) // create name

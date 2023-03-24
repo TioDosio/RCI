@@ -42,6 +42,7 @@ void client_tcp(char *id, char *IP, char *TCP)
     }
     char buf[100] = "";
     n = sprintf(buffer, "NEW %s %s %s\n", id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
+    printf("buffer: %s);
     n = write(node.vizExt.fd, buffer, n);               // escreve no socket
     if (n == -1)                                        /*error*/
     {
@@ -108,6 +109,7 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
     close(fd);
     freeaddrinfo(res);
 }
+
 void leave(char *net, char *id, char *IP, char *TCP, int maxInter)
 {
     unreg(net, id, IP, TCP);
