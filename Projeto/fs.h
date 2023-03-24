@@ -8,6 +8,7 @@ struct infoNO
     char IPv[20];
     char Portv[6];
     int fd;
+    char ctrbuf[200];
 };
 struct NO
 {
@@ -15,7 +16,7 @@ struct NO
     struct infoNO vizExt;
     struct infoNO vizInt[98];
     char names[20][100];
-    int flagVaz;
+    int flagVaz, flagName, maxInter;
 };
 
 void create(char *name, int flagName);

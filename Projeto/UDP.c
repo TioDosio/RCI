@@ -11,7 +11,7 @@
 #include "TCP.h"
 #include "fs.h"
 extern struct NO node; // ter variavel global em varios ficheiros
-extern int maxInter;   // Mudar
+extern int node.maxInter;
 
 void reg(char *net, char *id, char *IP, char *TCP)
 {

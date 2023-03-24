@@ -9,30 +9,30 @@
 #include "TCP.h"
 #include "fs.h"
 extern struct NO node;
-extern int maxInter; // Mudar
+extern int node.maxInter;
 
-void create(char *name, int flagName)
+void create(char *name, int node.flagName)
 {
-    strcpy(node.names[flagName], name);
-    printf("Posição:%d, name:%s\n", flagName, node.names[flagName]);
+    strcpy(node.names[node.flagName], name);
+    printf("Posição:%d, name:%s\n", node.flagName, node.names[node.flagName]);
 }
-void delete(char *name, int flagName)
+void delete(char *name, int node.flagName)
 {
-    for (int i = 0; i < flagName; i++) // passa por todos os nomes já criados
+    for (int i = 0; i < node.flagName; i++) // passa por todos os nomes já criados
     {
         if (strcmp(node.names[i], name) == 0) // procura o nome
         {
             strcpy(node.names[i], "\0");       // apaga o nome
-            for (int j = i; j < flagName; j++) // shift left
+            for (int j = i; j < node.flagName; j++) // shift left
             {
                 strcpy(node.names[j], node.names[j + 1]);
             }
         }
     }
 }
-void showNames(int flagName)
+void showNames(int node.flagName)
 {
-    for (int i = 0; i < flagName; i++)
+    for (int i = 0; i < node.flagName; i++)
     {
         printf("Posição:%d, name:%s\n", i, node.names[i]);
     }
@@ -51,7 +51,7 @@ void get(char *dest, char *id, char *name)
         printf("error write ext tcp.c\n");
         exit(1);
     }
-    for (int i = 0; i < maxInter; i++) // maxInter só é incrementado depois de um inverno ser
+    for (int i = 0; i < node.maxInter; i++) // node.maxInter só é incrementado depois de um inverno ser
     {
         printf("4BAN FD:%d\n", node.vizInt[i].fd);
         n = write(node.vizInt[i].fd, bufsend, l);
@@ -62,10 +62,10 @@ void get(char *dest, char *id, char *name)
         }
     }
 }
-void showTopo(int maxInter) // maxInter para o for dos viz internos
+void showTopo(int node.maxInter) // node.maxInter para o for dos viz internos
 {
     printf("Vizinho Externo: \nid:%s ip:%s porto:%s fd:%d\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv, node.vizExt.fd);
-    for (int i = 0; i < maxInter; i++)
+    for (int i = 0; i < node.maxInter; i++)
     {
         printf("Vizinho Interno %d:\nid:%s ip:%s porto:%s fd:%d\n", i, node.vizInt[i].IDv, node.vizInt[i].IPv, node.vizInt[i].Portv, node.vizInt[i].fd);
     }
