@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
             }
             for (int i = 0; i < 98; i++)
             {
-                if (FD_ISSET(node.vizInt[i].fd, &rfds))
+                if (FD_ISSET(node.vizInt[i].fd, &rfds)) // check if vizInt is ready for reading
                 {
                     int n = 0;
                     printf("FD Int isSET[%d] %d\n", i, node.vizInt[i].fd);
@@ -205,13 +205,23 @@ int main(int argc, char *argv[])
                         sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         write(node.vizExt.fd, bufW, 3);
                     }
-                    if (strcmp(cmd, "EXTERN") == 0)
+                    else if (n == 0)
                     {
-                        sscanf(bufR, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
+                        printf("vizInt[%d] disconnected\n", i);
+                        close(node.vizInt[i].fd);
+                        node.vizInt[i].fd = -2;
+                        node.vizInt[i].IDv[0] = '\0';
+                        node.vizInt[i].IPv[0] = '\0';
+                        node.vizInt[i].Portv[0] = '\0';
+                        for (int j = i; j < maxInter; j++)
+                        {
+                            node.vizInt[j] = node.vizInt[j + 1];
+                        }
+                        maxInter--;
                     }
                 }
             }
-            if (FD_ISSET(node.vizExt.fd, &rfds)) // maybe meter o que ta ca dentro numa fs :)
+            if (FD_ISSET(node.vizExt.fd, &rfds)) // check if vizExt is ready for reading
             {
                 int n = 0;
                 printf("FD EXT ISSET %d\n", node.vizExt.fd);
@@ -228,9 +238,13 @@ int main(int argc, char *argv[])
                     sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                     write(node.vizExt.fd, bufW, strlen(bufW));
                 }
-                if (strcmp(cmd, "EXTERN") == 0)
+                else if (strcmp(cmd, "EXTERN") == 0)
                 {
                     sscanf(bufR, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
+                }
+                else if (n == 0)
+                {
+                    printf("vizExt disconnected\n");
                 }
             }
             if (FD_ISSET(server_fd, &rfds))
