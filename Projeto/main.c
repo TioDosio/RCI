@@ -196,15 +196,21 @@ int main(int argc, char *argv[])
                     int n = 0;
                     printf("FD Int isSET[%d] %d\n", i, node.vizInt[i].fd);
                     char bufR[100], cmd[20], bufW[100];
-                    node.vizInt[i].ctrbufsize = read(node.vizInt[i].fd, bufR, 100);
-                    strcat(node.vizExt.buf, bufR);
-                    if (node.vizInt[i].ctrbuf[node.vizInt[i].ctrbufsize - 1] == '\n')
+                    node.vizInt[i].ctrbufsize += read(node.vizInt[i].fd, bufR, 100); // NEW net id\n
+                    strcat(bufR, node.vizInt[i].ctrbuf);
+                    if (bufR[node.vizInt[i].ctrbufsize - 1] == '\n')
                     {
+                        sscanf(bufR, "%s", cmd);
                         if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
                         {
                             sscanf(bufR, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                             sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                             write(node.vizExt.fd, bufW, 3);
+                        }
+                        else if (strcmp(cmd, "QUERY") == 0) // QUERY DEST ORIG NAME
+                        {
+                            printf("QUERY RECEBIDO\n");
+                            // sscanf(bufR, "%s %s %s %s", cmd, dest, orig, name);
                         }
                         else if (n == 0)
                         {
@@ -220,6 +226,8 @@ int main(int argc, char *argv[])
                             }
                             node.maxInter--;
                         }
+                        strcpy(bufR, "");
+                        node.vizInt[i].ctrbufsize = 0;
                     }
                 }
             }
@@ -231,10 +239,10 @@ int main(int argc, char *argv[])
                 strcpy(bufR, "");
                 strcpy(bufW, "");
                 strcpy(cmd, "");
-                node.vizExt.ctrbufsize = read(node.vizExt.fd, bufR, 100);
+                node.vizExt.ctrbufsize += read(node.vizExt.fd, node.vizExt.ctrbuf, 100);
+                strcat(bufR, node.vizExt.ctrbuf);
                 printf("bufR:%s\n", bufR);
-                strcat(node.vizExt.ctrbuf, bufR);
-                if (node.vizExt.ctrbuf[node.vizExt.ctrbufsize - 1] == '\n') // a mensagem foi toda recebida
+                if (bufR[node.vizExt.ctrbufsize - 1] == '\n') // a mensagem foi toda recebida
                 {
                     sscanf(bufR, "%s", cmd);
                     if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
@@ -253,6 +261,11 @@ int main(int argc, char *argv[])
                         {
                         }
                     }
+                    else if (strcmp(cmd, "QUERY") == 0) // QUERY DEST ORIG NAME
+                    {
+                        printf("QUERY RECEBIDO\n");
+                        // sscanf(bufR, "%s %s %s %s", cmd, dest, orig, name);
+                    }
                     else if (n == 0)
                     {
                         if (strcmp(node.vizExt.IDv, "") != 0)
@@ -266,6 +279,8 @@ int main(int argc, char *argv[])
 
                         printf("vizExt disconnected\n");
                     }
+                    strcpy(bufR, "");
+                    node.vizExt.ctrbufsize = 0;
                 }
             }
             if (FD_ISSET(server_fd, &fds))
@@ -287,14 +302,13 @@ int main(int argc, char *argv[])
                 else // mais de 2 nós
                 {
                     printf("Entra no NAO VAZIO\n");
-                    printf("MAXCLITS:%d\n", node.maxInter);
                     node.vizInt[node.maxInter].fd = accept(server_fd, &addr, &addrlen);
                     if (node.vizInt[node.maxInter].fd == -1)
                     {
                         printf("INT erro accept main.c");
                         exit(1);
                     }
-                    n = read(node.vizInt[node.maxInter].fd, bufRead, 100);
+                    n = read(node.vizInt[node.maxInter].fd, bufRead, 100); /// meter IF para ver se é NEW em vezes separadas
                     printf("NOT VAZIO: %s\n", bufRead);
                     sscanf(bufRead, "%s %s %s %s", cmd, node.vizInt[node.maxInter].IDv, node.vizInt[node.maxInter].IPv, node.vizInt[node.maxInter].Portv);
                 }

@@ -27,7 +27,6 @@ void client_tcp(char *id, char *IP, char *TCP)
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET; // IPv4
     hints.ai_socktype = SOCK_STREAM;
-    // printf("IP: %s Porto: %s", node.vizExt.IPv, node.vizExt.Portv); // verificar se o IP e o porto estão bem
     n = getaddrinfo(node.vizExt.IPv, node.vizExt.Portv, &hints, &res); /// é preciso também meter o bootIP e bootPort quando for djoin
     if (n != 0)                                                        /*error*/
     {
@@ -48,6 +47,7 @@ void client_tcp(char *id, char *IP, char *TCP)
         printf("error write tcp.c\n");
         exit(1);
     }
+    node.tabExp[atoi(node.vizExt.IDv)] = atoi(node.vizExt.IDv);
     freeaddrinfo(res);
 }
 

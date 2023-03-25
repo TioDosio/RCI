@@ -18,6 +18,7 @@ struct NO
     struct infoNO vizInt[98];
     char names[20][100];
     int flagVaz, flagName, maxInter;
+    int tabExp[100]; // 00-99
 };
 
 void create(char *name);
