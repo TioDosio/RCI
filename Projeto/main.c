@@ -213,6 +213,7 @@ int main(int argc, char *argv[])
                             sscanf(bufR, "%s %s %s %s", cmd, destQ, origQ, nameQ);
                             fdR = node.vizInt[i].fd;
                             printf("ID:%s\n", id);
+                            node.tabExp[atoi(origQ)] = atoi(node.vizInt[0].IDv);
                             query(destQ, origQ, nameQ, fdR, id);
                         }
                         else if (strcmp(cmd, "CONTENT") == 0)
@@ -276,9 +277,22 @@ int main(int argc, char *argv[])
                     }
                     else if (strcmp(cmd, "QUERY") == 0) // QUERY DEST ORIG NAME
                     {
-                        char destR[3], origR[3], nameR[100];
-                        sscanf(bufR, "%s %s %s %s", cmd, destR, origR, nameR);
-                        query(destR, origR, nameR);
+                        char destQ[3], origQ[3], nameQ[100];
+                        sscanf(bufR, "%s %s %s %s", cmd, destQ, origQ, nameQ);
+                        node.tabExp[atoi(origQ)] = atoi(node.vizExt.IDv);
+                        query(destQ, origQ, nameQ);
+                    }
+                    else if (strcmp(cmd, "CONTENT") == 0)
+                    {
+                        char destC[3], origC[3], nameC[100];
+                        sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
+                        CNContent(0, destC, origC, nameC, node.vizInt[i].fd);
+                    }
+                    else if (strcmp(cmd, "NOCONTENT") == 0)
+                    {
+                        char destC[3], origC[3], nameC[100];
+                        sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
+                        CNContent(1, destC, origC, nameC, node.vizInt[i].fd);
                     }
                     else if (n == 0)
                     {
