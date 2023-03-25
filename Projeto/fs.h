@@ -28,7 +28,7 @@ void showNames();
 void get(char *dest, char *id, char *name);
 void showTopo();
 void showRouting();
-void query(destR, origR, nameR);
-void CNContent(CNC, destR, origR, nameR, fdR, id);
+void query(char *destR, char *origR, char *nameR, int fdR, char *id);
+void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR, char *id);
 
 #endif

@@ -86,7 +86,7 @@ void showRouting()
         }
     }
 }
-void query(destR, origR, nameR, fdR, id)
+void query(char *destR, char *origR, char *nameR, int fdR, char *id)
 {
     char bufsend[100];
     strcpy(bufsend, "");
@@ -94,7 +94,7 @@ void query(destR, origR, nameR, fdR, id)
     printf("QUERY RECEBIDO, %s %s %s\n", destR, origR, nameR);
     if (strcmp(destR, id) == 0) // se o destino for o próprio nó
     {
-        for (int i = 0; i <= node.flagName, i++) // procura o name na lista de names
+        for (int i = 0; i <= node.flagName; i++) // procura o name na lista de names
         {
             if (strcmp(node.names[i], nameR) == 0) // se encontrar o name retorna o CONTENT para onde veio o QUERY
             {
@@ -104,7 +104,7 @@ void query(destR, origR, nameR, fdR, id)
                 flag = 1;
             }
         }
-        if (flag = 0) // se não encontrar o name retorna o NOCONTENT para onde veio o QUERY
+        if (flag == 0) // se não encontrar o name retorna o NOCONTENT para onde veio o QUERY
         {
             printf("NOME NÃO ENCONTRADO\n");
             sprintf(bufsend, "NOCONTENT %s %s %s\n", origR, destR, nameR);
@@ -140,7 +140,7 @@ void query(destR, origR, nameR, fdR, id)
         }
     }
 }
-void CNContent(CNC, destR, origR, nameR, fdR, id)
+void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR, char *id)
 {
     if (CNC == 0)
     {
@@ -156,7 +156,7 @@ void CNContent(CNC, destR, origR, nameR, fdR, id)
     strcpy(bufsend, "");
     if (strcmp(destR, id) != 0) // se o destino for o próprio nó
     {
-        flag = 0;
+        int flag = 0;
         for (int i = 0; i < node.maxInter; i++) // Passa por todos os vizinhos internos
         {
             if (strcmp(destR, node.vizInt[i].IDv) == 0) // vê se algum dos seus vizinhos é o destino

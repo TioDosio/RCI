@@ -42,7 +42,6 @@ int main(int argc, char *argv[])
         break;
     default:
         printf("Argumentos invalidos\n");
-        help();
     }
     struct addrinfo hints, *res;
     int errcode, server_fd = -2; /*node.maxInter->counter VizInternos*/ /*server_fd->serverFD*/
@@ -220,13 +219,15 @@ int main(int argc, char *argv[])
                         {
                             char destC[3], origC[3], nameC[100];
                             sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
-                            CNContent(0, destC, origC, nameC, node.vizInt[i].fd);
+                            fdR = node.vizInt[i].fd;
+                            CNContent(0, destC, origC, nameC, fdR, id);
                         }
                         else if (strcmp(cmd, "NOCONTENT") == 0)
                         {
                             char destC[3], origC[3], nameC[100];
                             sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
-                            CNContent(1, destC, origC, nameC, node.vizInt[i].fd);
+                            fdR = node.vizInt[i].fd;
+                            CNContent(1, destC, origC, nameC, fdR, id);
                         }
                         else if (n == 0)
                         {
@@ -248,11 +249,12 @@ int main(int argc, char *argv[])
                         }
                         node.vizInt[i].ctrbufsize = 0;
                     }
+                    FD_CLR(node.vizInt[i].fd, &fds);
                 }
             }
             if (FD_ISSET(node.vizExt.fd, &fds)) // check if vizExt is ready for reading
             {
-                int n = 0;
+                int n = 0, fdR = -2;
                 printf("EXTERNO:%d\n", node.vizExt.fd);
                 char bufR[100], cmd[20], bufW[100];
                 strcpy(bufR, "");
@@ -280,19 +282,22 @@ int main(int argc, char *argv[])
                         char destQ[3], origQ[3], nameQ[100];
                         sscanf(bufR, "%s %s %s %s", cmd, destQ, origQ, nameQ);
                         node.tabExp[atoi(origQ)] = atoi(node.vizExt.IDv);
-                        query(destQ, origQ, nameQ);
+                        fdR = node.vizExt.fd;
+                        query(destQ, origQ, nameQ, fdR, id);
                     }
                     else if (strcmp(cmd, "CONTENT") == 0)
                     {
                         char destC[3], origC[3], nameC[100];
                         sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
-                        CNContent(0, destC, origC, nameC, node.vizInt[i].fd);
+                        fdR = node.vizExt.fd;
+                        CNContent(0, destC, origC, nameC, fdR, id);
                     }
                     else if (strcmp(cmd, "NOCONTENT") == 0)
                     {
                         char destC[3], origC[3], nameC[100];
                         sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
-                        CNContent(1, destC, origC, nameC, node.vizInt[i].fd);
+                        fdR = node.vizExt.fd;
+                        CNContent(1, destC, origC, nameC, fdR, id);
                     }
                     else if (n == 0)
                     {
@@ -301,6 +306,7 @@ int main(int argc, char *argv[])
                     strcpy(bufR, "");
                     node.vizExt.ctrbufsize = 0;
                 }
+                FD_CLR(node.vizExt.fd, &fds);
             }
             if (FD_ISSET(server_fd, &fds))
             {
