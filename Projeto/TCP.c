@@ -64,7 +64,14 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
 void leave(char *net, char *id, char *IP, char *TCP)
 {
     unreg(net, id, IP, TCP);
-    for (int i = 0; i < node.maxInter; i++) // fecha todos os sockets que se estavam a usar
+    char bufsend[100];
+    sprintf(bufsend, "WITHDRAW %s\n", id);
+    for (int i = 0; i < node.maxInter; i++) // Passa por todos os vizinhos internos
+    {
+        write(node.vizInt[i].fd, bufsend, strlen(bufsend)); // manda o WITHDRAW para o vizinho interno
+    }
+    write(node.vizExt.fd, bufsend, strlen(bufsend)); // manda o WITHDRAW para o vizinho externo
+    for (int i = 0; i < node.maxInter; i++)          // fecha todos os sockets que se estavam a usar
     {
         if (node.vizInt[i].fd != -2)
         {

@@ -229,6 +229,21 @@ int main(int argc, char *argv[])
                             fdR = node.vizInt[i].fd;
                             CNContent(1, destC, origC, nameC, fdR, id);
                         }
+                        else if (strcmp(cmd, "WITHDRAW") == 0)
+                        {
+                            char idW[3], bufsend[100];
+                            sscanf(bufR, "%s %s", cmd, idW);
+                            node.tabExp[atoi(idW)] = -1;
+                            sprintf(bufsend, "WITHDRAW %s\n", idW);
+                            for (int i = 0; i < node.maxInter; i++) // Passa por todos os vizinhos internos
+                            {
+                                write(node.vizInt[i].fd, bufsend, strlen(bufsend)); // manda o WITHDRAW para o vizinho interno
+                            }
+                            if (strcmp(node.vizExt.IDv, "") != 0)
+                            {
+                                write(node.vizExt.fd, bufsend, strlen(bufsend)); // manda o WITHDRAW para o vizinho externo
+                            }
+                        }
                         else if (n == 0)
                         {
                             printf("vizInt[%d] disconnected\n", i);
@@ -301,9 +316,18 @@ int main(int argc, char *argv[])
                     }
                     else if (strcmp(cmd, "WITHDRAW") == 0)
                     {
-                        char idW[3];
+                        char idW[3], bufsend[100];
                         sscanf(bufR, "%s %s", cmd, idW);
                         node.tabExp[atoi(idW)] = -1;
+                        sprintf(bufsend, "WITHDRAW %s\n", idW);
+                        for (int i = 0; i < node.maxInter; i++) // Passa por todos os vizinhos internos
+                        {
+                            write(node.vizInt[i].fd, bufsend, strlen(bufsend)); // manda o WITHDRAW para o vizinho interno
+                        }
+                        if (strcmp(node.vizExt.IDv, "") != 0)
+                        {
+                            write(node.vizExt.fd, bufsend, strlen(bufsend)); // manda o WITHDRAW para o vizinho externo
+                        }
                     }
                     else if (n == 0)
                     {
