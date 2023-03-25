@@ -196,26 +196,30 @@ int main(int argc, char *argv[])
                     int n = 0;
                     printf("FD Int isSET[%d] %d\n", i, node.vizInt[i].fd);
                     char bufR[100], cmd[20], bufW[100];
-                    n = read(node.vizInt[i].fd, bufR, 100);
-                    if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
+                    node.vizInt[i].ctrbufsize = read(node.vizInt[i].fd, bufR, 100);
+                    strcat(node.vizExt.buf, bufR);
+                    if (node.vizInt[i].ctrbuf[node.vizInt[i].ctrbufsize - 1] == '\n')
                     {
-                        sscanf(bufR, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                        sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                        write(node.vizExt.fd, bufW, 3);
-                    }
-                    else if (n == 0)
-                    {
-                        printf("vizInt[%d] disconnected\n", i);
-                        node.vizInt[i].fd = -2;
-                        strcpy(node.vizInt[i].IDv, "");
-                        strcpy(node.vizInt[i].IPv, "");
-                        strcpy(node.vizInt[i].Portv, "");
-                        strcpy(node.vizInt[i].ctrbuf, "");
-                        for (int j = i; j < node.maxInter; j++)
+                        if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
                         {
-                            node.vizInt[j] = node.vizInt[j + 1];
+                            sscanf(bufR, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                            sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                            write(node.vizExt.fd, bufW, 3);
                         }
-                        node.maxInter--;
+                        else if (n == 0)
+                        {
+                            printf("vizInt[%d] disconnected\n", i);
+                            node.vizInt[i].fd = -2;
+                            strcpy(node.vizInt[i].IDv, "");
+                            strcpy(node.vizInt[i].IPv, "");
+                            strcpy(node.vizInt[i].Portv, "");
+                            strcpy(node.vizInt[i].ctrbuf, "");
+                            for (int j = i; j < node.maxInter; j++)
+                            {
+                                node.vizInt[j] = node.vizInt[j + 1];
+                            }
+                            node.maxInter--;
+                        }
                     }
                 }
             }
@@ -227,37 +231,41 @@ int main(int argc, char *argv[])
                 strcpy(bufR, "");
                 strcpy(bufW, "");
                 strcpy(cmd, "");
-                read(node.vizExt.fd, bufR, 100);
+                node.vizExt.ctrbufsize = read(node.vizExt.fd, bufR, 100);
                 printf("bufR:%s\n", bufR);
-                sscanf(bufR, "%s", cmd);
-                if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
+                strcat(node.vizExt.ctrbuf, bufR);
+                if (node.vizExt.ctrbuf[node.vizExt.ctrbufsize - 1] == '\n') // a mensagem foi toda recebida
                 {
-                    sscanf(bufR, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                    sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                    write(node.vizExt.fd, bufW, strlen(bufW));
-                }
-                else if (strcmp(cmd, "EXTERN") == 0)
-                {
-                    sscanf(bufR, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
-                }
-                else if (strcmp(cmd, "QUERY"))
-                {
-                    for (int i = 0; i < node.maxInter; i++)
+                    sscanf(bufR, "%s", cmd);
+                    if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
                     {
-                    }
-                }
-                else if (n == 0)
-                {
-                    if (strcmp(node.vizExt.IDv, "") != 0)
-                    {
-                        sprintf(bufW, " %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                        sscanf(bufR, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                        sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         write(node.vizExt.fd, bufW, strlen(bufW));
                     }
+                    else if (strcmp(cmd, "EXTERN") == 0)
                     {
-                        /* code */
+                        sscanf(bufR, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
                     }
+                    else if (strcmp(cmd, "QUERY"))
+                    {
+                        for (int i = 0; i < node.maxInter; i++)
+                        {
+                        }
+                    }
+                    else if (n == 0)
+                    {
+                        if (strcmp(node.vizExt.IDv, "") != 0)
+                        {
+                            sprintf(bufW, " %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                            write(node.vizExt.fd, bufW, strlen(bufW));
+                        }
+                        {
+                            /* code */
+                        }
 
-                    printf("vizExt disconnected\n");
+                        printf("vizExt disconnected\n");
+                    }
                 }
             }
             if (FD_ISSET(server_fd, &fds))

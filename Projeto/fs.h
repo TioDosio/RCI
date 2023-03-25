@@ -8,7 +8,8 @@ struct infoNO
     char IPv[20];
     char Portv[6];
     int fd;
-    char ctrbuf[200];
+    char ctrbuf[100];
+    int ctrbufsize;
 };
 struct NO
 {
