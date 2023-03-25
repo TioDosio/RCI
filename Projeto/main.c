@@ -299,6 +299,12 @@ int main(int argc, char *argv[])
                         fdR = node.vizExt.fd;
                         CNContent(1, destC, origC, nameC, fdR, id);
                     }
+                    else if (strcmp(cmd, "WITHDRAW") == 0)
+                    {
+                        char idW[3];
+                        sscanf(bufR, "%s %s", cmd, idW);
+                        node.tabExp[atoi(idW)] = -1;
+                    }
                     else if (n == 0)
                     {
                         printf("vizExt disconnected\n");
