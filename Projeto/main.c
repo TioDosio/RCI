@@ -11,13 +11,7 @@
 #include "TCP.h"
 #include "fs.h"
 struct NO node;
-void help()
-{
-    printf("Usage: ./cot <IP> <TCP> <regIP> <regUDP>\n");
-    printf("Usage: ./cot <IP> <TCP>\n");
-    printf("Usage: ./cot\n");
-    exit(1);
-}
+
 int main(int argc, char *argv[])
 {
     char IP[20];     // IP do TCP que é dado
@@ -196,8 +190,9 @@ int main(int argc, char *argv[])
             {
                 if (FD_ISSET(node.vizInt[i].fd, &fds)) // check if vizInt is ready for reading
                 {
-                    int n = 0;
+                    int n = 0, fdR = -2;
                     char bufR[100], cmd[20], bufW[100];
+                    strcpy(bufR, "");
                     printf("INTERNO[%d]:%d\n", i, node.vizInt[i].fd);
                     node.vizInt[i].ctrbufsize += read(node.vizInt[i].fd, node.vizInt[i].ctrbuf, 100); // NEW net id\n NEW net id\n
                     strcat(bufR, node.vizInt[i].ctrbuf);
@@ -214,9 +209,23 @@ int main(int argc, char *argv[])
                         }
                         else if (strcmp(cmd, "QUERY") == 0) // QUERY DEST ORIG NAME
                         {
-                            char destR[3], origR[3], nameR[100];
-                            sscanf(bufR, "%s %s %s %s", cmd, destR, origR, nameR);
-                            printf("QUERY RECEBIDO, %s %s %s\n", destR, origR, nameR);
+                            char destQ[3], origQ[3], nameQ[100];
+                            sscanf(bufR, "%s %s %s %s", cmd, destQ, origQ, nameQ);
+                            fdR = node.vizInt[i].fd;
+                            printf("ID:%s\n", id);
+                            query(destQ, origQ, nameQ, fdR, id);
+                        }
+                        else if (strcmp(cmd, "CONTENT") == 0)
+                        {
+                            char destC[3], origC[3], nameC[100];
+                            sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
+                            CNContent(0, destC, origC, nameC, node.vizInt[i].fd);
+                        }
+                        else if (strcmp(cmd, "NOCONTENT") == 0)
+                        {
+                            char destC[3], origC[3], nameC[100];
+                            sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
+                            CNContent(1, destC, origC, nameC, node.vizInt[i].fd);
                         }
                         else if (n == 0)
                         {
@@ -236,7 +245,6 @@ int main(int argc, char *argv[])
                         {
                             printf("EXTERN WTF\n");
                         }
-                        strcpy(bufR, "");
                         node.vizInt[i].ctrbufsize = 0;
                     }
                 }
@@ -254,7 +262,6 @@ int main(int argc, char *argv[])
                 printf("bufR:%s\n", bufR);
                 if (bufR[node.vizExt.ctrbufsize - 1] == '\n') // a mensagem foi toda recebida
                 {
-                    printf("ENTRA NO ID DO BARRAN EXTERNO\n");
                     sscanf(bufR, "%s", cmd);
                     if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
                     {
@@ -271,7 +278,7 @@ int main(int argc, char *argv[])
                     {
                         char destR[3], origR[3], nameR[100];
                         sscanf(bufR, "%s %s %s %s", cmd, destR, origR, nameR);
-                        printf("QUERY RECEBIDO, %s %s %s\n", destR, origR, nameR);
+                        query(destR, origR, nameR);
                     }
                     else if (n == 0)
                     {

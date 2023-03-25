@@ -40,24 +40,29 @@ void get(char *dest, char *id, char *name)
 {
     // QUERY dest orig name
     char bufsend[100];
-    int n, l;
-    l = sprintf(bufsend, "QUERY %s %s %s\n", dest, id, name);
+    int flag = 0;
+    sprintf(bufsend, "QUERY %s %s %s\n", dest, id, name);
     printf("bufsend:%s\n", bufsend);
     printf("AAAAAAFD:%d\n", node.vizExt.fd);
-    n = write(node.vizExt.fd, bufsend, l);
-    if (n == -1) /*error*/
+    for (int i = 0; i < node.maxInter; i++)
     {
-        printf("error write ext tcp.c\n");
-        exit(1);
-    }
-    for (int i = 0; i < node.maxInter; i++) // node.maxInter só é incrementado depois de um inverno ser
-    {
-        printf("4BAN FD:%d\n", node.vizInt[i].fd);
-        n = write(node.vizInt[i].fd, bufsend, l);
-        if (n == -1) /*error*/
+        if (strcmp(dest, node.vizInt[i].IDv) == 0)
         {
-            printf("error write int tcp.c\n");
-            exit(1);
+            write(node.vizInt[i].fd, bufsend, strlen(bufsend));
+            flag = 1;
+        }
+    }
+    if (strcmp(dest, node.vizExt.IDv) == 0)
+    {
+        write(node.vizExt.fd, bufsend, strlen(bufsend));
+        flag = 1;
+    }
+    if (flag == 0)
+    {
+        write(node.vizExt.fd, bufsend, strlen(bufsend));
+        for (int i = 0; i < node.maxInter; i++) // node.maxInter só é incrementado depois de um inverno ser
+        {
+            write(node.vizInt[i].fd, bufsend, strlen(bufsend));
         }
     }
 }
@@ -78,6 +83,124 @@ void showRouting()
         if (node.tabExp[i] != -1)
         {
             printf("TabelaExp[%d]:%d\n", i, node.tabExp[i]);
+        }
+    }
+}
+void query(destR, origR, nameR, fdR, id)
+{
+    char bufsend[100];
+    strcpy(bufsend, "");
+    int flag = 0;
+    printf("QUERY RECEBIDO, %s %s %s\n", destR, origR, nameR);
+    if (strcmp(destR, id) == 0) // se o destino for o próprio nó
+    {
+        for (int i = 0; i <= node.flagName, i++) // procura o name na lista de names
+        {
+            if (strcmp(node.names[i], nameR) == 0) // se encontrar o name retorna o CONTENT para onde veio o QUERY
+            {
+                printf("NOME ENCONTRADO\n");
+                sprintf(bufsend, "CONTENT %s %s %s\n", origR, destR, nameR);
+                write(fdR, bufsend, strlen(bufsend));
+                flag = 1;
+            }
+        }
+        if (flag = 0) // se não encontrar o name retorna o NOCONTENT para onde veio o QUERY
+        {
+            printf("NOME NÃO ENCONTRADO\n");
+            sprintf(bufsend, "NOCONTENT %s %s %s\n", origR, destR, nameR);
+            write(fdR, bufsend, strlen(bufsend));
+        }
+    }
+    else // Se destino não for o próprio nó
+    {
+        flag = 0;
+        for (int i = 0; i < node.maxInter; i++) // Passa por todos os vizinhos internos
+        {
+            if (strcmp(destR, node.vizInt[i].IDv) == 0) // vê se algum dos seus vizinhos é o destino
+            {
+                sprintf(bufsend, "QUERY %s %s %s\n", destR, origR, nameR);
+                write(node.vizInt[i].fd, bufsend, strlen(bufsend)); // manda o QUERY para o vizinho interno
+                flag = 1;
+            }
+        }
+        if (strcmp(destR, node.vizExt.IDv) == 0) // vê se o vizinho externo é o destino
+        {
+            sprintf(bufsend, "QUERY %s %s %s\n", destR, origR, nameR);
+            write(node.vizExt.fd, bufsend, strlen(bufsend)); // manda o QUERY para o vizinho externo
+            flag = 1;
+        }
+        if (flag == 0) // se nenhum dos seus vizinhos for o destino manda FLOOD
+        {
+            sprintf(bufsend, "QUERY %s %s %s\n", destR, origR, nameR);
+            write(node.vizExt.fd, bufsend, strlen(bufsend)); // envia o QUERY para o vizinho externo
+            for (int i = 0; i < node.maxInter; i++)          // envia o QUERY para todos os vizinhos internos
+            {
+                write(node.vizInt[i].fd, bufsend, strlen(bufsend));
+            }
+        }
+    }
+}
+void CNContent(CNC, destR, origR, nameR, fdR, id)
+{
+    if (CNC == 0)
+    {
+        char bufCNC[10];
+        strcpy(bufCNC, "CONTENT");
+    }
+    else if (CNC == 1)
+    {
+        char bufCNC[10];
+        strcpy(bufCNC, "NOCONTENT");
+    }
+    char bufsend[100];
+    strcpy(bufsend, "");
+    int flag = 0;
+    printf("CONTENT RECEBIDO, %s %s %s\n", destR, origR, nameR);
+    if (strcmp(destR, id) == 0) // se o destino for o próprio nó
+    {
+        for (int i = 0; i <= node.flagName, i++) // procura o name na lista de names
+        {
+            if (strcmp(node.names[i], nameR) == 0) // se encontrar o name retorna o CONTENT para onde veio o QUERY
+            {
+                printf("NOME ENCONTRADO\n");
+                sprintf(bufsend, "CONTENT %s %s %s\n", origR, destR, nameR);
+                write(fdR, bufsend, strlen(bufsend));
+                flag = 1;
+            }
+        }
+        if (flag = 0) // se não encontrar o name retorna o NOCONTENT para onde veio o QUERY
+        {
+            printf("NOME NÃO ENCONTRADO\n");
+            sprintf(bufsend, "NOCONTENT %s %s %s\n", origR, destR, nameR);
+            write(fdR, bufsend, strlen(bufsend));
+        }
+    }
+    else // Se destino não for o próprio nó
+    {
+        flag = 0;
+        for (int i = 0; i < node.maxInter; i++) // Passa por todos os vizinhos internos
+        {
+            if (strcmp(destR, node.vizInt[i].IDv) == 0) // vê se algum dos seus vizinhos é o destino
+            {
+                sprintf(bufsend, "QUERY %s %s %s\n", destR, origR, nameR);
+                write(node.vizInt[i].fd, bufsend, strlen(bufsend)); // manda o QUERY para o vizinho interno
+                flag = 1;
+            }
+        }
+        if (strcmp(destR, node.vizExt.IDv) == 0) // vê se o vizinho externo é o destino
+        {
+            sprintf(bufsend, "QUERY %s %s %s\n", destR, origR, nameR);
+            write(node.vizExt.fd, bufsend, strlen(bufsend)); // manda o QUERY para o vizinho externo
+            flag = 1;
+        }
+        if (flag == 0) // se nenhum dos seus vizinhos for o destino manda FLOOD
+        {
+            sprintf(bufsend, "QUERY %s %s %s\n", destR, origR, nameR);
+            write(node.vizExt.fd, bufsend, strlen(bufsend)); // envia o QUERY para o vizinho externo
+            for (int i = 0; i < node.maxInter; i++)          // envia o QUERY para todos os vizinhos internos
+            {
+                write(node.vizInt[i].fd, bufsend, strlen(bufsend));
+            }
         }
     }
 }

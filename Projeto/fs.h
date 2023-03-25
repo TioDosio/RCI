@@ -19,6 +19,7 @@ struct NO
     char names[20][100];
     int flagVaz, flagName, maxInter;
     int tabExp[100]; // 00-99
+    // char id[3];
 };
 
 void create(char *name);
@@ -27,5 +28,7 @@ void showNames();
 void get(char *dest, char *id, char *name);
 void showTopo();
 void showRouting();
+void query(destR, origR, nameR);
+void CNContent(CNC, destR, origR, nameR, fdR, id);
 
 #endif
