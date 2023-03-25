@@ -63,10 +63,21 @@ void get(char *dest, char *id, char *name)
 }
 void showTopo() // node.maxInter para o for dos viz internos
 {
-    printf("Vizinho Externo: \nid:%s ip:%s porto:%s fd:%d\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv, node.vizExt.fd);
+    printf("Vizinho Externo:   id:%s ip:%s porto:%s fd:%d\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv, node.vizExt.fd);
     for (int i = 0; i < node.maxInter; i++)
     {
-        printf("Vizinho Interno %d:\nid:%s ip:%s porto:%s fd:%d\n", i, node.vizInt[i].IDv, node.vizInt[i].IPv, node.vizInt[i].Portv, node.vizInt[i].fd);
+        printf("Vizinho Interno %d:   id:%s ip:%s porto:%s fd:%d\n", i, node.vizInt[i].IDv, node.vizInt[i].IPv, node.vizInt[i].Portv, node.vizInt[i].fd);
     }
-    printf("Vizinho Backup:\nid:%s ip:%s porto:%s\n", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
+    printf("Vizinho Backup:   id:%s ip:%s porto:%s\n", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
+}
+void showRouting()
+{
+    printf("Routing table:\n");
+    for (int i = 0; i < 100; i++)
+    {
+        if (node.tabExp[i] != -1)
+        {
+            printf("TabelaExp[%d]:%d\n", i, node.tabExp[i]);
+        }
+    }
 }

@@ -26,5 +26,6 @@ void delete(char *name);
 void showNames();
 void get(char *dest, char *id, char *name);
 void showTopo();
+void showRouting();
 
 #endif

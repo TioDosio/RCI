@@ -51,12 +51,11 @@ int main(int argc, char *argv[])
         help();
     }
     struct addrinfo hints, *res;
-    int errcode, server_fd = -2, n; /*node.maxInter->counter VizInternos*/ /*server_fd->serverFD*/
+    int errcode, server_fd = -2; /*node.maxInter->counter VizInternos*/ /*server_fd->serverFD*/
     struct sockaddr addr;
     socklen_t addrlen;
     char bufstdin[100]; // ver melhor o tamanho do buffer
     fd_set rfds, fds;   // create file descriptors set
-    // create TCP server
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
     {
         printf("erro socket main.c");
@@ -83,11 +82,15 @@ int main(int argc, char *argv[])
         exit(1);
     }
     char strV[20], net[20], id[3];
-    for (int i = 0; i < 98; i++)
+    for (int i = 0; i < 98; i++) // inicializar o array de vizinhos internos a -2
     {
         node.vizInt[i].fd = -2;
     }
-    node.vizExt.fd = -2;
+    node.vizExt.fd = -2;          // inicializar o vizinho externo a -2
+    for (int i = 0; i < 100; i++) // inicializar o array de tabExp a -1
+    {
+        node.tabExp[i] = -1;
+    }
     strcpy(node.vizExt.IDv, "");
     strcpy(node.vizExt.IPv, "");
     strcpy(node.vizExt.Portv, "");
@@ -106,7 +109,7 @@ int main(int argc, char *argv[])
         {
             if (node.vizInt[i].fd > 0)
             {
-                printf("INTfdset:%d", node.vizInt[i].fd);
+                printf("INTfdset:%d\n", node.vizInt[i].fd);
                 FD_SET(node.vizInt[i].fd, &rfds);
                 // max_fd = node.vizInt[i].fd;
             }
@@ -155,7 +158,7 @@ int main(int argc, char *argv[])
                 {
                     char dest[4], name[101] = "";
                     sscanf(bufstdin, "%s %s %s", strV, dest, name); // falta mandar a mensagem para os outros nós
-                    printf("dest:%s name:%s id:%s", dest, name, id);
+                    printf("dest:%s name:%s orig:%s", dest, name, id);
                     get(dest, id, name);
                 }
                 else if ((strcmp(strV, "show topology") == 0) || (strcmp(strV, "st") == 0)) // show topology (st)
@@ -168,7 +171,7 @@ int main(int argc, char *argv[])
                 }
                 else if ((strcmp(strV, "show routing") == 0) || (strcmp(strV, "sr") == 0)) // show routing (sr)
                 {
-                    printf("show routing não implementado\n");
+                    showRouting();
                 }
                 else if (strcmp(strV, "leave") == 0) // leave net id
                 {
@@ -194,23 +197,26 @@ int main(int argc, char *argv[])
                 if (FD_ISSET(node.vizInt[i].fd, &fds)) // check if vizInt is ready for reading
                 {
                     int n = 0;
-                    printf("FD Int isSET[%d] %d\n", i, node.vizInt[i].fd);
                     char bufR[100], cmd[20], bufW[100];
-                    node.vizInt[i].ctrbufsize += read(node.vizInt[i].fd, bufR, 100); // NEW net id\n
+                    printf("INTERNO[%d]:%d\n", i, node.vizInt[i].fd);
+                    node.vizInt[i].ctrbufsize += read(node.vizInt[i].fd, node.vizInt[i].ctrbuf, 100); // NEW net id\n NEW net id\n
                     strcat(bufR, node.vizInt[i].ctrbuf);
+                    printf("bufR:%s\n", bufR);
                     if (bufR[node.vizInt[i].ctrbufsize - 1] == '\n')
                     {
                         sscanf(bufR, "%s", cmd);
                         if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
                         {
-                            sscanf(bufR, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                            sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                            write(node.vizExt.fd, bufW, 3);
+                            sscanf(bufR, "%s %s %s %s", cmd, node.vizInt[i].IDv, node.vizInt[i].IPv, node.vizInt[i].Portv); // recebe NEW e guarda como interno
+                            sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);        // mete seu EXT no buffer
+                            write(node.vizInt[i].fd, bufW, strlen(bufW));                                                   // Envia EXTERN para o Intern para ser o Back dele
+                            node.tabExp[atoi(node.vizInt[i].IDv)] = atoi(node.vizInt[i].IDv);                               // Adiciona o novo vizinho na tabela de exp
                         }
                         else if (strcmp(cmd, "QUERY") == 0) // QUERY DEST ORIG NAME
                         {
-                            printf("QUERY RECEBIDO\n");
-                            // sscanf(bufR, "%s %s %s %s", cmd, dest, orig, name);
+                            char destR[3], origR[3], nameR[100];
+                            sscanf(bufR, "%s %s %s %s", cmd, destR, origR, nameR);
+                            printf("QUERY RECEBIDO, %s %s %s\n", destR, origR, nameR);
                         }
                         else if (n == 0)
                         {
@@ -226,6 +232,10 @@ int main(int argc, char *argv[])
                             }
                             node.maxInter--;
                         }
+                        else if (strcmp(cmd, "EXTERN") == 0)
+                        {
+                            printf("EXTERN WTF\n");
+                        }
                         strcpy(bufR, "");
                         node.vizInt[i].ctrbufsize = 0;
                     }
@@ -234,7 +244,7 @@ int main(int argc, char *argv[])
             if (FD_ISSET(node.vizExt.fd, &fds)) // check if vizExt is ready for reading
             {
                 int n = 0;
-                printf("FD EXT ISSET %d\n", node.vizExt.fd);
+                printf("EXTERNO:%d\n", node.vizExt.fd);
                 char bufR[100], cmd[20], bufW[100];
                 strcpy(bufR, "");
                 strcpy(bufW, "");
@@ -244,39 +254,27 @@ int main(int argc, char *argv[])
                 printf("bufR:%s\n", bufR);
                 if (bufR[node.vizExt.ctrbufsize - 1] == '\n') // a mensagem foi toda recebida
                 {
+                    printf("ENTRA NO ID DO BARRAN EXTERNO\n");
                     sscanf(bufR, "%s", cmd);
                     if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
                     {
                         sscanf(bufR, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         write(node.vizExt.fd, bufW, strlen(bufW));
+                        node.tabExp[atoi(node.vizExt.IDv)] = atoi(node.vizExt.IDv);
                     }
                     else if (strcmp(cmd, "EXTERN") == 0)
                     {
                         sscanf(bufR, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
                     }
-                    else if (strcmp(cmd, "QUERY"))
-                    {
-                        for (int i = 0; i < node.maxInter; i++)
-                        {
-                        }
-                    }
                     else if (strcmp(cmd, "QUERY") == 0) // QUERY DEST ORIG NAME
                     {
-                        printf("QUERY RECEBIDO\n");
-                        // sscanf(bufR, "%s %s %s %s", cmd, dest, orig, name);
+                        char destR[3], origR[3], nameR[100];
+                        sscanf(bufR, "%s %s %s %s", cmd, destR, origR, nameR);
+                        printf("QUERY RECEBIDO, %s %s %s\n", destR, origR, nameR);
                     }
                     else if (n == 0)
                     {
-                        if (strcmp(node.vizExt.IDv, "") != 0)
-                        {
-                            sprintf(bufW, " %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                            write(node.vizExt.fd, bufW, strlen(bufW));
-                        }
-                        {
-                            /* code */
-                        }
-
                         printf("vizExt disconnected\n");
                     }
                     strcpy(bufR, "");
@@ -286,9 +284,7 @@ int main(int argc, char *argv[])
             if (FD_ISSET(server_fd, &fds))
             {
                 printf("SERVER IS_SET\n");
-                ssize_t g;
                 addrlen = sizeof(addr);
-                char bufRead[100], cmd[10], bufsend[100] = "";
                 if (node.flagVaz == 1) // Sou o único da rede e ligam-se a mim
                 {
                     printf("Sou o único da rede e ligam-se a mim\n");
@@ -301,48 +297,14 @@ int main(int argc, char *argv[])
                 }
                 else // mais de 2 nós
                 {
-                    printf("Entra no NAO VAZIO\n");
+                    printf("Aceita um nó (a rede já nao sou só eu)\n");
                     node.vizInt[node.maxInter].fd = accept(server_fd, &addr, &addrlen);
                     if (node.vizInt[node.maxInter].fd == -1)
                     {
                         printf("INT erro accept main.c");
                         exit(1);
                     }
-                    n = read(node.vizInt[node.maxInter].fd, bufRead, 100); /// meter IF para ver se é NEW em vezes separadas
-                    printf("NOT VAZIO: %s\n", bufRead);
-                    sscanf(bufRead, "%s %s %s %s", cmd, node.vizInt[node.maxInter].IDv, node.vizInt[node.maxInter].IPv, node.vizInt[node.maxInter].Portv);
-                }
-                if (n == -1)
-                {
-                    printf("erro read main.c");
-                    exit(1);
-                }
-                if (strcmp(cmd, "NEW") == 0) // se alguém se ligar ao server
-                {
-                    if (node.flagVaz == 1) // Apenas 2 nós na rede
-                    {
-                        g = sprintf(bufsend, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                        n = write(node.vizExt.fd, bufsend, g);
-                        if (n == -1)
-                        {
-                            printf("erro write main.c");
-                            exit(1);
-                        }
-                        printf("enviado ao cliente: %s\n", bufsend);
-                    }
-                    else // + de 2 nós na rede
-                    {
-                        g = sprintf(bufsend, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                        n = write(node.vizInt[node.maxInter].fd, bufsend, g);
-                        if (n == -1)
-                        {
-                            printf("erro write main.c");
-                            exit(1);
-                        }
-                        printf("enviado ao cliente: %s\n", bufsend);
-                        node.maxInter++; /*passa para a próxima posição dos vizInt[]*/
-                        printf("2MAXCLITS:%d\n", node.maxInter);
-                    }
+                    node.maxInter++;
                 }
             }
         }
