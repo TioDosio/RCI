@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     node.vizExt.fd = -2;          // inicializar o vizinho externo a -2
     for (int i = 0; i < 100; i++) // inicializar o array de tabExp a -1
     {
-        node.tabExp[i] = -1;
+        node.tabExp[i] = -2;
     }
     strcpy(node.vizExt.IDv, "");
     strcpy(node.vizExt.IPv, "");
@@ -90,6 +90,7 @@ int main(int argc, char *argv[])
     while (1)
     {
         FD_ZERO(&rfds);
+        FD_ZERO(&fds); ////////// necessary???
         FD_SET(STDIN_FILENO, &rfds);
         FD_SET(server_fd, &rfds);
         if (node.vizExt.fd > 0)
@@ -102,7 +103,6 @@ int main(int argc, char *argv[])
         {
             if (node.vizInt[i].fd > 0)
             {
-                printf("INTfdset:%d\n", node.vizInt[i].fd);
                 FD_SET(node.vizInt[i].fd, &rfds);
                 // max_fd = node.vizInt[i].fd;
             }
@@ -138,14 +138,12 @@ int main(int argc, char *argv[])
                     char name[101] = "";
                     sscanf(bufstdin, "%s %s", strV, name);
                     create(name);
-                    node.flagName++;
                 }
                 else if (strcmp(strV, "delete") == 0) // delete name
                 {
                     char name[101] = "";
                     sscanf(bufstdin, "%s %s", strV, name);
                     delete (name);
-                    node.flagName--;
                 }
                 else if (strcmp(strV, "get") == 0) // get dest name
                 {
@@ -195,7 +193,7 @@ int main(int argc, char *argv[])
                     printf("INTERNO[%d]:%d\n", i, node.vizInt[i].fd);
                     node.vizInt[i].ctrbufsize += read(node.vizInt[i].fd, node.vizInt[i].ctrbuf, 100); // NEW net id\n NEW net id\n
                     strcat(bufR, node.vizInt[i].ctrbuf);
-                    printf("bufR:%s\n", bufR);
+                    printf("1bufR:%s\n", bufR);
                     if (bufR[node.vizInt[i].ctrbufsize - 1] == '\n')
                     {
                         sscanf(bufR, "%s", cmd);
@@ -211,8 +209,7 @@ int main(int argc, char *argv[])
                             char destQ[3], origQ[3], nameQ[100];
                             sscanf(bufR, "%s %s %s %s", cmd, destQ, origQ, nameQ);
                             fdR = node.vizInt[i].fd;
-                            printf("ID:%s\n", node.id);
-                            node.tabExp[atoi(origQ)] = atoi(node.vizInt[0].IDv);
+                            node.tabExp[atoi(origQ)] = atoi(node.vizInt[i].IDv);
                             query(destQ, origQ, nameQ, fdR);
                         }
                         else if (strcmp(cmd, "CONTENT") == 0)
@@ -232,6 +229,7 @@ int main(int argc, char *argv[])
                         else if (strcmp(cmd, "WITHDRAW") == 0)
                         {
                             char idW[3], bufsend[100];
+                            strcpy(bufsend, "");
                             sscanf(bufR, "%s %s", cmd, idW);
                             node.tabExp[atoi(idW)] = -1;
                             sprintf(bufsend, "WITHDRAW %s\n", idW);
@@ -264,7 +262,6 @@ int main(int argc, char *argv[])
                         }
                         node.vizInt[i].ctrbufsize = 0;
                     }
-                    FD_CLR(node.vizInt[i].fd, &fds);
                 }
             }
             if (FD_ISSET(node.vizExt.fd, &fds)) // check if vizExt is ready for reading
@@ -277,7 +274,7 @@ int main(int argc, char *argv[])
                 strcpy(cmd, "");
                 node.vizExt.ctrbufsize += read(node.vizExt.fd, node.vizExt.ctrbuf, 100);
                 strcat(bufR, node.vizExt.ctrbuf);
-                printf("bufR:%s\n", bufR);
+                printf("2bufR:%s\n", bufR);
                 if (bufR[node.vizExt.ctrbufsize - 1] == '\n') // a mensagem foi toda recebida
                 {
                     sscanf(bufR, "%s", cmd);
@@ -336,7 +333,6 @@ int main(int argc, char *argv[])
                     strcpy(bufR, "");
                     node.vizExt.ctrbufsize = 0;
                 }
-                FD_CLR(node.vizExt.fd, &fds);
             }
             if (FD_ISSET(server_fd, &fds))
             {
