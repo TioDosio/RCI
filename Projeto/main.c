@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
         printf("erro get addrinfo main.c");
         exit(1);
     }
-    char strV[20], net[20], id[3];
+    char strV[20], net[20];
     for (int i = 0; i < 98; i++) // inicializar o array de vizinhos internos a -2
     {
         node.vizInt[i].fd = -2;
@@ -124,14 +124,14 @@ int main(int argc, char *argv[])
                 sscanf(bufstdin, "%s", strV);
                 if (strcmp(strV, "join") == 0) // join net id
                 {
-                    sscanf(bufstdin, "%s %s %s", strV, net, id);
-                    reg(net, id, IP, TCP);
+                    sscanf(bufstdin, "%s %s %s", strV, net, node.id);
+                    reg(net, IP, TCP);
                 }
                 else if (strcmp(strV, "djoin") == 0) // djoin net id bootid bootIP bootTCP
                 {
                     char bootid[3], bootIP[16], bootTCP[5];
-                    sscanf(bufstdin, "%s %s %s %s %s %s", strV, net, id, bootid, bootIP, bootTCP);
-                    djoin(net, id, IP, TCP, bootid, bootIP, bootTCP);
+                    sscanf(bufstdin, "%s %s %s %s %s %s", strV, net, node.id, bootid, bootIP, bootTCP);
+                    djoin(net, IP, TCP, bootid, bootIP, bootTCP);
                 }
                 else if (strcmp(strV, "create") == 0) // create name
                 {
@@ -151,8 +151,8 @@ int main(int argc, char *argv[])
                 {
                     char dest[4], name[101] = "";
                     sscanf(bufstdin, "%s %s %s", strV, dest, name); // falta mandar a mensagem para os outros nós
-                    printf("dest:%s name:%s orig:%s", dest, name, id);
-                    get(dest, id, name);
+                    printf("dest:%s name:%s orig:%s", dest, name, node.id);
+                    get(dest, name);
                 }
                 else if ((strcmp(strV, "show topology") == 0) || (strcmp(strV, "st") == 0)) // show topology (st)
                 {
@@ -168,13 +168,13 @@ int main(int argc, char *argv[])
                 }
                 else if (strcmp(strV, "leave") == 0) // leave net id
                 {
-                    sscanf(bufstdin, "%s %s %s", strV, net, id);
-                    leave(net, id, IP, TCP);
+                    sscanf(bufstdin, "%s %s %s", strV, net, node.id);
+                    leave(net, IP, TCP);
                 }
                 else if (strcmp(strV, "show") == 0) // exit
                 {
-                    sscanf(bufstdin, "%s %s %s", strV, net, id);
-                    show(0, net, id, IP, TCP);
+                    sscanf(bufstdin, "%s %s %s", strV, net, node.id);
+                    show(0, net, IP, TCP);
                 }
                 else if (strcmp(strV, "exit") == 0) // exit
                 {
@@ -211,23 +211,23 @@ int main(int argc, char *argv[])
                             char destQ[3], origQ[3], nameQ[100];
                             sscanf(bufR, "%s %s %s %s", cmd, destQ, origQ, nameQ);
                             fdR = node.vizInt[i].fd;
-                            printf("ID:%s\n", id);
+                            printf("ID:%s\n", node.id);
                             node.tabExp[atoi(origQ)] = atoi(node.vizInt[0].IDv);
-                            query(destQ, origQ, nameQ, fdR, id);
+                            query(destQ, origQ, nameQ, fdR);
                         }
                         else if (strcmp(cmd, "CONTENT") == 0)
                         {
                             char destC[3], origC[3], nameC[100];
                             sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
                             fdR = node.vizInt[i].fd;
-                            CNContent(0, destC, origC, nameC, fdR, id);
+                            CNContent(0, destC, origC, nameC, fdR);
                         }
                         else if (strcmp(cmd, "NOCONTENT") == 0)
                         {
                             char destC[3], origC[3], nameC[100];
                             sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
                             fdR = node.vizInt[i].fd;
-                            CNContent(1, destC, origC, nameC, fdR, id);
+                            CNContent(1, destC, origC, nameC, fdR);
                         }
                         else if (strcmp(cmd, "WITHDRAW") == 0)
                         {
@@ -298,21 +298,21 @@ int main(int argc, char *argv[])
                         sscanf(bufR, "%s %s %s %s", cmd, destQ, origQ, nameQ);
                         node.tabExp[atoi(origQ)] = atoi(node.vizExt.IDv);
                         fdR = node.vizExt.fd;
-                        query(destQ, origQ, nameQ, fdR, id);
+                        query(destQ, origQ, nameQ, fdR);
                     }
                     else if (strcmp(cmd, "CONTENT") == 0)
                     {
                         char destC[3], origC[3], nameC[100];
                         sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
                         fdR = node.vizExt.fd;
-                        CNContent(0, destC, origC, nameC, fdR, id);
+                        CNContent(0, destC, origC, nameC, fdR);
                     }
                     else if (strcmp(cmd, "NOCONTENT") == 0)
                     {
                         char destC[3], origC[3], nameC[100];
                         sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
                         fdR = node.vizExt.fd;
-                        CNContent(1, destC, origC, nameC, fdR, id);
+                        CNContent(1, destC, origC, nameC, fdR);
                     }
                     else if (strcmp(cmd, "WITHDRAW") == 0)
                     {

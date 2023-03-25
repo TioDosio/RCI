@@ -12,26 +12,26 @@
 #include "fs.h"
 extern struct NO node; // ter variavel global em varios ficheiros
 
-void reg(char *net, char *id, char *IP, char *TCP)
+void reg(char *net, char *IP, char *TCP)
 {
     char sendV[50];
-    int F = show(1, net, id, IP, TCP);
+    int F = show(1, net, IP, TCP);
     if (F >= 0 && F <= 9)
     {
-        strcpy(id, "");
-        sprintf(id, "0%d", F);
-        printf("id: %s\n", id);
+        strcpy(node.id, "");
+        sprintf(node.id, "0%d", F);
+        printf("id: %s\n", node.id);
     }
     else if (F >= 10 && F <= 99)
     {
-        strcpy(id, "");
-        sprintf(id, "%d", F);
-        printf("id: %s\n", id);
+        strcpy(node.id, "");
+        sprintf(node.id, "%d", F);
+        printf("id: %s\n", node.id);
     }
-    strcpy(node.vizBackup.IDv, id);
+    strcpy(node.vizBackup.IDv, node.id);
     strcpy(node.vizBackup.IPv, IP);
     strcpy(node.vizBackup.Portv, TCP);
-    sprintf(sendV, "REG %s %s %s %s", net, id, IP, TCP); // REG net id IP TCP
+    sprintf(sendV, "REG %s %s %s %s", net, node.id, IP, TCP); // REG net id IP TCP
     struct addrinfo hints, *res;
     int fd, errcode;
     ssize_t n;
@@ -68,15 +68,15 @@ void reg(char *net, char *id, char *IP, char *TCP)
     printf("%s\n\n", buffOKs);
     if (node.flagVaz > 1)
     {
-        client_tcp(id, IP, TCP);
+        client_tcp(IP, TCP);
     }
     freeaddrinfo(res);
     close(fd);
 }
-void unreg(char *net, char *id, char *IP, char *TCP)
+void unreg(char *net, char *IP, char *TCP)
 {
     char sendV[50], bufOKs[10];
-    sprintf(sendV, "UNREG %s %s", net, id); // NODES net
+    sprintf(sendV, "UNREG %s %s", net, node.id); // NODES net
     printf("sending: %s\n", sendV);
     struct addrinfo hints, *res;
     int fd, errcode;
@@ -117,7 +117,7 @@ void unreg(char *net, char *id, char *IP, char *TCP)
     close(fd);
     freeaddrinfo(res);
 }
-int show(int flagS, char *net, char *id, char *IP, char *TCP)
+int show(int flagS, char *net, char *IP, char *TCP)
 {
     char sendV[50];
     sprintf(sendV, "NODES %s", net); // NODES net
@@ -165,7 +165,7 @@ int show(int flagS, char *net, char *id, char *IP, char *TCP)
 
     if (flagS == 1) // so entra se for o join
     {               /*Dá para fazer isto com strings mudar*/
-        intID = atoi(id);
+        intID = atoi(node.id);
         char *saveptr, IDv[11], IPv[20], Portv[6];
         char *line = strtok_r(buffer, "\n", &saveptr);
         printf("line: %s\n", line);

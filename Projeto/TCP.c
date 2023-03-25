@@ -13,7 +13,7 @@
 
 extern struct NO node; // ter variavel global em varios ficheiros
 
-void client_tcp(char *id, char *IP, char *TCP)
+void client_tcp(char *IP, char *TCP)
 {
     char buffer[128 + 1];
     struct addrinfo hints, *res;
@@ -40,16 +40,16 @@ void client_tcp(char *id, char *IP, char *TCP)
         printf("error connect tcp.c\n");
         exit(1);
     }
-    n = sprintf(buffer, "NEW %s %s %s\n", id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
+    n = sprintf(buffer, "NEW %s %s %s\n", node.id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
     printf("enviado por mim: %s\n", buffer);
     write(node.vizExt.fd, buffer, n);
     node.tabExp[atoi(node.vizExt.IDv)] = atoi(node.vizExt.IDv);
     freeaddrinfo(res);
 }
 
-void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP, char *bootTCP)
+void djoin(char *net, char *IP, char *TCP, char *bootID, char *bootIP, char *bootTCP)
 {
-    if (strcmp(id, bootID) == 0)
+    if (strcmp(node.id, bootID) == 0)
     {
         printf("ID igual ao do boot\n");
     }
@@ -58,14 +58,14 @@ void djoin(char *net, char *id, char *IP, char *TCP, char *bootID, char *bootIP,
         strcpy(node.vizExt.IDv, bootID);
         strcpy(node.vizExt.IPv, bootIP);
         strcpy(node.vizExt.Portv, bootTCP);
-        client_tcp(id, IP, TCP);
+        client_tcp(IP, TCP);
     }
 }
-void leave(char *net, char *id, char *IP, char *TCP)
+void leave(char *net, char *IP, char *TCP)
 {
-    unreg(net, id, IP, TCP);
+    unreg(net, IP, TCP);
     char bufsend[100];
-    sprintf(bufsend, "WITHDRAW %s\n", id);
+    sprintf(bufsend, "WITHDRAW %s\n", node.id);
     for (int i = 0; i < node.maxInter; i++) // Passa por todos os vizinhos internos
     {
         write(node.vizInt[i].fd, bufsend, strlen(bufsend)); // manda o WITHDRAW para o vizinho interno
