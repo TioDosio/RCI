@@ -210,6 +210,7 @@ int main(int argc, char *argv[])
                             sscanf(bufR, "%s %s %s %s", cmd, destQ, origQ, nameQ);
                             fdR = node.vizInt[i].fd;
                             node.tabExp[atoi(origQ)] = atoi(node.vizInt[i].IDv);
+                            printf("tabExp[%d]:%d", atoi(origQ), node.tabExp[atoi(origQ)]);
                             query(destQ, origQ, nameQ, fdR);
                         }
                         else if (strcmp(cmd, "CONTENT") == 0)
@@ -288,6 +289,7 @@ int main(int argc, char *argv[])
                         char destQ[3], origQ[3], nameQ[100];
                         sscanf(bufR, "%s %s %s %s", cmd, destQ, origQ, nameQ);
                         node.tabExp[atoi(origQ)] = atoi(node.vizExt.IDv);
+                        printf("tabExp[%d]:%d", atoi(origQ), node.tabExp[atoi(origQ)]);
                         fdR = node.vizExt.fd;
                         query(destQ, origQ, nameQ, fdR);
                     }
@@ -313,7 +315,6 @@ int main(int argc, char *argv[])
                         sscanf(bufR, "%s %s", cmd, idW);
                         wdraw(idW, fdR);
                     }
-
                     strcpy(bufR, "");
                     node.vizExt.ctrbufsize = 0;
                 }
