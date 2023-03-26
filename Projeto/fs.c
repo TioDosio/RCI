@@ -186,3 +186,22 @@ void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR)
         }
     }
 }
+void wdraw(char *idR, int fdR)
+{
+    char bufsend[13]; // WITHDRAW + id + \n
+    strcpy(bufsend, "");
+    node.tabExp[atoi(idR)] = -2; // retira o destino da tabela de expedição
+    sprintf(bufsend, "WITHDRAW %s\n", idR);
+    for (int i = 0; i < node.maxInter; i++)
+    {
+        if (node.vizInt[i].fd != fdR) // Todos os vizinhos internos menos o que enviou o WITHDRAW
+        {
+            write(node.vizInt[i].fd, bufsend, strlen(bufsend)); // FLOOD internos
+        }
+    }
+
+    if (node.vizExt.fd != fdR) // Vizinho externo menos se foi ele que nos enviouo WITHDRAW
+    {
+        write(node.vizExt.fd, bufsend, strlen(bufsend)); // FLOOD externo
+    }
+}
