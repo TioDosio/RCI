@@ -12,9 +12,21 @@ extern struct NO node;
 
 void create(char *name)
 {
-    strcpy(node.names[node.flagName], name);
-    printf("Posição:%d, name:%s\n", node.flagName, node.names[node.flagName]);
-    node.flagName++;
+    int flag = 0;
+    for (int i = 0; i < node.flagName; i++) // passa por todos os nomes já criados
+    {
+        if (strcmp(node.names[i], name) == 0) // procura o nome
+        {
+            printf("Nome já existe\n");
+            flag = 1;
+        }
+    }
+    if (flag == 0)
+    {
+        strcpy(node.names[node.flagName], name);
+        printf("Posição:%d, name:%s\n", node.flagName, node.names[node.flagName]);
+        node.flagName++;
+    }
 }
 void delete(char *name)
 {
