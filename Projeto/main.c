@@ -250,6 +250,7 @@ int main(int argc, char *argv[])
                         strcpy(node.vizInt[i].IPv, "");
                         strcpy(node.vizInt[i].Portv, "");
                         strcpy(node.vizInt[i].ctrbuf, "");
+                        node.vizInt[i].ctrbufsize = 0;
                         for (int j = i; j < node.maxInter; j++)
                         {
                             node.vizInt[j] = node.vizInt[j + 1];
@@ -321,6 +322,40 @@ int main(int argc, char *argv[])
                 else if (node.vizExt.ctrbufsize == 0)
                 {
                     printf("vizExt disconnected\n");
+                    if (strcmp(node.id, node.vizBackup.IDv) != 0) // não somos ancora
+                    {
+                        strcpy(node.vizExt.IDv, node.vizBackup.IDv);
+                        strcpy(node.vizExt.IPv, node.vizBackup.IPv);
+                        strcpy(node.vizExt.Portv, node.vizBackup.Portv);
+                        client_tcp(IP, TCP);
+                        for (int i = 0; i < node.maxInter; i++)
+                        {
+                            sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                            write(node.vizInt[i].fd, bufW, strlen(bufW));
+                        }
+                    }
+                    else if ((strcmp(node.id, node.vizBackup.IDv) == 0) && (node.maxInter != 0))
+                    {
+                        printf("O Externo que saiu é ancora e promovo um vizinho interno a ancora\n");
+                        strcpy(node.vizExt.IDv, node.vizInt[0].IDv);
+                        strcpy(node.vizExt.IPv, node.vizInt[0].IPv);
+                        strcpy(node.vizExt.Portv, node.vizInt[0].Portv);
+                        for (int j = 0; j < node.maxInter; j++)
+                        {
+                            node.vizInt[j] = node.vizInt[j + 1];
+                        }
+                        node.maxInter--;
+                        sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                        write(node.vizExt.fd, bufW, strlen(bufW));
+                    }
+                    else
+                    {
+                        strcpy(node.vizExt.IDv, node.id);
+                        strcpy(node.vizExt.IPv, "");
+                        strcpy(node.vizExt.Portv, "");
+                        node.flagVaz = 1;
+                    }
+                    node.vizExt.fd = -2;
                 }
                 FD_CLR(node.vizExt.fd, &fds);
             }

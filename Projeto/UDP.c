@@ -28,7 +28,7 @@ void reg(char *net, char *IP, char *TCP)
         sprintf(node.id, "%d", F);
         printf("id: %s\n", node.id);
     }
-    strcpy(node.vizBackup.IDv, node.id);
+    strcpy(node.vizBackup.IDv, node.id); //////////////////////////////////////////////////////////////// mudar de Sitio
     strcpy(node.vizBackup.IPv, IP);
     strcpy(node.vizBackup.Portv, TCP);
     sprintf(sendV, "REG %s %s %s %s", net, node.id, IP, TCP); // REG net id IP TCP

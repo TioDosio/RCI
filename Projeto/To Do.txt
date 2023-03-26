@@ -6,3 +6,4 @@ Coisas a fazer:
 
 Menos importantes:
 1- O name pode ser mais que 1 palavra, logo precisamos de ler o buffer até \n;
+2- Tirar lixo do bufR que recebe os querys e Withdraws;
