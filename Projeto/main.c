@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
             {
                 if (FD_ISSET(node.vizInt[i].fd, &fds)) // check if vizInt is ready for reading
                 {
-                    int n = 0, fdR = -2;
+                    int fdR = -2;
                     char bufR[100], cmd[20], bufW[100];
                     strcpy(bufR, "");
                     printf("INTERNO[%d]:%d\n", i, node.vizInt[i].fd);
@@ -234,32 +234,33 @@ int main(int argc, char *argv[])
                             sscanf(bufR, "%s %s", cmd, idW);
                             wdraw(idW, fdR);
                         }
-                        else if (n == 0)
-                        {
-                            printf("vizInt[%d] disconnected\n", i);
-                            node.vizInt[i].fd = -2;
-                            strcpy(node.vizInt[i].IDv, "");
-                            strcpy(node.vizInt[i].IPv, "");
-                            strcpy(node.vizInt[i].Portv, "");
-                            strcpy(node.vizInt[i].ctrbuf, "");
-                            for (int j = i; j < node.maxInter; j++)
-                            {
-                                node.vizInt[j] = node.vizInt[j + 1];
-                            }
-                            node.maxInter--;
-                        }
+
                         else if (strcmp(cmd, "EXTERN") == 0)
                         {
                             printf("EXTERN WTF\n");
                         }
                         node.vizInt[i].ctrbufsize = 0;
                     }
+                    else if (node.vizInt[i].ctrbufsize == 0) // saída de um Vizinho Interno
+                    {
+                        printf("vizInt[%d] disconnected\n", i);
+                        node.vizInt[i].fd = -2;
+                        strcpy(node.vizInt[i].IDv, "");
+                        strcpy(node.vizInt[i].IPv, "");
+                        strcpy(node.vizInt[i].Portv, "");
+                        strcpy(node.vizInt[i].ctrbuf, "");
+                        for (int j = i; j < node.maxInter; j++)
+                        {
+                            node.vizInt[j] = node.vizInt[j + 1];
+                        }
+                        node.maxInter--;
+                    }
                     FD_CLR(node.vizInt[i].fd, &fds);
                 }
             }
             if (FD_ISSET(node.vizExt.fd, &fds)) // check if vizExt is ready for reading
             {
-                int n = 0, fdR = -2;
+                int fdR = -2;
                 printf("EXTERNO:%d\n", node.vizExt.fd);
                 char bufR[100], cmd[20], bufW[100];
                 strcpy(bufR, "");
@@ -312,12 +313,13 @@ int main(int argc, char *argv[])
                         sscanf(bufR, "%s %s", cmd, idW);
                         wdraw(idW, fdR);
                     }
-                    else if (n == 0)
-                    {
-                        printf("vizExt disconnected\n");
-                    }
+
                     strcpy(bufR, "");
                     node.vizExt.ctrbufsize = 0;
+                }
+                else if (node.vizExt.ctrbufsize == 0)
+                {
+                    printf("vizExt disconnected\n");
                 }
                 FD_CLR(node.vizExt.fd, &fds);
             }
