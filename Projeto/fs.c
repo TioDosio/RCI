@@ -190,7 +190,14 @@ void wdraw(char *idR, int fdR)
 {
     char bufsend[13]; // WITHDRAW + id + \n
     strcpy(bufsend, "");
-    node.tabExp[atoi(idR)] = -2; // retira o destino da tabela de expedição
+    node.tabExp[atoi(idR)] = -2;            // retira o destino da tabela de expedição
+    for (int i = 0; i < node.flagName; i++) // Se um vizinho der leave nós tiramos esse caminho da tabela de expedição
+    {
+        if (node.tabExp[i] == atoi(idR))
+        {
+            node.tabNames[i] = -2;
+        }
+    }
     sprintf(bufsend, "WITHDRAW %s\n", idR);
     for (int i = 0; i < node.maxInter; i++)
     {

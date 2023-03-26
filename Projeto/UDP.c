@@ -113,7 +113,7 @@ void unreg(char *net, char *IP, char *TCP)
         exit(1);
     }
     bufOKs[n] = '\0'; // adiciona terminador de string
-    printf("received: %s\n\n", bufOKs);
+    printf("%s\n", bufOKs);
     close(fd);
     freeaddrinfo(res);
 }

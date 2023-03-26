@@ -75,13 +75,14 @@ void leave(char *net, char *IP, char *TCP)
     {
         if (node.vizInt[i].fd != -2)
         {
+            printf("close vizInt %d\n", node.vizInt[i].fd);
             close(node.vizInt[i].fd);
             node.vizInt[i].fd = -2;
         }
     }
     if (node.vizExt.fd != -2)
     {
-        printf("EXT ID:%s IP:%s Port:%s fd:%d\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv, node.vizExt.fd);
+        printf("close vizExt\n");
         close(node.vizExt.fd);
         node.vizExt.fd = -2;
     }
