@@ -195,7 +195,7 @@ void wdraw(char *idR, int fdR)
     {
         if (node.tabExp[i] == atoi(idR))
         {
-            node.tabNames[i] = -2;
+            node.tabExp[i] = -2;
         }
     }
     sprintf(bufsend, "WITHDRAW %s\n", idR);

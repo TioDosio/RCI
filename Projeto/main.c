@@ -254,6 +254,7 @@ int main(int argc, char *argv[])
                         }
                         node.vizInt[i].ctrbufsize = 0;
                     }
+                    FD_CLR(node.vizInt[i].fd, &fds);
                 }
             }
             if (FD_ISSET(node.vizExt.fd, &fds)) // check if vizExt is ready for reading
@@ -318,6 +319,7 @@ int main(int argc, char *argv[])
                     strcpy(bufR, "");
                     node.vizExt.ctrbufsize = 0;
                 }
+                FD_CLR(node.vizExt.fd, &fds);
             }
             if (FD_ISSET(server_fd, &fds))
             {
@@ -344,6 +346,7 @@ int main(int argc, char *argv[])
                     }
                     node.maxInter++;
                 }
+                FD_CLR(server_fd, &fds);
             }
         }
     }
