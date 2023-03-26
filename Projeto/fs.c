@@ -128,22 +128,37 @@ void query(char *destR, char *origR, char *nameR, int fdR)
     else // Se destino não for o próprio nó
     {
         sprintf(bufsend, "QUERY %s %s %s\n", destR, origR, nameR);
-        if (node.tabExp[atoi(destR)] != -2) // a tabela de Expedição está preenchida com alguma coisa
+        if (node.tabExp[atoi(destR)] == atoi(node.vizExt.IDv)) // Se o destino estiver na tabela de expedição e for o vizinho externo
         {
-            write(fdR, bufsend, strlen(bufsend)); // envia o QUERY para o vizinho que está na tabela de expedição
+            write(node.vizExt.fd, bufsend, strlen(bufsend)); // envia o QUERY para o vizinho externo
         }
-        else // Se a tabela de expedição não estiver preenchida
+        else
         {
-            for (int i = 0; i < node.maxInter; i++) // node.maxInter só é incrementado depois de um inverno ser
+            int flood = 0;
+            for (int i = 0; i < node.maxInter; i++)
             {
-                if (node.vizInt[i].fd != fdR)
+                if (node.tabExp[atoi(destR)] == atoi(node.vizInt[i].IDv))
                 {
-                    write(node.vizInt[i].fd, bufsend, strlen(bufsend)); // FLOOD internos
+                    if (node.vizInt[i].fd != fdR)
+                    {
+                        write(node.vizInt[i].fd, bufsend, strlen(bufsend));
+                    }
+                    flood = 1;
                 }
             }
-            if (node.vizExt.fd != fdR)
+            if (flood == 0) // FLOOD
             {
-                write(node.vizExt.fd, bufsend, strlen(bufsend)); // FLOOD externo
+                if (node.vizExt.fd != fdR)
+                {
+                    write(node.vizExt.fd, bufsend, strlen(bufsend));
+                }
+                for (int i = 0; i < node.maxInter; i++)
+                {
+                    if (node.vizInt[i].fd != fdR)
+                    {
+                        write(node.vizInt[i].fd, bufsend, strlen(bufsend));
+                    }
+                }
             }
         }
     }
@@ -160,28 +175,31 @@ void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR)
     {
         strcpy(bufCNC, "NOCONTENT");
     }
-    if (strcmp(destR, node.id) != 0) // se o destino for o próprio nó
+    if (strcmp(destR, node.id) == 0) // se o destino for o próprio nó
     {
         printf("%s VOLTOU", bufCNC);
     }
     else // Se destino não for o próprio nó
     {
-        sprintf(bufsend, "%s %s %s %s\n", bufCNC, destR, origR, nameR);
+        printf("TOU AQUI\n");
+        sprintf(bufsend, "%s %s %s %s\n", bufCNC, origR, destR, nameR);
         for (int i = 0; i < node.maxInter; i++)
         {
-            if (node.tabExp[atoi(destR)] == atoi(node.vizInt[i].IDv))
+            if (node.tabExp[atoi(origR)] == atoi(node.vizInt[i].IDv))
             {
                 if (node.vizInt[i].fd != fdR)
                 {
-                    write(node.vizInt[i].fd, bufsend, strlen(bufsend)); // FLOOD internos
+                    write(node.vizInt[i].fd, bufsend, strlen(bufsend));
+                    printf("TOU AQUI2\n");
                 }
             }
         }
-        if (node.tabExp[atoi(destR)] == atoi(node.vizExt.IDv))
+        if (node.tabExp[atoi(origR)] == atoi(node.vizExt.IDv))
         {
             if (node.vizExt.fd != fdR)
             {
-                write(node.vizExt.fd, bufsend, strlen(bufsend)); // FLOOD internos
+                write(node.vizExt.fd, bufsend, strlen(bufsend));
+                printf("TOU AQUI3\n");
             }
         }
     }

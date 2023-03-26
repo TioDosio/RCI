@@ -324,6 +324,7 @@ int main(int argc, char *argv[])
                     printf("vizExt disconnected\n");
                     if (strcmp(node.id, node.vizBackup.IDv) != 0) // não somos ancora
                     {
+                        printf("entra aqui\n");
                         strcpy(node.vizExt.IDv, node.vizBackup.IDv);
                         strcpy(node.vizExt.IPv, node.vizBackup.IPv);
                         strcpy(node.vizExt.Portv, node.vizBackup.Portv);
@@ -334,7 +335,7 @@ int main(int argc, char *argv[])
                             write(node.vizInt[i].fd, bufW, strlen(bufW));
                         }
                     }
-                    else if ((strcmp(node.id, node.vizBackup.IDv) == 0) && (node.maxInter != 0))
+                    else if ((strcmp(node.id, node.vizBackup.IDv) == 0) && (node.maxInter > 0))
                     {
                         printf("O Externo que saiu é ancora e promovo um vizinho interno a ancora\n");
                         strcpy(node.vizExt.IDv, node.vizInt[0].IDv);
