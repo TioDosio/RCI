@@ -93,33 +93,36 @@ int main(int argc, char *argv[])
         FD_ZERO(&fds); ////////// necessary???
         FD_SET(STDIN_FILENO, &rfds);
         FD_SET(server_fd, &rfds);
+        int max_fd = (STDIN_FILENO > server_fd) ? STDIN_FILENO : server_fd; // coloca o maior fd no max_fd entre i sdtin e o server
         if (node.vizExt.fd > 0)
         {
-            FD_SET(node.vizExt.fd, &rfds);
+            FD_SET(node.vizExt.fd, &rfds); // coloca o vizinho externo no rfds
+            max_fd = node.vizExt.fd;       // se houver vizinho externo coloca o fd como o max_fd
         }
-        // int max_fd = (STDIN_FILENO > server_fd) ? STDIN_FILENO : server_fd;
         int Nsel = 1;
-        for (int i = 0; i < 98; i++)
+        for (int i = 0; i < 98; i++) // coloca os vizinhos internos que estão ligados no rfds
         {
             if (node.vizInt[i].fd > 0)
             {
                 FD_SET(node.vizInt[i].fd, &rfds);
-                // max_fd = node.vizInt[i].fd;
+                if (node.vizInt[i].fd > max_fd)
+                {
+                    max_fd = node.vizInt[i].fd; // se houver vizinhos internos coloca o fd como o max_fd
+                }
             }
         }
         fds = rfds;
-        if ((Nsel = select(99 + 1, &fds, NULL, NULL, NULL)) < 0)
+        if ((Nsel = select(max_fd + 1, &fds, NULL, NULL, NULL)) < 0) // select para ver se há algo para ler
         {
             printf("erro select main.c");
             perror("error select");
             exit(EXIT_FAILURE);
         }
-        for (int counter = 0; counter < Nsel; counter++)
+        for (int counter = 0; counter < Nsel; counter++) // se houver mais que uma coisa para ler ao mesmo tempo o select retorna o Nsel e repete aqui as vazes necessarias
         {
-            // check if stdin is ready for reading
-            if (FD_ISSET(STDIN_FILENO, &fds))
+            if (FD_ISSET(STDIN_FILENO, &fds)) // check if stdin is ready for reading
             {
-                printf("stdin isSET\n");
+                strcpy(bufstdin, "");
                 fgets(bufstdin, 100, stdin);
                 sscanf(bufstdin, "%s", strV);
                 if (strcmp(strV, "join") == 0) // join net id
@@ -218,6 +221,7 @@ int main(int argc, char *argv[])
                             char destC[3], origC[3], nameC[100];
                             sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
                             fdR = node.vizInt[i].fd;
+                            node.tabExp[atoi(destC)] = atoi(node.vizInt[i].IDv);
                             CNContent(0, destC, origC, nameC, fdR);
                         }
                         else if (strcmp(cmd, "NOCONTENT") == 0)
@@ -225,6 +229,7 @@ int main(int argc, char *argv[])
                             char destC[3], origC[3], nameC[100];
                             sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
                             fdR = node.vizInt[i].fd;
+                            node.tabExp[atoi(destC)] = atoi(node.vizInt[i].IDv);
                             CNContent(1, destC, origC, nameC, fdR);
                         }
                         else if (strcmp(cmd, "WITHDRAW") == 0)
@@ -299,6 +304,7 @@ int main(int argc, char *argv[])
                         char destC[3], origC[3], nameC[100];
                         sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
                         fdR = node.vizExt.fd;
+                        node.tabExp[atoi(destC)] = atoi(node.vizExt.IDv);
                         CNContent(0, destC, origC, nameC, fdR);
                     }
                     else if (strcmp(cmd, "NOCONTENT") == 0)
@@ -306,6 +312,7 @@ int main(int argc, char *argv[])
                         char destC[3], origC[3], nameC[100];
                         sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
                         fdR = node.vizExt.fd;
+                        node.tabExp[atoi(destC)] = atoi(node.vizExt.IDv);
                         CNContent(1, destC, origC, nameC, fdR);
                     }
                     else if (strcmp(cmd, "WITHDRAW") == 0)
@@ -324,15 +331,18 @@ int main(int argc, char *argv[])
                     printf("vizExt disconnected\n");
                     if (strcmp(node.id, node.vizBackup.IDv) != 0) // não somos ancora
                     {
-                        printf("entra aqui\n");
+                        printf("Ligamos ao Backup\n");
                         strcpy(node.vizExt.IDv, node.vizBackup.IDv);
                         strcpy(node.vizExt.IPv, node.vizBackup.IPv);
                         strcpy(node.vizExt.Portv, node.vizBackup.Portv);
                         client_tcp(IP, TCP);
                         for (int i = 0; i < node.maxInter; i++)
                         {
-                            sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                            write(node.vizInt[i].fd, bufW, strlen(bufW));
+                            if (node.vizInt[i].fd != -2)
+                            {
+                                sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                                write(node.vizInt[i].fd, bufW, strlen(bufW));
+                            }
                         }
                     }
                     else if ((strcmp(node.id, node.vizBackup.IDv) == 0) && (node.maxInter > 0))

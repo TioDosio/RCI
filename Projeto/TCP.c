@@ -43,7 +43,7 @@ void client_tcp(char *IP, char *TCP)
     n = sprintf(buffer, "NEW %s %s %s\n", node.id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
     printf("enviado por mim: %s\n", buffer);
     write(node.vizExt.fd, buffer, n);
-    node.tabExp[atoi(node.vizExt.IDv)] = atoi(node.vizExt.IDv);
+    node.tabExp[atoi(node.vizExt.IDv)] = atoi(node.vizExt.IDv); // coloca a que nos estamos a ligar como destino direto
     freeaddrinfo(res);
 }
 
@@ -68,21 +68,18 @@ void leave(char *net, char *IP, char *TCP)
     sprintf(bufsend, "WITHDRAW %s\n", node.id);
     for (int i = 0; i < node.maxInter; i++) // Passa por todos os vizinhos internos
     {
-        write(node.vizInt[i].fd, bufsend, strlen(bufsend)); // manda o WITHDRAW para o vizinho interno
-    }
-    write(node.vizExt.fd, bufsend, strlen(bufsend)); // manda o WITHDRAW para o vizinho externo
-    for (int i = 0; i < node.maxInter; i++)          // fecha todos os sockets que se estavam a usar
-    {
-        if (node.vizInt[i].fd != -2)
+        if (node.vizExt.fd != -2)
         {
-            printf("close vizInt %d\n", node.vizInt[i].fd);
+            write(node.vizInt[i].fd, bufsend, strlen(bufsend)); // manda o WITHDRAW para o vizinho interno
+            printf("closing vizInt %d\n", node.vizInt[i].fd);
             close(node.vizInt[i].fd);
             node.vizInt[i].fd = -2;
         }
     }
     if (node.vizExt.fd != -2)
     {
-        printf("close vizExt\n");
+        write(node.vizExt.fd, bufsend, strlen(bufsend)); // manda o WITHDRAW para o vizinho externo
+        printf("closing vizExt\n");
         close(node.vizExt.fd);
         node.vizExt.fd = -2;
     }

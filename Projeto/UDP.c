@@ -28,7 +28,7 @@ void reg(char *net, char *IP, char *TCP)
         sprintf(node.id, "%d", F);
         printf("id: %s\n", node.id);
     }
-    strcpy(node.vizBackup.IDv, node.id); //////////////////////////////////////////////////////////////// mudar de Sitio
+    strcpy(node.vizBackup.IDv, node.id);
     strcpy(node.vizBackup.IPv, IP);
     strcpy(node.vizBackup.Portv, TCP);
     sprintf(sendV, "REG %s %s %s %s", net, node.id, IP, TCP); // REG net id IP TCP
@@ -163,15 +163,15 @@ int show(int flagS, char *net, char *IP, char *TCP)
     int intIDv, intID;
     node.flagVaz = 0;
 
-    if (flagS == 1) // so entra se for o join
-    {               /*Dá para fazer isto com strings mudar*/
+    if (flagS == 1) // so entra se for chamada com o join
+    {
         intID = atoi(node.id);
         char *saveptr, IDv[11], IPv[20], Portv[6];
         char *line = strtok_r(buffer, "\n", &saveptr);
         printf("line: %s\n", line);
         while (line != NULL)
         {
-            sscanf(line, "%s %s %s", IDv, IPv, Portv);
+            sscanf(line, "%s %s %s", IDv, IPv, Portv); // fazer com que se ligue a um random em vez de se ligar ao ultimo
             intIDv = atoi(IDv);
             line = strtok_r(NULL, "\n", &saveptr);
             while (intID == intIDv)
