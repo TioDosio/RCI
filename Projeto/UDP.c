@@ -160,37 +160,39 @@ int show(int flagS, char *net, char *IP, char *TCP)
     buffer[n] = '\0'; // adiciona terminador de string
     printf("%s\n\n", buffer);
     // meter argumentos do buffer nos arrays
-    int intIDv, intID;
+    int intIDv, intID, i = 0;
     node.flagVaz = 0;
 
-    if (flagS == 1) // so entra se for chamada com o join
+    if (flagS == 1) // so entra se for chamada com o join //////////////////////////////////////////////////////////////////////////////////////
     {
         intID = atoi(node.id);
-        char *saveptr, IDv[11], IPv[20], Portv[6];
+        char *saveptr, IDv[100][11], IPv[100][20], Portv[100][6];
         char *line = strtok_r(buffer, "\n", &saveptr);
         printf("line: %s\n", line);
+        line = strtok_r(NULL, "\n", &saveptr);
         while (line != NULL)
         {
-            sscanf(line, "%s %s %s", IDv, IPv, Portv); // fazer com que se ligue a um random em vez de se ligar ao ultimo
-            intIDv = atoi(IDv);
-            line = strtok_r(NULL, "\n", &saveptr);
+            sscanf(line, "%s %s %s", IDv[i], IPv[i], Portv[i]); // fazer com que se ligue a um random em vez de se ligar ao ultimo
+            intIDv = atoi(IDv[i]);
             while (intID == intIDv)
             {
                 intID = rand() % 100;
-                // printf("ID already exists, new ID: %d", intID);
             }
             node.flagVaz++;
-            printf("flagVaz: %d", node.flagVaz);
+            i++;
+            line = strtok_r(NULL, "\n", &saveptr);
         }
-        if (line == NULL)
+        if (line == NULL && i == 0)
         {
-            printf("\n%s %s %s\n", IDv, IPv, Portv);
+            printf("print=%s %s %s\n", IDv[i - 1], IPv[i - 1], Portv[i - 1]);
         }
         if (node.flagVaz > 1)
         {
-            strcpy(node.vizExt.IDv, IDv);
-            strcpy(node.vizExt.IPv, IPv);
-            strcpy(node.vizExt.Portv, Portv);
+            int r = rand() % (i);
+            printf("r=%d\n", r);
+            strcpy(node.vizExt.IDv, IDv[r]);
+            strcpy(node.vizExt.IPv, IPv[r]);
+            strcpy(node.vizExt.Portv, Portv[r]);
         }
         else
         {
