@@ -1,6 +1,6 @@
 Coisas a fazer:
 1- ver lixo que aparece;
-2- completar LEAVE;
+2- completar LEAVE; 
 3- djoin ver se é o primeiro a entrar, so me ligo se id=bootID e se for diferente meter mensagem; idk se ta feito;
 4- read da forma que os stores têm nos slides; KINDA DONE
 5- invalid comand é precido aparecer logo no ecrã;
@@ -9,3 +9,6 @@ Menos importantes:
 1- O name pode ser mais que 1 palavra, logo precisamos de ler o buffer até \n;
 2- Tirar lixo do bufR que recebe os querys e Withdraws;
 3- Fazer com que se ligue a um random em vez de se ligar ao ultimo
+
+
+Nota quando damos leave de um externo que não é ancora, o new e o Extern são bem enviados mas o interno não recebe fica com fd_EXT set e não LÊ o EXTERN

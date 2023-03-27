@@ -40,9 +40,9 @@ void client_tcp(char *IP, char *TCP)
         printf("error connect tcp.c\n");
         exit(1);
     }
-    n = sprintf(buffer, "NEW %s %s %s\n", node.id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
+    sprintf(buffer, "NEW %s %s %s\n", node.id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
     printf("enviado por mim: %s\n", buffer);
-    write(node.vizExt.fd, buffer, n);
+    write(node.vizExt.fd, buffer, strlen(buffer));
     node.tabExp[atoi(node.vizExt.IDv)] = atoi(node.vizExt.IDv); // coloca a que nos estamos a ligar como destino direto
     freeaddrinfo(res);
 }

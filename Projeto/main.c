@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
                     printf("INTERNO[%d]:%d\n", i, node.vizInt[i].fd);
                     node.vizInt[i].ctrbufsize += read(node.vizInt[i].fd, node.vizInt[i].ctrbuf, 100); // NEW net id\n NEW net id\n
                     strcat(bufR, node.vizInt[i].ctrbuf);
-                    printf("1bufR:%s\n", bufR);
+                    printf("INT-bufR:%s\n", bufR);
                     if (bufR[node.vizInt[i].ctrbufsize - 1] == '\n')
                     {
                         sscanf(bufR, "%s", cmd);
@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
                 strcpy(cmd, "");
                 node.vizExt.ctrbufsize += read(node.vizExt.fd, node.vizExt.ctrbuf, 100);
                 strcat(bufR, node.vizExt.ctrbuf);
-                printf("2bufR:%s\n", bufR);
+                printf("EXT-bufR:%s\n", bufR);
                 if (bufR[node.vizExt.ctrbufsize - 1] == '\n') // a mensagem foi toda recebida
                 {
                     sscanf(bufR, "%s", cmd);
@@ -326,15 +326,16 @@ int main(int argc, char *argv[])
                     strcpy(bufR, "");
                     node.vizExt.ctrbufsize = 0;
                 }
-                else if (node.vizExt.ctrbufsize == 0)
+                else if (node.vizExt.ctrbufsize == 0) // saída do vizinho externo
                 {
                     printf("vizExt disconnected\n");
                     if (strcmp(node.id, node.vizBackup.IDv) != 0) // não somos ancora
                     {
-                        printf("Ligamos ao Backup\n");
+                        printf("Não somos ancora e ligamos ao Backup\n");
                         strcpy(node.vizExt.IDv, node.vizBackup.IDv);
                         strcpy(node.vizExt.IPv, node.vizBackup.IPv);
                         strcpy(node.vizExt.Portv, node.vizBackup.Portv);
+                        printf("DADOS NOVOS ID:%s IP:%s Porto:%s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         client_tcp(IP, TCP);
                         for (int i = 0; i < node.maxInter; i++)
                         {
@@ -347,7 +348,7 @@ int main(int argc, char *argv[])
                     }
                     else if ((strcmp(node.id, node.vizBackup.IDv) == 0) && (node.maxInter > 0))
                     {
-                        printf("O Externo que saiu é ancora e promovo um vizinho interno a ancora\n");
+                        printf("O Externo que saiu é ancora e nós e promovo um vizinho interno a ancora\n");
                         strcpy(node.vizExt.IDv, node.vizInt[0].IDv);
                         strcpy(node.vizExt.IPv, node.vizInt[0].IPv);
                         strcpy(node.vizExt.Portv, node.vizInt[0].Portv);
@@ -359,11 +360,20 @@ int main(int argc, char *argv[])
                         sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         write(node.vizExt.fd, bufW, strlen(bufW));
                     }
+                    else if ((strcmp(node.id, node.vizBackup.IDv) == 0) && (node.maxInter == 0))
+                    {
+                        printf("O Externo que saiu é ancora e nós e espero que os internos dele se liguem a mim\n");
+                        node.flagVaz = 1;
+                    }
                     else
                     {
-                        strcpy(node.vizExt.IDv, node.id);
+                        printf("Fiquei sozinho na rede :(\n");
+                        strcpy(node.vizExt.IDv, "");
                         strcpy(node.vizExt.IPv, "");
                         strcpy(node.vizExt.Portv, "");
+                        strcpy(node.vizBackup.IDv, ""); // limpar vizinho backup
+                        strcpy(node.vizBackup.IPv, "");
+                        strcpy(node.vizBackup.Portv, "");
                         node.flagVaz = 1;
                     }
                     node.vizExt.fd = -2;
