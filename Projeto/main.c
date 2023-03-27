@@ -355,6 +355,7 @@ int main(int argc, char *argv[])
                         strcpy(node.vizExt.IDv, node.vizInt[0].IDv);
                         strcpy(node.vizExt.IPv, node.vizInt[0].IPv);
                         strcpy(node.vizExt.Portv, node.vizInt[0].Portv);
+                        node.vizExt.fd = node.vizInt[0].fd;
                         for (int j = 0; j < node.maxInter; j++)
                         {
                             node.vizInt[j] = node.vizInt[j + 1];
@@ -366,8 +367,11 @@ int main(int argc, char *argv[])
                     else if ((strcmp(node.id, node.vizBackup.IDv) == 0) && (node.maxInter == 0)) // somos ancora e não temos internos
                     {                                                                            // ficamos á espera que os internos do ancora que saiu se liguem a nós
                         printf("O Externo que saiu é ancora e nós e espero que os internos dele se liguem a mim\n");
+                        strcpy(node.vizExt.IDv, "");
+                        strcpy(node.vizExt.IPv, "");
+                        strcpy(node.vizExt.Portv, "");
                         node.flagVaz = 1;
-                        node.vizExt.fd = -69;
+                        node.vizExt.fd = -2;
                     }
                     else
                     {
@@ -379,7 +383,7 @@ int main(int argc, char *argv[])
                         strcpy(node.vizBackup.IPv, "");
                         strcpy(node.vizBackup.Portv, "");
                         node.flagVaz = 1;
-                        node.vizExt.fd = -69;
+                        node.vizExt.fd = -2;
                     }
                 }
                 FD_CLR(node.vizExt.fd, &fds);
