@@ -35,7 +35,8 @@ void client_tcp(char *IP, char *TCP)
         exit(1);
     }
     n = connect(node.vizExt.fd, res->ai_addr, res->ai_addrlen);
-    if (n == -1) /*error*/
+    printf("connect clientTCP:%d\n", node.vizExt.fd); ///////////////////////////
+    if (n == -1)                                      /*error*/
     {
         printf("error connect tcp.c\n");
         exit(1);

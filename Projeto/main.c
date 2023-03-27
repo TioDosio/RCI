@@ -204,6 +204,7 @@ int main(int argc, char *argv[])
                         {
                             sscanf(bufR, "%s %s %s %s", cmd, node.vizInt[i].IDv, node.vizInt[i].IPv, node.vizInt[i].Portv); // recebe NEW e guarda como interno
                             sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);        // mete seu EXT no buffer
+                            printf("Enviado:%s", bufW);                                                                     ///////////////////////////////////////////////////////////////////////77
                             write(node.vizInt[i].fd, bufW, strlen(bufW));                                                   // Envia EXTERN para o Intern para ser o Back dele
                             node.tabExp[atoi(node.vizInt[i].IDv)] = atoi(node.vizInt[i].IDv);                               // Adiciona o novo vizinho na tabela de exp
                         }
@@ -243,7 +244,7 @@ int main(int argc, char *argv[])
 
                         else if (strcmp(cmd, "EXTERN") == 0)
                         {
-                            printf("EXTERN WTF\n");
+                            printf("!!!!!!!!!!!!!!!!!!!!!!!!!Recebido: %s\n", bufR);
                         }
                         node.vizInt[i].ctrbufsize = 0;
                     }
@@ -284,11 +285,13 @@ int main(int argc, char *argv[])
                         sscanf(bufR, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         write(node.vizExt.fd, bufW, strlen(bufW));
+                        printf("Enviado: %s", bufW);
                         node.tabExp[atoi(node.vizExt.IDv)] = atoi(node.vizExt.IDv);
                     }
                     else if (strcmp(cmd, "EXTERN") == 0)
                     {
                         sscanf(bufR, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
+                        printf("Recebido: %s\n", bufR);
                     }
                     else if (strcmp(cmd, "QUERY") == 0) // QUERY DEST ORIG NAME
                     {
@@ -360,10 +363,11 @@ int main(int argc, char *argv[])
                         sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         write(node.vizExt.fd, bufW, strlen(bufW));
                     }
-                    else if ((strcmp(node.id, node.vizBackup.IDv) == 0) && (node.maxInter == 0))
-                    {
+                    else if ((strcmp(node.id, node.vizBackup.IDv) == 0) && (node.maxInter == 0)) // somos ancora e não temos internos
+                    {                                                                            // ficamos á espera que os internos do ancora que saiu se liguem a nós
                         printf("O Externo que saiu é ancora e nós e espero que os internos dele se liguem a mim\n");
                         node.flagVaz = 1;
+                        node.vizExt.fd = -69;
                     }
                     else
                     {
@@ -375,8 +379,8 @@ int main(int argc, char *argv[])
                         strcpy(node.vizBackup.IPv, "");
                         strcpy(node.vizBackup.Portv, "");
                         node.flagVaz = 1;
+                        node.vizExt.fd = -69;
                     }
-                    node.vizExt.fd = -2;
                 }
                 FD_CLR(node.vizExt.fd, &fds);
             }
@@ -388,6 +392,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Sou o único da rede e ligam-se a mim\n");
                     node.vizExt.fd = accept(server_fd, &addr, &addrlen);
+                    printf("Accept %d\n", node.vizExt.fd); ////////////////////////////
                     if ((node.vizExt.fd == -1))
                     {
                         printf("EXT erro accept main.c");
@@ -398,6 +403,7 @@ int main(int argc, char *argv[])
                 {
                     printf("Aceita um nó (a rede já nao sou só eu)\n");
                     node.vizInt[node.maxInter].fd = accept(server_fd, &addr, &addrlen);
+                    printf("Accept %d\n", node.vizInt[node.maxInter].fd); //////////////////////////////
                     if (node.vizInt[node.maxInter].fd == -1)
                     {
                         printf("INT erro accept main.c");
