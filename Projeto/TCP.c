@@ -15,7 +15,7 @@ extern struct NO node; // ter variavel global em varios ficheiros
 
 void client_tcp(char *IP, char *TCP)
 {
-    char buffer[128 + 1];
+    char buffer[128];
     struct addrinfo hints, *res;
     int n;
     node.vizExt.fd = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
@@ -64,7 +64,6 @@ void djoin(char *net, char *IP, char *TCP, char *bootID, char *bootIP, char *boo
 }
 void leave(char *net, char *IP, char *TCP)
 {
-    int B = 0, C = 0;
     unreg(net, IP, TCP);
     char bufsend[100];
     sprintf(bufsend, "WITHDRAW %s\n", node.id);
@@ -76,8 +75,6 @@ void leave(char *net, char *IP, char *TCP)
             printf("closing vizInt[%d] %s\n", node.vizInt[i].fd, node.vizInt[i].IDv);
             close(node.vizInt[i].fd);
             node.vizInt[i].fd = -2;
-            C++;
-            printf("C = %d\n", C);
         }
     }
     if (node.vizExt.fd != -2)
@@ -86,8 +83,6 @@ void leave(char *net, char *IP, char *TCP)
         printf("closing vizExt\n");
         close(node.vizExt.fd);
         node.vizExt.fd = -2;
-        B++;
-        printf("B = %d\n", B);
     }
     strcpy(node.vizExt.IDv, "");
     strcpy(node.vizExt.IPv, "");

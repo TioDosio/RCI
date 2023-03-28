@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
     strcpy(node.vizExt.IDv, "");
     strcpy(node.vizExt.IPv, "");
     strcpy(node.vizExt.Portv, "");
-    int P = 0;
+    ;
     while (1)
     {
         FD_ZERO(&rfds);
@@ -115,7 +115,6 @@ int main(int argc, char *argv[])
             }
         }
         fds = rfds;
-        printf("Max_fd %d\n", max_fd);
         if ((Nsel = select(max_fd + 1, &fds, NULL, NULL, NULL)) < 0) // select para ver se há algo para ler
         {
             printf("erro select main.c");
@@ -190,7 +189,7 @@ int main(int argc, char *argv[])
                     printf("Invalid command\n");
                 }
             }
-            for (int i = 0; i < node.maxInter; i++)
+            for (int i = 0; i < 98; i++)
             {
                 if (FD_ISSET(node.vizInt[i].fd, &fds)) // check if vizInt is ready for reading
                 {
@@ -261,6 +260,7 @@ int main(int argc, char *argv[])
                         node.maxInter--;
                     }
                 }
+                FD_CLR(node.vizInt[i].fd, &fds);
             }
             if (FD_ISSET(node.vizExt.fd, &fds)) // check if vizExt is ready for reading
             {
@@ -273,8 +273,6 @@ int main(int argc, char *argv[])
                 node.vizExt.ctrbufsize += read(node.vizExt.fd, node.vizExt.ctrbuf, 100);
                 strcat(bufR, node.vizExt.ctrbuf);
                 printf("EXT-bufR:%s\n", bufR);
-                P++;
-                printf("P=%d", P);
                 if (bufR[node.vizExt.ctrbufsize - 1] == '\n') // a mensagem foi toda recebida
                 {
                     sscanf(bufR, "%s", cmd);
@@ -361,15 +359,11 @@ int main(int argc, char *argv[])
                         node.maxInter--;
                         sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         write(node.vizExt.fd, bufW, strlen(bufW));
-                    }
-                    else if ((strcmp(node.id, node.vizBackup.IDv) == 0) && (node.maxInter == 0)) // somos ancora e não temos internos
-                    {                                                                            // ficamos á espera que os internos do ancora que saiu se liguem a nós
-                        printf("Somos Ancora sem Int's\n");
-                        strcpy(node.vizExt.IDv, "");
-                        strcpy(node.vizExt.IPv, "");
-                        strcpy(node.vizExt.Portv, "");
-                        node.flagVaz = 0;
-                        node.vizExt.fd = -2;
+                        for (int i = 0; i < node.maxInter; i++)
+                        {
+                            write(node.vizInt[i].fd, bufW, strlen(bufW));
+                        }
+                        printf("Enviado: %s", bufW);
                     }
                     else
                     {
@@ -377,13 +371,14 @@ int main(int argc, char *argv[])
                         strcpy(node.vizExt.IDv, "");
                         strcpy(node.vizExt.IPv, "");
                         strcpy(node.vizExt.Portv, "");
-                        strcpy(node.vizBackup.IDv, ""); // limpar vizinho backup
-                        strcpy(node.vizBackup.IPv, "");
-                        strcpy(node.vizBackup.Portv, "");
+                        strcpy(node.vizBackup.IDv, node.id);
+                        strcpy(node.vizBackup.IPv, IP);
+                        strcpy(node.vizBackup.Portv, TCP);
                         node.flagVaz = 0;
                         node.vizExt.fd = -2;
                     }
                 }
+                FD_CLR(node.vizExt.fd, &fds);
             }
             if (FD_ISSET(server_fd, &fds))
             {
@@ -399,6 +394,7 @@ int main(int argc, char *argv[])
                         printf("EXT erro accept main.c");
                         exit(1);
                     }
+                    node.flagVaz = 1;
                 }
                 else // mais de 2 nós
                 {
@@ -412,7 +408,6 @@ int main(int argc, char *argv[])
                     }
                     node.maxInter++;
                 }
-                FD_CLR(server_fd, &fds);
             }
         }
     }
