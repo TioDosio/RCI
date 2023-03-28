@@ -121,6 +121,7 @@ int main(int argc, char *argv[])
             perror("error select");
             exit(EXIT_FAILURE);
         }
+        printf("Nsel: %d\n", Nsel);
         for (int counter = 0; counter < Nsel; counter++) // se houver mais que uma coisa para ler ao mesmo tempo o select retorna o Nsel e repete aqui as vazes necessarias
         {
             if (FD_ISSET(STDIN_FILENO, &fds)) // check if stdin is ready for reading
@@ -246,8 +247,26 @@ int main(int argc, char *argv[])
                     }
                     else if (node.vizInt[i].ctrbufsize == 0) // saída de um Vizinho Interno
                     {
+                        char bufW[15]; // withdraw id
                         printf("vizInt[%d] disconnected\n", i);
+                        sprintf(bufW, "WITHDRAW %s\n", node.vizInt[i].IDv);
+                        node.tabExp[atoi(node.vizInt[i].IDv)] = -2;
+                        for (int i = 0; i < node.maxInter; i++)
+                        {
+                            if (node.tabExp[i] == atoi(node.vizInt[i].IDv))
+                            {
+                                node.tabExp[i] = -2;
+                            }
+                        }
                         node.vizInt[i].fd = -2;
+                        write(node.vizExt.fd, bufW, strlen(bufW));
+                        for (int j = 0; j < node.maxInter; j++)
+                        {
+                            if (node.vizInt[j].fd != -2)
+                            {
+                                write(node.vizInt[j].fd, bufW, strlen(bufW));
+                            }
+                        }
                         strcpy(node.vizInt[i].IDv, "");
                         strcpy(node.vizInt[i].IPv, "");
                         strcpy(node.vizInt[i].Portv, "");
@@ -327,7 +346,25 @@ int main(int argc, char *argv[])
                 }
                 else if (node.vizExt.ctrbufsize == 0) // saída do vizinho externo
                 {
+                    char bufW[100]; // withdraw id
                     printf("vizExt disconnected\n");
+                    sprintf(bufW, "WITHDRAW %s\n", node.vizExt.IDv);
+                    node.tabExp[atoi(node.vizExt.IDv)] = -2;
+                    for (int i = 0; i < node.maxInter; i++)
+                    {
+                        if (node.tabExp[i] == atoi(node.vizExt.IDv))
+                        {
+                            node.tabExp[i] = -2;
+                        }
+                    }
+                    write(node.vizExt.fd, bufW, strlen(bufW));
+                    for (int j = 0; j < node.maxInter; j++)
+                    {
+                        if (node.vizInt[j].fd != -2)
+                        {
+                            write(node.vizInt[j].fd, bufW, strlen(bufW));
+                        }
+                    }
                     if (strcmp(node.id, node.vizBackup.IDv) != 0) // não somos ancora
                     {
                         strcpy(node.vizExt.IDv, node.vizBackup.IDv);

@@ -80,6 +80,10 @@ void leave(char *net, char *IP, char *TCP)
         close(node.vizExt.fd);
         node.vizExt.fd = -2;
     }
+    for (int i = 0; i < 100; i++)
+    {
+        node.tabExp[i] = -2;
+    }
     strcpy(node.vizExt.IDv, "");
     strcpy(node.vizExt.IPv, "");
     strcpy(node.vizExt.Portv, "");
