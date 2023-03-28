@@ -66,8 +66,8 @@ void leave(char *net, char *IP, char *TCP)
 {
     unreg(net, IP, TCP);
     char bufsend[100];
-    sprintf(bufsend, "WITHDRAW %s\n", node.id);
-    for (int i = 0; i < node.maxInter; i++) // Passa por todos os vizinhos internos
+    sprintf(bufsend, "WITHDRAW %s\n", node.id); //////////////////////////////////////    TIRAR O WITHDRAW
+    for (int i = 0; i < node.maxInter; i++)     // Passa por todos os vizinhos internos
     {
         if (node.vizInt[i].fd != -2)
         {
