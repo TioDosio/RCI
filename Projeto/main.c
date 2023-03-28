@@ -299,7 +299,7 @@ int main(int argc, char *argv[])
                     if (line != NULL)
                     {
                         strcpy(bufM2, line);
-                        peinrft("bufM2:%s\n", bufM2);
+                        printf("bufM2:%s\n", bufM2);
                         flag = 2;
                     }
                     printf("EXT-bufR:%s\n", bufR);
