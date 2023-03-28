@@ -66,8 +66,9 @@ void reg(char *net, char *IP, char *TCP)
     }
     buffOKs[n] = '\0'; // adiciona terminador de string
     printf("%s\n\n", buffOKs);
-    if (node.flagVaz > 1)
+    if (node.flagVaz > 0)
     {
+        printf("entra aqui");
         client_tcp(IP, TCP);
     }
     freeaddrinfo(res);
@@ -160,7 +161,7 @@ int show(int flagS, char *net, char *IP, char *TCP)
     buffer[n] = '\0'; // adiciona terminador de string
     printf("%s\n\n", buffer);
     // meter argumentos do buffer nos arrays
-    int intIDv, intID, i = 0;
+    int intIDv, intID, i = 0; /////////////////////// este i pode ser descartado e substituido por node.flagVaz?
     node.flagVaz = 0;
 
     if (flagS == 1) // so entra se for chamada com o join //////////////////////////////////////////////////////////////////////////////////////
@@ -172,7 +173,7 @@ int show(int flagS, char *net, char *IP, char *TCP)
         line = strtok_r(NULL, "\n", &saveptr);
         while (line != NULL)
         {
-            sscanf(line, "%s %s %s", IDv[i], IPv[i], Portv[i]); // fazer com que se ligue a um random em vez de se ligar ao ultimo
+            sscanf(line, "%s %s %s", IDv[i], IPv[i], Portv[i]);
             intIDv = atoi(IDv[i]);
             while (intID == intIDv)
             {
@@ -184,12 +185,14 @@ int show(int flagS, char *net, char *IP, char *TCP)
         }
         if (line == NULL && i == 0)
         {
-            printf("print=%s %s %s\n", IDv[i - 1], IPv[i - 1], Portv[i - 1]);
+            printf("Sou o primeiro a entrar na rede\n");
         }
-        if (node.flagVaz > 1)
+        if (node.flagVaz > 0)
         {
             int r = rand() % (i);
-            printf("r=%d\n", r);
+            printf("IDv[%d]=%s\n", r, IDv[r]);
+            printf("IPv[%d]=%s\n", r, IPv[r]);
+            printf("Portv[%d]=%s\n", r, Portv[r]);
             strcpy(node.vizExt.IDv, IDv[r]);
             strcpy(node.vizExt.IPv, IPv[r]);
             strcpy(node.vizExt.Portv, Portv[r]);

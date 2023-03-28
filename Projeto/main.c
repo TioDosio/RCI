@@ -370,7 +370,7 @@ int main(int argc, char *argv[])
                         strcpy(node.vizExt.IDv, "");
                         strcpy(node.vizExt.IPv, "");
                         strcpy(node.vizExt.Portv, "");
-                        node.flagVaz = 1;
+                        node.flagVaz = 0;
                         node.vizExt.fd = -2;
                     }
                     else
@@ -382,7 +382,7 @@ int main(int argc, char *argv[])
                         strcpy(node.vizBackup.IDv, ""); // limpar vizinho backup
                         strcpy(node.vizBackup.IPv, "");
                         strcpy(node.vizBackup.Portv, "");
-                        node.flagVaz = 1;
+                        node.flagVaz = 0;
                         node.vizExt.fd = -2;
                     }
                 }
@@ -392,7 +392,7 @@ int main(int argc, char *argv[])
             {
                 printf("SERVER IS_SET\n");
                 addrlen = sizeof(addr);
-                if (node.flagVaz == 1) // Sou o único da rede e ligam-se a mim
+                if (node.flagVaz == 0) // Sou o único da rede e ligam-se a mim
                 {
                     printf("Sou o único da rede e ligam-se a mim\n");
                     node.vizExt.fd = accept(server_fd, &addr, &addrlen);
