@@ -181,7 +181,7 @@ void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR)
     }
     else // Se destino não for o próprio nó
     {
-        printf("TOU AQUI\n");
+        printf("O dest não sou eu\n");
         sprintf(bufsend, "%s %s %s %s\n", bufCNC, origR, destR, nameR);
         for (int i = 0; i < node.maxInter; i++)
         {
@@ -190,7 +190,7 @@ void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR)
                 if (node.vizInt[i].fd != fdR)
                 {
                     write(node.vizInt[i].fd, bufsend, strlen(bufsend));
-                    printf("TOU AQUI2\n");
+                    printf("Tenho na tabela de Exp e envio:%s\n", bufsend);
                 }
             }
         }
@@ -199,7 +199,7 @@ void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR)
             if (node.vizExt.fd != fdR)
             {
                 write(node.vizExt.fd, bufsend, strlen(bufsend));
-                printf("TOU AQUI3\n");
+                printf("2Tenho na tabela de Exp e envio:%s\n", bufsend);
             }
         }
     }
@@ -208,8 +208,8 @@ void wdraw(char *idR, int fdR)
 {
     char bufsend[13]; // WITHDRAW + id + \n
     strcpy(bufsend, "");
-    node.tabExp[atoi(idR)] = -2;            // retira o destino da tabela de expedição
-    for (int i = 0; i < node.flagName; i++) // Se um vizinho der leave nós tiramos esse caminho da tabela de expedição
+    node.tabExp[atoi(idR)] = -2;  // retira o destino da tabela de expedição
+    for (int i = 0; i < 100; i++) // Se um vizinho der leave nós tiramos esse caminho da tabela de expedição
     {
         if (node.tabExp[i] == atoi(idR))
         {

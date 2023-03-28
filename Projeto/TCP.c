@@ -64,17 +64,20 @@ void djoin(char *net, char *IP, char *TCP, char *bootID, char *bootIP, char *boo
 }
 void leave(char *net, char *IP, char *TCP)
 {
+    int B = 0, C = 0;
     unreg(net, IP, TCP);
     char bufsend[100];
     sprintf(bufsend, "WITHDRAW %s\n", node.id);
     for (int i = 0; i < node.maxInter; i++) // Passa por todos os vizinhos internos
     {
-        if (node.vizExt.fd != -2)
+        if (node.vizInt[i].fd != -2)
         {
             write(node.vizInt[i].fd, bufsend, strlen(bufsend)); // manda o WITHDRAW para o vizinho interno
-            printf("closing vizInt %d\n", node.vizInt[i].fd);
+            printf("closing vizInt[%d] %s\n", node.vizInt[i].fd, node.vizInt[i].IDv);
             close(node.vizInt[i].fd);
             node.vizInt[i].fd = -2;
+            C++;
+            printf("C = %d\n", C);
         }
     }
     if (node.vizExt.fd != -2)
@@ -83,6 +86,8 @@ void leave(char *net, char *IP, char *TCP)
         printf("closing vizExt\n");
         close(node.vizExt.fd);
         node.vizExt.fd = -2;
+        B++;
+        printf("B = %d\n", B);
     }
     strcpy(node.vizExt.IDv, "");
     strcpy(node.vizExt.IPv, "");

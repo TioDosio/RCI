@@ -87,19 +87,22 @@ int main(int argc, char *argv[])
     strcpy(node.vizExt.IDv, "");
     strcpy(node.vizExt.IPv, "");
     strcpy(node.vizExt.Portv, "");
+    int P = 0;
     while (1)
     {
         FD_ZERO(&rfds);
-        FD_ZERO(&fds); ////////// necessary???
         FD_SET(STDIN_FILENO, &rfds);
-        FD_SET(server_fd, &rfds);
+        if (server_fd > 0)
+        {
+            FD_SET(server_fd, &rfds);
+        }
         int max_fd = (STDIN_FILENO > server_fd) ? STDIN_FILENO : server_fd; // coloca o maior fd no max_fd entre i sdtin e o server
         if (node.vizExt.fd > 0)
         {
             FD_SET(node.vizExt.fd, &rfds); // coloca o vizinho externo no rfds
             max_fd = node.vizExt.fd;       // se houver vizinho externo coloca o fd como o max_fd
         }
-        int Nsel = 1;
+        int Nsel = 0;
         for (int i = 0; i < 98; i++) // coloca os vizinhos internos que estão ligados no rfds
         {
             if (node.vizInt[i].fd > 0)
@@ -112,6 +115,7 @@ int main(int argc, char *argv[])
             }
         }
         fds = rfds;
+        printf("Max_fd %d\n", max_fd);
         if ((Nsel = select(max_fd + 1, &fds, NULL, NULL, NULL)) < 0) // select para ver se há algo para ler
         {
             printf("erro select main.c");
@@ -186,17 +190,16 @@ int main(int argc, char *argv[])
                     printf("Invalid command\n");
                 }
             }
-            for (int i = 0; i < 98; i++)
+            for (int i = 0; i < node.maxInter; i++)
             {
                 if (FD_ISSET(node.vizInt[i].fd, &fds)) // check if vizInt is ready for reading
                 {
                     int fdR = -2;
                     char bufR[100], cmd[20], bufW[100];
                     strcpy(bufR, "");
-                    printf("INTERNO[%d]:%d\n", i, node.vizInt[i].fd);
                     node.vizInt[i].ctrbufsize += read(node.vizInt[i].fd, node.vizInt[i].ctrbuf, 100); // NEW net id\n NEW net id\n
                     strcat(bufR, node.vizInt[i].ctrbuf);
-                    printf("INT-bufR:%s\n", bufR);
+                    printf("INTERNO[%d]:%d->R:%s\n", i, node.vizInt[i].fd, bufR);
                     if (bufR[node.vizInt[i].ctrbufsize - 1] == '\n')
                     {
                         sscanf(bufR, "%s", cmd);
@@ -214,7 +217,6 @@ int main(int argc, char *argv[])
                             sscanf(bufR, "%s %s %s %s", cmd, destQ, origQ, nameQ);
                             fdR = node.vizInt[i].fd;
                             node.tabExp[atoi(origQ)] = atoi(node.vizInt[i].IDv);
-                            printf("tabExp[%d]:%d", atoi(origQ), node.tabExp[atoi(origQ)]);
                             query(destQ, origQ, nameQ, fdR);
                         }
                         else if (strcmp(cmd, "CONTENT") == 0)
@@ -241,11 +243,6 @@ int main(int argc, char *argv[])
                             sscanf(bufR, "%s %s", cmd, idW);
                             wdraw(idW, fdR);
                         }
-
-                        else if (strcmp(cmd, "EXTERN") == 0)
-                        {
-                            printf("!!!!!!!!!!!!!!!!!!!!!!!!!Recebido: %s\n", bufR);
-                        }
                         node.vizInt[i].ctrbufsize = 0;
                     }
                     else if (node.vizInt[i].ctrbufsize == 0) // saída de um Vizinho Interno
@@ -263,7 +260,6 @@ int main(int argc, char *argv[])
                         }
                         node.maxInter--;
                     }
-                    FD_CLR(node.vizInt[i].fd, &fds);
                 }
             }
             if (FD_ISSET(node.vizExt.fd, &fds)) // check if vizExt is ready for reading
@@ -277,16 +273,19 @@ int main(int argc, char *argv[])
                 node.vizExt.ctrbufsize += read(node.vizExt.fd, node.vizExt.ctrbuf, 100);
                 strcat(bufR, node.vizExt.ctrbuf);
                 printf("EXT-bufR:%s\n", bufR);
+                P++;
+                printf("P=%d", P);
                 if (bufR[node.vizExt.ctrbufsize - 1] == '\n') // a mensagem foi toda recebida
                 {
                     sscanf(bufR, "%s", cmd);
                     if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
                     {
-                        sscanf(bufR, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                        printf("Recebemos NEW do nosso Externo????????????????????\n");
+                        /*sscanf(bufR, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         write(node.vizExt.fd, bufW, strlen(bufW));
                         printf("Enviado: %s", bufW);
-                        node.tabExp[atoi(node.vizExt.IDv)] = atoi(node.vizExt.IDv);
+                        node.tabExp[atoi(node.vizExt.IDv)] = atoi(node.vizExt.IDv);*/
                     }
                     else if (strcmp(cmd, "EXTERN") == 0)
                     {
@@ -386,7 +385,6 @@ int main(int argc, char *argv[])
                         node.vizExt.fd = -2;
                     }
                 }
-                FD_CLR(node.vizExt.fd, &fds);
             }
             if (FD_ISSET(server_fd, &fds))
             {
