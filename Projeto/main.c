@@ -121,7 +121,6 @@ int main(int argc, char *argv[])
             perror("error select");
             exit(EXIT_FAILURE);
         }
-        printf("Nsel: %d\n", Nsel);
         for (int counter = 0; counter < Nsel; counter++) // se houver mais que uma coisa para ler ao mesmo tempo o select retorna o Nsel e repete aqui as vazes necessarias
         {
             if (FD_ISSET(STDIN_FILENO, &fds)) // check if stdin is ready for reading
@@ -283,65 +282,78 @@ int main(int argc, char *argv[])
             }
             if (FD_ISSET(node.vizExt.fd, &fds)) // check if vizExt is ready for reading
             {
-                int fdR = -2;
+                int fdR = -2, flag = 1;
+                char bufR[100], bufM1[30], bufM2[30], cmd[20], bufW[100], *ptr, *line;
                 printf("EXTERNO:%d\n", node.vizExt.fd);
-                char bufR[100], cmd[20], bufW[100];
                 strcpy(bufR, "");
                 strcpy(bufW, "");
                 strcpy(cmd, "");
-                node.vizExt.ctrbufsize += read(node.vizExt.fd, node.vizExt.ctrbuf, 100);
+                node.vizExt.ctrbufsize = read(node.vizExt.fd, node.vizExt.ctrbuf, 100);
                 strcat(bufR, node.vizExt.ctrbuf);
-                printf("EXT-bufR:%s\n", bufR);
-                if (bufR[node.vizExt.ctrbufsize - 1] == '\n') // a mensagem foi toda recebida
+                if (bufR[node.vizExt.ctrbufsize - 1] == '\n')
                 {
-                    sscanf(bufR, "%s", cmd);
-                    if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
+                    line = strtok_r(bufR, "\n", &ptr);
+                    strcpy(bufM1, line);
+                    printf("bufM1:%s\n", bufM1);
+                    line = strtok_r(NULL, "\n", &ptr);
+                    if (line != NULL)
                     {
-                        sscanf(bufR, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                        sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
-                        write(node.vizExt.fd, bufW, strlen(bufW));
-                        printf("Enviado: %s", bufW);
-                        node.tabExp[atoi(node.vizExt.IDv)] = atoi(node.vizExt.IDv);
+                        strcpy(bufM2, line);
+                        peinrft("bufM2:%s\n", bufM2);
+                        flag = 2;
                     }
-                    else if (strcmp(cmd, "EXTERN") == 0)
+                    printf("EXT-bufR:%s\n", bufR);
+                    for (int i = 0; i < flag; i++)
                     {
-                        sscanf(bufR, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
-                        printf("Recebido: %s\n", bufR);
+                        sscanf(bufM1, "%s", cmd);
+                        if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
+                        {
+                            sscanf(bufM1, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                            sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                            write(node.vizExt.fd, bufW, strlen(bufW));
+                            printf("Enviado: %s", bufW);
+                            node.tabExp[atoi(node.vizExt.IDv)] = atoi(node.vizExt.IDv);
+                        }
+                        else if (strcmp(cmd, "EXTERN") == 0)
+                        {
+                            sscanf(bufM1, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
+                            printf("Recebido: %s\n", bufM1);
+                        }
+                        else if (strcmp(cmd, "QUERY") == 0) // QUERY DEST ORIG NAME
+                        {
+                            char destQ[3], origQ[3], nameQ[100];
+                            sscanf(bufM1, "%s %s %s %s", cmd, destQ, origQ, nameQ);
+                            node.tabExp[atoi(origQ)] = atoi(node.vizExt.IDv);
+                            printf("tabExp[%d]:%d", atoi(origQ), node.tabExp[atoi(origQ)]);
+                            fdR = node.vizExt.fd;
+                            query(destQ, origQ, nameQ, fdR);
+                        }
+                        else if (strcmp(cmd, "CONTENT") == 0)
+                        {
+                            char destC[3], origC[3], nameC[100];
+                            sscanf(bufM1, "%s %s %s %s", cmd, origC, destC, nameC);
+                            fdR = node.vizExt.fd;
+                            node.tabExp[atoi(destC)] = atoi(node.vizExt.IDv);
+                            CNContent(0, destC, origC, nameC, fdR);
+                        }
+                        else if (strcmp(cmd, "NOCONTENT") == 0)
+                        {
+                            char destC[3], origC[3], nameC[100];
+                            sscanf(bufM1, "%s %s %s %s", cmd, origC, destC, nameC);
+                            fdR = node.vizExt.fd;
+                            node.tabExp[atoi(destC)] = atoi(node.vizExt.IDv);
+                            CNContent(1, destC, origC, nameC, fdR);
+                        }
+                        else if (strcmp(cmd, "WITHDRAW") == 0)
+                        {
+                            char idW[3], bufsend[100];
+                            int fdR = node.vizExt.fd;
+                            strcpy(bufsend, "");
+                            sscanf(bufM1, "%s %s", cmd, idW);
+                            wdraw(idW, fdR);
+                        }
+                        strcpy(bufM1, bufM2);
                     }
-                    else if (strcmp(cmd, "QUERY") == 0) // QUERY DEST ORIG NAME
-                    {
-                        char destQ[3], origQ[3], nameQ[100];
-                        sscanf(bufR, "%s %s %s %s", cmd, destQ, origQ, nameQ);
-                        node.tabExp[atoi(origQ)] = atoi(node.vizExt.IDv);
-                        printf("tabExp[%d]:%d", atoi(origQ), node.tabExp[atoi(origQ)]);
-                        fdR = node.vizExt.fd;
-                        query(destQ, origQ, nameQ, fdR);
-                    }
-                    else if (strcmp(cmd, "CONTENT") == 0)
-                    {
-                        char destC[3], origC[3], nameC[100];
-                        sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
-                        fdR = node.vizExt.fd;
-                        node.tabExp[atoi(destC)] = atoi(node.vizExt.IDv);
-                        CNContent(0, destC, origC, nameC, fdR);
-                    }
-                    else if (strcmp(cmd, "NOCONTENT") == 0)
-                    {
-                        char destC[3], origC[3], nameC[100];
-                        sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
-                        fdR = node.vizExt.fd;
-                        node.tabExp[atoi(destC)] = atoi(node.vizExt.IDv);
-                        CNContent(1, destC, origC, nameC, fdR);
-                    }
-                    else if (strcmp(cmd, "WITHDRAW") == 0)
-                    {
-                        char idW[3], bufsend[100];
-                        int fdR = node.vizExt.fd;
-                        strcpy(bufsend, "");
-                        sscanf(bufR, "%s %s", cmd, idW);
-                        wdraw(idW, fdR);
-                    }
-                    strcpy(bufR, "");
                     node.vizExt.ctrbufsize = 0;
                 }
                 else if (node.vizExt.ctrbufsize == 0) // saída do vizinho externo
