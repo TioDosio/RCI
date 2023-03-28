@@ -136,9 +136,9 @@ int main(int argc, char *argv[])
                 }
                 else if (strcmp(strV, "djoin") == 0) // djoin net id bootid bootIP bootTCP
                 {
-                    char bootid[3], bootIP[16], bootTCP[5];
-                    sscanf(bufstdin, "%s %s %s %s %s %s", strV, net, node.id, bootid, bootIP, bootTCP);
-                    djoin(net, IP, TCP, bootid, bootIP, bootTCP);
+                    char bootid[3], bootIP[16], bootTCP[5], dnet[4];
+                    sscanf(bufstdin, "%s %s %s %s %s %s", strV, dnet, node.id, bootid, bootIP, bootTCP);
+                    djoin(dnet, IP, TCP, bootid, bootIP, bootTCP);
                 }
                 else if (strcmp(strV, "create") == 0) // create name
                 {
@@ -280,12 +280,11 @@ int main(int argc, char *argv[])
                     sscanf(bufR, "%s", cmd);
                     if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
                     {
-                        printf("Recebemos NEW do nosso Externo????????????????????\n");
-                        /*sscanf(bufR, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                        sscanf(bufR, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         write(node.vizExt.fd, bufW, strlen(bufW));
                         printf("Enviado: %s", bufW);
-                        node.tabExp[atoi(node.vizExt.IDv)] = atoi(node.vizExt.IDv);*/
+                        node.tabExp[atoi(node.vizExt.IDv)] = atoi(node.vizExt.IDv);
                     }
                     else if (strcmp(cmd, "EXTERN") == 0)
                     {
@@ -333,16 +332,16 @@ int main(int argc, char *argv[])
                     printf("vizExt disconnected\n");
                     if (strcmp(node.id, node.vizBackup.IDv) != 0) // não somos ancora
                     {
-                        printf("Não somos ancora e ligamos ao Backup\n");
                         strcpy(node.vizExt.IDv, node.vizBackup.IDv);
                         strcpy(node.vizExt.IPv, node.vizBackup.IPv);
                         strcpy(node.vizExt.Portv, node.vizBackup.Portv);
-                        printf("DADOS NOVOS ID:%s IP:%s Porto:%s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                        printf("N.A. Ligar Back.A ligar a ID:%s IP:%s Porto:%s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         client_tcp(IP, TCP);
                         for (int i = 0; i < node.maxInter; i++)
                         {
                             if (node.vizInt[i].fd != -2)
                             {
+                                strcpy(bufW, "");
                                 sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                                 write(node.vizInt[i].fd, bufW, strlen(bufW));
                             }
@@ -350,7 +349,7 @@ int main(int argc, char *argv[])
                     }
                     else if ((strcmp(node.id, node.vizBackup.IDv) == 0) && (node.maxInter > 0))
                     {
-                        printf("O Externo que saiu é ancora e nós e promovo um vizinho interno a ancora\n");
+                        printf("Somos Ancora com Int's\n");
                         strcpy(node.vizExt.IDv, node.vizInt[0].IDv);
                         strcpy(node.vizExt.IPv, node.vizInt[0].IPv);
                         strcpy(node.vizExt.Portv, node.vizInt[0].Portv);
@@ -365,7 +364,7 @@ int main(int argc, char *argv[])
                     }
                     else if ((strcmp(node.id, node.vizBackup.IDv) == 0) && (node.maxInter == 0)) // somos ancora e não temos internos
                     {                                                                            // ficamos á espera que os internos do ancora que saiu se liguem a nós
-                        printf("O Externo que saiu é ancora e nós e espero que os internos dele se liguem a mim\n");
+                        printf("Somos Ancora sem Int's\n");
                         strcpy(node.vizExt.IDv, "");
                         strcpy(node.vizExt.IPv, "");
                         strcpy(node.vizExt.Portv, "");
