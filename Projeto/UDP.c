@@ -57,7 +57,7 @@ void reg(char *net, char *IP, char *TCP)
         exit(1);
     }
     addrlen = sizeof(addr);
-
+    timeout(fd);
     n = recvfrom(fd, buffOKs, sizeof(buffOKs), 0, &addr, &addrlen); // Recebe a resposta do servidor
     if (n == -1)
     {
@@ -106,7 +106,7 @@ void unreg(char *net, char *IP, char *TCP)
         exit(1);
     }
     addrlen = sizeof(addr);
-
+    timeout(fd);
     n = recvfrom(fd, bufOKs, 10, 0, &addr, &addrlen); // Recebe a resposta do servidor
     if (n == -1)                                      /*error*/
     {
@@ -151,7 +151,7 @@ int show(int flagS, char *net, char *IP, char *TCP)
         exit(1);
     }
     addrlen = sizeof(addr);
-
+    timeout(fd);
     n = recvfrom(fd, buffer, 2500, 0, &addr, &addrlen); // Recebe a resposta do servidor
     if (n == -1)
     { /*error*/

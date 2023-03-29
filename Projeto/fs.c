@@ -5,6 +5,7 @@
 #include <netdb.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 #include "UDP.h"
 #include "TCP.h"
 #include "fs.h"
@@ -80,12 +81,14 @@ void get(char *dest, char *name)
         for (int i = 0; i < node.maxInter; i++) // FLOOD internos
         {
             write(node.vizInt[i].fd, bufsend, strlen(bufsend)); // FLOOD internos
+            printf("FLOODINT %d\n", i);
         }
         write(node.vizExt.fd, bufsend, strlen(bufsend)); // FLOOD externo
     }
 }
 void showTopo() // node.maxInter para o for dos viz internos
 {
+    printf("Nó=>%s\n", node.id);
     printf("Vizinho Externo:    id:%s ip:%s porto:%s fd:%d\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv, node.vizExt.fd);
     for (int i = 0; i < node.maxInter; i++)
     {
@@ -100,7 +103,7 @@ void showRouting()
     {
         if (node.tabExp[i] != -2)
         {
-            printf("TabelaExp[%d]:%d\n", i, node.tabExp[i]);
+            printf("Dest:%d»»%d\n", i, node.tabExp[i]);
         }
     }
 }
@@ -144,10 +147,7 @@ void query(char *destR, char *origR, char *nameR, int fdR)
             {
                 if (node.tabExp[atoi(destR)] == atoi(node.vizInt[i].IDv))
                 {
-                    if (node.vizInt[i].fd != fdR)
-                    {
-                        write(node.vizInt[i].fd, bufsend, strlen(bufsend));
-                    }
+                    write(node.vizInt[i].fd, bufsend, strlen(bufsend));
                     flood = 1;
                 }
             }
@@ -187,24 +187,24 @@ void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR)
     else // Se destino não for o próprio nó
     {
         printf("O dest não sou eu\n");
-        sprintf(bufsend, "%s %s %s %s\n", bufCNC, origR, destR, nameR);
+        sprintf(bufsend, "%s %s %s %s\n", bufCNC, destR, origR, nameR);
         for (int i = 0; i < node.maxInter; i++)
         {
-            if (node.tabExp[atoi(origR)] == atoi(node.vizInt[i].IDv))
+            if (node.tabExp[atoi(destR)] == atoi(node.vizInt[i].IDv))
             {
                 if (node.vizInt[i].fd != fdR)
                 {
                     write(node.vizInt[i].fd, bufsend, strlen(bufsend));
-                    printf("Tenho na tabela de Exp e envio:%s\n", bufsend);
+                    printf("INT-Tenho na tabela de Exp e envio:%s\n", bufsend);
                 }
             }
         }
-        if (node.tabExp[atoi(origR)] == atoi(node.vizExt.IDv))
+        if (node.tabExp[atoi(destR)] == atoi(node.vizExt.IDv))
         {
             if (node.vizExt.fd != fdR)
             {
                 write(node.vizExt.fd, bufsend, strlen(bufsend));
-                printf("2Tenho na tabela de Exp e envio:%s\n", bufsend);
+                printf("EXT-Tenho na tabela de Exp e envio:%s\n", bufsend);
             }
         }
     }
@@ -233,5 +233,24 @@ void wdraw(char *idR, int fdR)
     if (node.vizExt.fd != fdR) // Vizinho externo menos se foi ele que nos enviouo WITHDRAW
     {
         write(node.vizExt.fd, bufsend, strlen(bufsend)); // FLOOD externo
+    }
+}
+void timeout(int fd)
+{
+    struct timeval time;
+    time.tv_sec = 3;
+    time.tv_usec = 0;
+    fd_set fds;
+    FD_ZERO(&fds);
+    FD_SET(fd, &fds);
+    int flagTempo = select(fd + 1, &fds, NULL, NULL, &time);
+    if (flagTempo == -1)
+    {
+        printf("Erro no select2\n");
+        return;
+    }
+    else if (FD_ISSET(fd, &fds) == 0)
+    {
+        return;
     }
 }

@@ -31,5 +31,6 @@ void showRouting();
 void query(char *destR, char *origR, char *nameR, int fdR);
 void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR);
 void wdraw(char *idR, int fdR);
+void timeout(int fd);
 
 #endif

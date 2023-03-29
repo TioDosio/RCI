@@ -184,21 +184,6 @@ int main(int argc, char *argv[])
                 {
                     exit(0);
                 }
-                else if (strcmp(strV, "ban") == 0)
-                {
-                    if (node.vizExt.fd >= 0)
-                    {
-                        printf("FDext:%d\n", node.vizExt.fd);
-                    }
-
-                    for (int i = 0; i < 98; i++)
-                    {
-                        if (node.vizInt[i].fd >= 0)
-                        {
-                            printf("FD[%d]%d\n", i, node.vizInt[i].fd);
-                        }
-                    }
-                }
                 else
                 {
                     printf("Invalid command\n");
@@ -209,15 +194,20 @@ int main(int argc, char *argv[])
                 if (FD_ISSET(node.vizInt[i].fd, &fds)) // check if vizInt is ready for reading
                 {
                     int fdR = -2;
-                    char bufR[200], bufM1[30], cmd[20], bufW[100], *ptr, *line;
+                    char bufR[200], bufM1[30], cmd[20], bufW[100], *ptr, *line /*, *ret*/;
                     strcpy(bufR, "");
+                    strcpy(bufM1, "");
+                    strcpy(bufW, "");
                     node.vizInt[i].ctrbufsize += read(node.vizInt[i].fd, node.vizInt[i].ctrbuf, 100); // NEW net id\n NEW net id\n
                     strcat(bufR, node.vizInt[i].ctrbuf);
                     printf("INTERNO[%d]:%d->R:%s\n", i, node.vizInt[i].fd, bufR);
                     if (bufR[node.vizInt[i].ctrbufsize - 1] == '\n')
                     {
                         line = strtok_r(bufR, "\n", &ptr);
-                        strcpy(bufR, line);
+                        strcpy(bufM1, line);
+                        /*ret = strchr(bufM1, '\n');
+                        if (ret != NULL)
+                        {*/
                         printf("bufM1:%s\n", bufM1);
                         while (line != NULL)
                         {
@@ -241,14 +231,14 @@ int main(int argc, char *argv[])
                             else if (strcmp(cmd, "CONTENT") == 0) // CONTENT ORIG DEST NAME
                             {
                                 char destC[3], origC[3], nameC[100];
-                                sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
+                                sscanf(bufR, "%s %s %s %s", cmd, destC, origC, nameC);
                                 fdR = node.vizInt[i].fd;
                                 CNContent(0, destC, origC, nameC, fdR);
                             }
                             else if (strcmp(cmd, "NOCONTENT") == 0) // NOCONTENT ORIG DEST NAME
                             {
                                 char destC[3], origC[3], nameC[100];
-                                sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
+                                sscanf(bufR, "%s %s %s %s", cmd, destC, origC, nameC);
                                 fdR = node.vizInt[i].fd;
                                 CNContent(1, destC, origC, nameC, fdR);
                             }
@@ -262,11 +252,13 @@ int main(int argc, char *argv[])
                             }
                             node.vizInt[i].ctrbufsize = 0;
                             line = strtok_r(NULL, "\n", &ptr);
+                            // }
                         }
                     }
                     else if (node.vizInt[i].ctrbufsize == 0) // saída de um Vizinho Interno
                     {
                         char bufW[15]; // withdraw id
+                        strcpy(bufW, "");
                         printf("vizInt[%d] disconnected\n", i);
                         sprintf(bufW, "WITHDRAW %s\n", node.vizInt[i].IDv);
                         node.tabExp[atoi(node.vizInt[i].IDv)] = -2;
@@ -303,11 +295,11 @@ int main(int argc, char *argv[])
             if (FD_ISSET(node.vizExt.fd, &fds)) // check if vizExt is ready for reading
             {
                 int fdR = -2;
-                char bufR[200], bufM1[30], cmd[20], bufW[100], *ptr, *line;
+                char bufR[200], bufM1[30], cmd[20], bufW[100], *ptr, *line /*, *ret*/;
                 printf("EXTERNO:%d\n", node.vizExt.fd);
                 strcpy(bufR, "");
                 strcpy(bufW, "");
-                strcpy(cmd, "");
+                strcpy(bufM1, "");
                 node.vizExt.ctrbufsize = read(node.vizExt.fd, node.vizExt.ctrbuf, 100);
 
                 strcat(bufR, node.vizExt.ctrbuf);
@@ -318,6 +310,9 @@ int main(int argc, char *argv[])
                     while (line != NULL)
                     {
                         strcpy(bufM1, line);
+                        // ret = strchr(bufM1, '\n');
+                        // if (ret != NULL)
+                        // {
                         printf("bufM1:%s\n", bufM1);
                         sscanf(bufM1, "%s", cmd);
                         if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
@@ -344,14 +339,14 @@ int main(int argc, char *argv[])
                         else if (strcmp(cmd, "CONTENT") == 0) // CONTENT ORIG DEST NAME
                         {
                             char destC[3], origC[3], nameC[100];
-                            sscanf(bufM1, "%s %s %s %s", cmd, origC, destC, nameC);
+                            sscanf(bufM1, "%s %s %s %s", cmd, destC, origC, nameC);
                             fdR = node.vizExt.fd;
                             CNContent(0, destC, origC, nameC, fdR);
                         }
                         else if (strcmp(cmd, "NOCONTENT") == 0) // NOCONTENT ORIG DEST NAME
                         {
                             char destC[3], origC[3], nameC[100];
-                            sscanf(bufM1, "%s %s %s %s", cmd, origC, destC, nameC);
+                            sscanf(bufM1, "%s %s %s %s", cmd, destC, origC, nameC);
                             fdR = node.vizExt.fd;
                             CNContent(1, destC, origC, nameC, fdR);
                         }
@@ -364,6 +359,7 @@ int main(int argc, char *argv[])
                             wdraw(idW, fdR);
                         }
                         line = strtok_r(NULL, "\n", &ptr);
+                        // }
                     }
                     node.vizExt.ctrbufsize = 0;
                 }
