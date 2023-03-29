@@ -449,9 +449,9 @@ int main(int argc, char *argv[])
                         printf("EXT erro accept main.c");
                         exit(1);
                     }
-                    node.flagVaz = 1;
+                    node.flagVaz++;
                 }
-                else if (node.flagVaz == 1) // mais de 2 nós
+                else if (node.flagVaz > 0) // mais de 2 nós
                 {
                     int k;
                     printf("Aceita um nó (a rede já nao sou só eu)\n");
@@ -460,7 +460,7 @@ int main(int argc, char *argv[])
                     {
                         printf("INT erro accept main.c");
                     }
-                    printf("Accept %d\n", node.vizInt[node.maxInter].fd); //////////////////////////////
+                    printf("Accept %d\n", node.vizInt[node.maxInter].fd);
                     if (node.vizInt[node.maxInter].fd == -1)
                     {
                         printf("INT erro accept main.c");
@@ -468,6 +468,8 @@ int main(int argc, char *argv[])
                     }
                     node.maxInter++;
                 }
+                printf("FLAG:%d", node.flagVaz);
+                FD_CLR(server_fd, &fds);
             }
         }
     }
