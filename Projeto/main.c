@@ -238,20 +238,18 @@ int main(int argc, char *argv[])
                                 node.tabExp[atoi(origQ)] = atoi(node.vizInt[i].IDv);
                                 query(destQ, origQ, nameQ, fdR);
                             }
-                            else if (strcmp(cmd, "CONTENT") == 0)
+                            else if (strcmp(cmd, "CONTENT") == 0) // CONTENT ORIG DEST NAME
                             {
                                 char destC[3], origC[3], nameC[100];
                                 sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
                                 fdR = node.vizInt[i].fd;
-                                node.tabExp[atoi(destC)] = atoi(node.vizInt[i].IDv);
                                 CNContent(0, destC, origC, nameC, fdR);
                             }
-                            else if (strcmp(cmd, "NOCONTENT") == 0)
+                            else if (strcmp(cmd, "NOCONTENT") == 0) // NOCONTENT ORIG DEST NAME
                             {
                                 char destC[3], origC[3], nameC[100];
                                 sscanf(bufR, "%s %s %s %s", cmd, origC, destC, nameC);
                                 fdR = node.vizInt[i].fd;
-                                node.tabExp[atoi(destC)] = atoi(node.vizInt[i].IDv);
                                 CNContent(1, destC, origC, nameC, fdR);
                             }
                             else if (strcmp(cmd, "WITHDRAW") == 0)
@@ -343,20 +341,18 @@ int main(int argc, char *argv[])
                             fdR = node.vizExt.fd;
                             query(destQ, origQ, nameQ, fdR);
                         }
-                        else if (strcmp(cmd, "CONTENT") == 0)
+                        else if (strcmp(cmd, "CONTENT") == 0) // CONTENT ORIG DEST NAME
                         {
                             char destC[3], origC[3], nameC[100];
                             sscanf(bufM1, "%s %s %s %s", cmd, origC, destC, nameC);
                             fdR = node.vizExt.fd;
-                            node.tabExp[atoi(destC)] = atoi(node.vizExt.IDv);
                             CNContent(0, destC, origC, nameC, fdR);
                         }
-                        else if (strcmp(cmd, "NOCONTENT") == 0)
+                        else if (strcmp(cmd, "NOCONTENT") == 0) // NOCONTENT ORIG DEST NAME
                         {
                             char destC[3], origC[3], nameC[100];
                             sscanf(bufM1, "%s %s %s %s", cmd, origC, destC, nameC);
                             fdR = node.vizExt.fd;
-                            node.tabExp[atoi(destC)] = atoi(node.vizExt.IDv);
                             CNContent(1, destC, origC, nameC, fdR);
                         }
                         else if (strcmp(cmd, "WITHDRAW") == 0)

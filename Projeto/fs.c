@@ -55,23 +55,28 @@ void get(char *dest, char *name)
     // QUERY dest orig name
     char bufsend[100];
     sprintf(bufsend, "QUERY %s %s %s\n", dest, node.id, name);
-    printf("bufsend:%s\n", bufsend);
+    printf("bufQ:%s\n", bufsend);
     if (node.tabExp[atoi(dest)] != -2) // se o destino estiver na tabela de exp
     {
+        printf("temos na Tab\n");
         if (node.tabExp[atoi(dest)] == atoi(node.vizExt.IDv))
         {
             write(node.vizExt.fd, bufsend, strlen(bufsend));
         }
-        for (int i = 0; i < node.maxInter; i++)
+        else
         {
-            if (node.tabExp[atoi(dest)] == atoi(node.vizInt[i].IDv))
+            for (int i = 0; i < node.maxInter; i++)
             {
-                write(node.vizInt[i].fd, bufsend, strlen(bufsend));
+                if (node.tabExp[atoi(dest)] == atoi(node.vizInt[i].IDv))
+                {
+                    write(node.vizInt[i].fd, bufsend, strlen(bufsend));
+                }
             }
         }
     }
     else
-    {                                           // FLOOD
+    {
+        printf("FLOOD\n");                      // FLOOD
         for (int i = 0; i < node.maxInter; i++) // FLOOD internos
         {
             write(node.vizInt[i].fd, bufsend, strlen(bufsend)); // FLOOD internos
