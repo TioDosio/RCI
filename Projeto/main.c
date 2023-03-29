@@ -229,7 +229,6 @@ int main(int argc, char *argv[])
                                 sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);        // mete seu EXT no buffer
                                 printf("Enviado:%s", bufW);                                                                     ///////////////////////////////////////////////////////////////////////77
                                 write(node.vizInt[i].fd, bufW, strlen(bufW));                                                   // Envia EXTERN para o Intern para ser o Back dele
-                                node.tabExp[atoi(node.vizInt[i].IDv)] = atoi(node.vizInt[i].IDv);                               // Adiciona o novo vizinho na tabela de exp
                             }
                             else if (strcmp(cmd, "QUERY") == 0) // QUERY DEST ORIG NAME
                             {
@@ -329,7 +328,6 @@ int main(int argc, char *argv[])
                             sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                             write(node.vizExt.fd, bufW, strlen(bufW));
                             printf("Enviado: %s", bufW);
-                            node.tabExp[atoi(node.vizExt.IDv)] = atoi(node.vizExt.IDv);
                         }
                         else if (strcmp(cmd, "EXTERN") == 0)
                         {
