@@ -184,6 +184,21 @@ int main(int argc, char *argv[])
                 {
                     exit(0);
                 }
+                else if (strcmp(strV, "ban") == 0)
+                {
+                    if (node.vizExt.fd >= 0)
+                    {
+                        printf("FDext:%d\n", node.vizExt.fd);
+                    }
+
+                    for (int i = 0; i < 98; i++)
+                    {
+                        if (node.vizInt[i].fd >= 0)
+                        {
+                            printf("FD[%d]%d\n", i, node.vizInt[i].fd);
+                        }
+                    }
+                }
                 else
                 {
                     printf("Invalid command\n");
@@ -283,7 +298,7 @@ int main(int argc, char *argv[])
             if (FD_ISSET(node.vizExt.fd, &fds)) // check if vizExt is ready for reading
             {
                 int fdR = -2, flag = 1;
-                char bufR[100], bufM1[30], bufM2[30], cmd[20], bufW[100], *ptr, *line;
+                char bufR[100], bufM1[30], cmd[20], bufW[100], *ptr, *line;
                 printf("EXTERNO:%d\n", node.vizExt.fd);
                 strcpy(bufR, "");
                 strcpy(bufW, "");
@@ -295,13 +310,6 @@ int main(int argc, char *argv[])
                     line = strtok_r(bufR, "\n", &ptr);
                     strcpy(bufM1, line);
                     printf("bufM1:%s\n", bufM1);
-                    line = strtok_r(NULL, "\n", &ptr);
-                    if (line != NULL)
-                    {
-                        strcpy(bufM2, line);
-                        peinrft("bufM2:%s\n", bufM2);
-                        flag = 2;
-                    }
                     printf("EXT-bufR:%s\n", bufR);
                     for (int i = 0; i < flag; i++)
                     {
@@ -352,7 +360,6 @@ int main(int argc, char *argv[])
                             sscanf(bufM1, "%s %s", cmd, idW);
                             wdraw(idW, fdR);
                         }
-                        strcpy(bufM1, bufM2);
                     }
                     node.vizExt.ctrbufsize = 0;
                 }
@@ -362,14 +369,13 @@ int main(int argc, char *argv[])
                     printf("vizExt disconnected\n");
                     sprintf(bufW, "WITHDRAW %s\n", node.vizExt.IDv);
                     node.tabExp[atoi(node.vizExt.IDv)] = -2;
-                    for (int i = 0; i < node.maxInter; i++)
+                    for (int i = 0; i < 100; i++) // atualizar tabela de exp
                     {
                         if (node.tabExp[i] == atoi(node.vizExt.IDv))
                         {
                             node.tabExp[i] = -2;
                         }
                     }
-                    write(node.vizExt.fd, bufW, strlen(bufW));
                     for (int j = 0; j < node.maxInter; j++)
                     {
                         if (node.vizInt[j].fd != -2)
@@ -382,8 +388,8 @@ int main(int argc, char *argv[])
                         strcpy(node.vizExt.IDv, node.vizBackup.IDv);
                         strcpy(node.vizExt.IPv, node.vizBackup.IPv);
                         strcpy(node.vizExt.Portv, node.vizBackup.Portv);
-                        printf("N.A. Ligar Back.A ligar a ID:%s IP:%s Porto:%s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         client_tcp(IP, TCP);
+                        printf("N.A. Ligar Back-> ID:%s IP:%s Porto:%s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         for (int i = 0; i < node.maxInter; i++)
                         {
                             if (node.vizInt[i].fd != -2)
@@ -394,7 +400,7 @@ int main(int argc, char *argv[])
                             }
                         }
                     }
-                    else if ((strcmp(node.id, node.vizBackup.IDv) == 0) && (node.maxInter > 0))
+                    else if (node.maxInter != 0) // somos ancora e temos vizinhos internos
                     {
                         printf("Somos Ancora com Int's\n");
                         strcpy(node.vizExt.IDv, node.vizInt[0].IDv);
@@ -445,10 +451,15 @@ int main(int argc, char *argv[])
                     }
                     node.flagVaz = 1;
                 }
-                else // mais de 2 nós
+                else if (node.flagVaz == 1) // mais de 2 nós
                 {
+                    int k;
                     printf("Aceita um nó (a rede já nao sou só eu)\n");
-                    node.vizInt[node.maxInter].fd = accept(server_fd, &addr, &addrlen);
+                    k = node.vizInt[node.maxInter].fd = accept(server_fd, &addr, &addrlen);
+                    if (k == -1)
+                    {
+                        printf("INT erro accept main.c");
+                    }
                     printf("Accept %d\n", node.vizInt[node.maxInter].fd); //////////////////////////////
                     if (node.vizInt[node.maxInter].fd == -1)
                     {
