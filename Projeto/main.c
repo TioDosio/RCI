@@ -204,14 +204,13 @@ int main(int argc, char *argv[])
                     if (bufR[node.vizInt[i].ctrbufsize - 1] == '\n')
                     {
                         line = strtok_r(bufR, "\n", &ptr);
-                        strcpy(bufM1, line);
                         /*ret = strchr(bufM1, '\n');
                         if (ret != NULL)
                         {*/
-                        printf("bufM1:%s\n", bufM1);
+                        printf("1st:%s\n", line);
                         while (line != NULL)
                         {
-                            strcpy(bufM1, line);
+                            strcpy(bufR, line);
                             sscanf(bufR, "%s", cmd);
                             if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
                             {
@@ -244,14 +243,14 @@ int main(int argc, char *argv[])
                             }
                             else if (strcmp(cmd, "WITHDRAW") == 0)
                             {
-                                char idW[3], bufsend[100];
+                                char idW[3];
                                 int fdR = node.vizInt[i].fd;
-                                strcpy(bufsend, "");
                                 sscanf(bufR, "%s %s", cmd, idW);
                                 wdraw(idW, fdR);
                             }
                             node.vizInt[i].ctrbufsize = 0;
                             line = strtok_r(NULL, "\n", &ptr);
+                            printf("next:%s\n", line);
                             // }
                         }
                     }
@@ -306,14 +305,13 @@ int main(int argc, char *argv[])
                 if (bufR[node.vizExt.ctrbufsize - 1] == '\n')
                 {
                     line = strtok_r(bufR, "\n", &ptr);
-                    printf("EXT-bufR:%s\n", bufR);
+                    printf("1st:%s\n", line);
                     while (line != NULL)
                     {
                         strcpy(bufM1, line);
                         // ret = strchr(bufM1, '\n');
                         // if (ret != NULL)
                         // {
-                        printf("bufM1:%s\n", bufM1);
                         sscanf(bufM1, "%s", cmd);
                         if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
                         {
@@ -359,6 +357,7 @@ int main(int argc, char *argv[])
                             wdraw(idW, fdR);
                         }
                         line = strtok_r(NULL, "\n", &ptr);
+                        printf("next:%s\n", line);
                         // }
                     }
                     node.vizExt.ctrbufsize = 0;

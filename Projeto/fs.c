@@ -113,7 +113,7 @@ void query(char *destR, char *origR, char *nameR, int fdR)
     strcpy(bufsend, "");
     int flag = 0;
     printf("QUERY RECEBIDO, %s %s %s\n", destR, origR, nameR);
-    if (strcmp(destR, node.id) == 0) // se o destino for o próprio nó
+    if (strcmp(destR, node.id) == 0) // se o destino formos nós
     {
         for (int i = 0; i < node.flagName; i++) // procura o name na lista de names
         {
@@ -133,7 +133,7 @@ void query(char *destR, char *origR, char *nameR, int fdR)
             write(fdR, bufsend, strlen(bufsend));
         }
     }
-    else // Se destino não for o próprio nó
+    else // Se o destino não for o próprio nó
     {
         sprintf(bufsend, "QUERY %s %s %s\n", destR, origR, nameR);
         if (node.tabExp[atoi(destR)] == atoi(node.vizExt.IDv)) // Se o destino estiver na tabela de expedição e for o vizinho externo
