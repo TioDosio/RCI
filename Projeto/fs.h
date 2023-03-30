@@ -16,7 +16,7 @@ struct NO
     struct infoNO vizBackup;
     struct infoNO vizExt;
     struct infoNO vizInt[98];
-    char names[20][100];
+    char names[50][100];
     int flagVaz, flagName, maxInter;
     int tabExp[100]; // 00-99
     char id[3];
