@@ -3,5 +3,3 @@ Coisas a fazer:
 2- atualizar a tabela de Expedição quadnorecebemos NOContent e Content
 3- Ver se há mensagens incompletas
 4- djoin
-
-

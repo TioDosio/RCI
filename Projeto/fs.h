@@ -23,7 +23,7 @@ struct NO
 };
 
 void create(char *name);
-void delete(char *name);
+void delet(char *name);
 void showNames();
 void get(char *dest, char *name);
 void showTopo();

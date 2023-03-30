@@ -125,19 +125,34 @@ int main(int argc, char *argv[])
         {
             if (FD_ISSET(STDIN_FILENO, &fds)) // check if stdin is ready for reading
             {
+                int tam;
                 strcpy(bufstdin, "");
                 fgets(bufstdin, 100, stdin);
                 sscanf(bufstdin, "%s", strV);
                 if (strcmp(strV, "join") == 0) // join net id
                 {
-                    sscanf(bufstdin, "%s %s %s", strV, net, node.id);
-                    reg(net, IP, TCP);
+                    tam = sscanf(bufstdin, "%s %s %s", strV, net, node.id);
+                    if (tam == 3)
+                    {
+                        reg(net, IP, TCP);
+                    }
+                    else
+                    {
+                        printf("Somethings missing\n");
+                    }
                 }
                 else if (strcmp(strV, "djoin") == 0) // djoin net id bootid bootIP bootTCP
                 {
                     char bootid[3], bootIP[16], bootTCP[5], dnet[4];
-                    sscanf(bufstdin, "%s %s %s %s %s %s", strV, dnet, node.id, bootid, bootIP, bootTCP);
-                    djoin(dnet, IP, TCP, bootid, bootIP, bootTCP);
+                    tam = sscanf(bufstdin, "%s %s %s %s %s %s", strV, dnet, node.id, bootid, bootIP, bootTCP);
+                    if (tam == 6)
+                    {
+                        djoin(dnet, IP, TCP, bootid, bootIP, bootTCP);
+                    }
+                    else
+                    {
+                        printf("Somethings missing\n");
+                    }
                 }
                 else if (strcmp(strV, "create") == 0) // create name
                 {
@@ -147,16 +162,24 @@ int main(int argc, char *argv[])
                 }
                 else if (strcmp(strV, "delete") == 0) // delete name
                 {
-                    char name[101] = "";
+                    char name[101];
+                    strcpy(name, "");
                     sscanf(bufstdin, "%s %s", strV, name);
-                    delete (name);
+                    delet(name);
                 }
                 else if (strcmp(strV, "get") == 0) // get dest name
                 {
                     char dest[4], name[101] = "";
-                    sscanf(bufstdin, "%s %s %s", strV, dest, name); // falta mandar a mensagem para os outros nós
+                    tam = sscanf(bufstdin, "%s %s %s", strV, dest, name); // falta mandar a mensagem para os outros nós
                     printf("dest:%s name:%s orig:%s", dest, name, node.id);
-                    get(dest, name);
+                    if (tam == 3)
+                    {
+                        get(dest, name);
+                    }
+                    else
+                    {
+                        printf("Somethings missing\n");
+                    }
                 }
                 else if ((strcmp(strV, "show topology") == 0) || (strcmp(strV, "st") == 0)) // show topology (st)
                 {
@@ -177,8 +200,15 @@ int main(int argc, char *argv[])
                 }
                 else if (strcmp(strV, "show") == 0) // exit
                 {
-                    sscanf(bufstdin, "%s %s %s", strV, net, node.id);
-                    show(0, net, IP, TCP);
+                    tam = sscanf(bufstdin, "%s %s %s", strV, net, node.id);
+                    if (tam == 2)
+                    {
+                        show(0, net, IP, TCP);
+                    }
+                    else
+                    {
+                        printf("Somethings missing\n");
+                    }
                 }
                 else if (strcmp(strV, "exit") == 0) // exit
                 {

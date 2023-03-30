@@ -29,7 +29,7 @@ void create(char *name)
         node.flagName++;
     }
 }
-void delete(char *name)
+void delet(char *name)
 {
     for (int i = 0; i < node.flagName; i++) // passa por todos os nomes já criados
     {
