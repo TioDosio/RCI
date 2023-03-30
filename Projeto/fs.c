@@ -18,7 +18,7 @@ void create(char *name)
     {
         if (strcmp(node.names[i], name) == 0) // procura o nome
         {
-            printf("Nome já existe\n");
+            printf("O conteudo já existe\n");
             flag = 1;
         }
     }
@@ -31,6 +31,7 @@ void create(char *name)
 }
 void delet(char *name)
 {
+    int flag = 0;
     for (int i = 0; i < node.flagName; i++) // passa por todos os nomes já criados
     {
         if (strcmp(node.names[i], name) == 0) // procura o nome
@@ -41,14 +42,21 @@ void delet(char *name)
                 strcpy(node.names[j], node.names[j + 1]);
             }
             node.flagName--;
+            flag = 1;
+            printf("O conteudo foi apagado\n");
         }
+    }
+    if (flag == 0)
+    {
+        printf("O conteudo não existe\n");
     }
 }
 void showNames()
 {
+    printf("Conteudos do nó:\n");
     for (int i = 0; i < node.flagName; i++)
     {
-        printf("Posição:%d, name:%s\n", i, node.names[i]);
+        printf("Conteudo %d »» %s\n", i, node.names[i]);
     }
 }
 void get(char *dest, char *name)
@@ -89,21 +97,21 @@ void get(char *dest, char *name)
 void showTopo() // node.maxInter para o for dos viz internos
 {
     printf("Nó=>%s\n", node.id);
-    printf("Vizinho Externo:    id:%s ip:%s porto:%s fd:%d\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv, node.vizExt.fd);
+    printf("Vizinho Externo:    id:%s ip:%s porto:%s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
     for (int i = 0; i < node.maxInter; i++)
     {
-        printf("Vizinho Interno %d:     id:%s ip:%s porto:%s fd:%d\n", i, node.vizInt[i].IDv, node.vizInt[i].IPv, node.vizInt[i].Portv, node.vizInt[i].fd);
+        printf("Vizinho Interno %d:     id:%s ip:%s porto:%s\n", i, node.vizInt[i].IDv, node.vizInt[i].IPv, node.vizInt[i].Portv);
     }
     printf("Vizinho Backup:     id:%s ip:%s porto:%s\n", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
 }
 void showRouting()
 {
-    printf("Routing table:\n");
+    printf("Tabela Expedicao:\n");
     for (int i = 0; i < 100; i++)
     {
         if (node.tabExp[i] != -2)
         {
-            printf("Dest:%d»»%d\n", i, node.tabExp[i]);
+            printf("Destino:%d »» Vizinho:%d\n", i, node.tabExp[i]);
         }
     }
 }
@@ -112,7 +120,6 @@ void query(char *destR, char *origR, char *nameR, int fdR)
     char bufsend[100];
     strcpy(bufsend, "");
     int flag = 0;
-    printf("QUERY RECEBIDO, %s %s %s\n", destR, origR, nameR);
     if (strcmp(destR, node.id) == 0) // se o destino formos nós
     {
         for (int i = 0; i < node.flagName; i++) // procura o name na lista de names
@@ -182,7 +189,7 @@ void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR)
     }
     if (strcmp(destR, node.id) == 0) // se o destino for o próprio nó
     {
-        printf("%s VOLTOU", bufCNC);
+        printf("--------->%s\n", bufCNC);
     }
     else // Se destino não for o próprio nó
     {
@@ -249,8 +256,15 @@ void timeout(int fd)
         printf("Erro no select2\n");
         return;
     }
-    else if (FD_ISSET(fd, &fds) == 0)
+    else if (FD_ISSET(fd, &fds))
     {
+        FD_ZERO(&fds);
         return;
+    }
+    else if (flagTempo == 0)
+    {
+        printf("TIMEOUT Sem resposta do servidor\n");
+        close(fd);
+        exit(1);
     }
 }
