@@ -1,4 +1,4 @@
 Coisas a fazer:
 1- ver lixo que aparece;
 2- Ver se há mensagens incompletas
-3- Se não fizer o controlo de mensagens enviadas em dois writes, reformular os buffers de controlo
+3- Ver Timeout

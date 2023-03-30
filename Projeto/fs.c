@@ -16,9 +16,17 @@ void create(char *name)
     int flag = 0;
     for (int i = 0; i < node.flagName; i++) // passa por todos os nomes já criados
     {
-        if (strcmp(node.names[i], name) == 0) // procura o nome
+        if (node.flagName < 50)
         {
-            printf("O conteudo já existe\n");
+            if (strcmp(node.names[i], name) == 0) // procura o nome
+            {
+                printf("O conteudo já existe\n");
+                flag = 1;
+            }
+        }
+        else
+        {
+            printf("O conteudo não pode ser criado, limite de 50 conteudos atingido\n");
             flag = 1;
         }
     }
@@ -62,7 +70,7 @@ void showNames()
 void get(char *dest, char *name)
 {
     // QUERY dest orig name
-    char bufsend[100];
+    char bufsend[100] = "";
     sprintf(bufsend, "QUERY %s %s %s\n", dest, node.id, name);
     if (node.tabExp[atoi(dest)] != -2) // se o destino estiver na tabela de exp
     {
@@ -172,7 +180,7 @@ void query(char *destR, char *origR, char *nameR, int fdR)
 }
 void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR)
 {
-    char bufCNC[10] = "", bufsend[100] = "";
+    char bufCNC[10] = "", bufcont[100] = "";
     if (CNC == 0)
     {
         strcpy(bufCNC, "CONTENT");
@@ -188,11 +196,12 @@ void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR)
     else // Se destino não for o próprio nó
     {
         printf("O dest não sou eu\n");
-        sprintf(bufsend, "%s %s %s %s\n", bufCNC, destR, origR, nameR);
+        sprintf(bufcont, "%s %s %s %s\n", bufCNC, destR, origR, nameR);
+        printf("ENVIADO bufcont:%s\n", bufcont);
         if (node.tabExp[atoi(destR)] == atoi(node.vizExt.IDv))
         {
-            write(node.vizExt.fd, bufsend, strlen(bufsend));
-            printf("EXT-Tenho na tabela de Exp e envio:%s\n", bufsend);
+            write(node.vizExt.fd, bufcont, strlen(bufcont));
+            printf("EXT-Tenho na tabela de Exp e envio:%s\n", bufcont);
         }
         else
         {
@@ -200,8 +209,8 @@ void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR)
             {
                 if (node.tabExp[atoi(destR)] == atoi(node.vizInt[i].IDv))
                 {
-                    write(node.vizInt[i].fd, bufsend, strlen(bufsend));
-                    printf("INT-Tenho na tabela de Exp e envio:%s\n", bufsend);
+                    write(node.vizInt[i].fd, bufcont, strlen(bufcont));
+                    printf("INT-Tenho na tabela de Exp e envio:%s\n", bufcont);
                     break;
                 }
             }
@@ -230,31 +239,5 @@ void wdraw(char *idR, int fdR)
     if (node.vizExt.fd != fdR) // Vizinho externo menos se foi ele que nos enviouo WITHDRAW
     {
         write(node.vizExt.fd, bufsend, strlen(bufsend)); // FLOOD externo
-    }
-}
-void timeout(int fd)
-{
-    struct timeval time;
-    time.tv_sec = 3;
-    time.tv_usec = 0;
-    fd_set fds;
-    FD_ZERO(&fds);
-    FD_SET(fd, &fds);
-    int flagTempo = select(fd + 1, &fds, NULL, NULL, &time);
-    if (flagTempo == -1)
-    {
-        printf("Erro no select2\n");
-        return;
-    }
-    else if (FD_ISSET(fd, &fds))
-    {
-        FD_ZERO(&fds);
-        return;
-    }
-    else if (flagTempo == 0)
-    {
-        printf("TIMEOUT Sem resposta do servidor\n");
-        close(fd);
-        exit(1);
     }
 }

@@ -248,14 +248,16 @@ int main(int argc, char *argv[])
                     printf("Invalid command\n");
                 }
             }
-            for (int i = 0; i < 98; i++)
+            for (int i = 0; i < 98; i++) // até MaxInternos?????????????????????????????????
             {
                 if (FD_ISSET(node.vizInt[i].fd, &fds)) // check if vizInt is ready for reading
                 {
                     int fdR = -2;
                     char bufR[200] = "", cmd[20] = "", bufW[100] = "", *ptr, *line /*, *ret*/;
-                    strcpy(node.vizExt.ctrbuf, "-1");
+                    strcpy(node.vizExt.ctrbuf, "");
+                    printf("Buffer antes: %s F\n", node.vizInt[i].ctrbuf);
                     node.vizInt[i].ctrbufsize = read(node.vizInt[i].fd, node.vizInt[i].ctrbuf, 100); // NEW net id\n NEW net id\n
+                    printf("ctrbuf:%s\n", node.vizInt[i].ctrbuf);
                     strcpy(bufR, node.vizInt[i].ctrbuf);
                     printf("INTERNO[%d]:%d\n", i, node.vizInt[i].fd);
                     if (bufR[node.vizInt[i].ctrbufsize - 1] == '\n')
@@ -264,7 +266,6 @@ int main(int argc, char *argv[])
                         printf("1st:%s\n", line);
                         while (line != NULL)
                         {
-
                             sscanf(line, "%s", cmd);
                             if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
                             {
@@ -306,6 +307,7 @@ int main(int argc, char *argv[])
                             }
                             node.vizInt[i].ctrbufsize = 0;
                             line = strtok_r(NULL, "\n", &ptr);
+                            printf("Possivel lixo:%s\n", line);
                         }
                     }
                     else if (node.vizInt[i].ctrbufsize == 0) // saída de um Vizinho Interno
@@ -351,7 +353,9 @@ int main(int argc, char *argv[])
                 char bufR[200] = "", cmd[20] = "", bufW[100] = "", *ptr, *line;
                 strcpy(node.vizExt.ctrbuf, "-1");
                 printf("EXTERNO:%d\n", node.vizExt.fd);
+                printf("Buffer antes: %s F\n", node.vizExt.ctrbuf);
                 node.vizExt.ctrbufsize = read(node.vizExt.fd, node.vizExt.ctrbuf, 100);
+                printf("CTLBuf%s", node.vizExt.ctrbuf);
                 strcpy(bufR, node.vizExt.ctrbuf);
                 if (bufR[node.vizExt.ctrbufsize - 1] == '\n')
                 {
@@ -406,6 +410,7 @@ int main(int argc, char *argv[])
                         }
                         strcpy(line, "");
                         line = strtok_r(NULL, "\n", &ptr);
+                        printf("Possivel lixo:%s\n", line);
                     }
                     node.vizExt.ctrbufsize = 0;
                 }

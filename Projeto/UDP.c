@@ -50,22 +50,49 @@ void reg(char *net, char *IP, char *TCP)
         printf("erro get addrinfo reg.c");
         exit(1);
     }
-    n = sendto(fd, sendV, strlen(sendV), 0, res->ai_addr, res->ai_addrlen);
-    if (n == -1) /*error*/
+    int i;
+    for (i = 0; i < 3; i++)
     {
-        printf("erro send reg.c");
+        struct timeval time;
+        time.tv_sec = 3;
+        time.tv_usec = 0;
+        fd_set fds;
+        FD_ZERO(&fds);
+        FD_SET(fd, &fds);
+        n = sendto(fd, sendV, strlen(sendV), 0, res->ai_addr, res->ai_addrlen);
+        if (n == -1)
+        {
+            printf("erro send reg.c");
+            exit(1);
+        }
+        int flagTempo = select(fd + 1, &fds, NULL, NULL, &time);
+        if (flagTempo == -1)
+        {
+            printf("Erro no select2\n");
+            return;
+        }
+        else if (FD_ISSET(fd, &fds))
+        {
+            addrlen = sizeof(addr);
+            n = recvfrom(fd, buffOKs, sizeof(buffOKs), 0, &addr, &addrlen); // Recebe a resposta do servidor
+            if (n == -1)
+            {
+                printf("erro recv reg.c");
+                exit(1);
+            }
+            FD_CLR(fd, &fds);
+            FD_ZERO(&fds);
+            break;
+        }
+    }
+    if (i == 3)
+    {
+        printf("Servidor indisponivel\n");
         exit(1);
     }
-    addrlen = sizeof(addr);
-    timeout(fd);
-    n = recvfrom(fd, buffOKs, sizeof(buffOKs), 0, &addr, &addrlen); // Recebe a resposta do servidor
-    if (n == -1)
-    {
-        printf("erro recv reg.c");
-        exit(1);
-    }
+
     buffOKs[n] = '\0'; // adiciona terminador de string
-    printf("%s\n\n", buffOKs);
+    printf("%s\n", buffOKs);
     if (node.flagVaz > 0)
     {
         printf("entra aqui");
@@ -99,18 +126,44 @@ void unreg(char *net, char *IP, char *TCP)
         printf("erro get addrinfo leave.c\n");
         exit(1);
     }
-    n = sendto(fd, sendV, strlen(sendV), 0, res->ai_addr, res->ai_addrlen);
-    if (n == -1) /*error*/
+    int i;
+    for (i = 0; i < 3; i++)
     {
-        printf("erro send leave.c\n");
-        exit(1);
+        struct timeval time;
+        time.tv_sec = 3;
+        time.tv_usec = 0;
+        fd_set fds;
+        FD_ZERO(&fds);
+        FD_SET(fd, &fds);
+        n = sendto(fd, sendV, strlen(sendV), 0, res->ai_addr, res->ai_addrlen);
+        if (n == -1)
+        {
+            printf("erro send reg.c");
+            exit(1);
+        }
+        int flagTempo = select(fd + 1, &fds, NULL, NULL, &time);
+        if (flagTempo == -1)
+        {
+            printf("Erro no select2\n");
+            return;
+        }
+        else if (FD_ISSET(fd, &fds))
+        {
+            addrlen = sizeof(addr);
+            n = recvfrom(fd, bufOKs, sizeof(bufOKs), 0, &addr, &addrlen); // Recebe a resposta do servidor
+            if (n == -1)
+            {
+                printf("erro recv reg.c");
+                exit(1);
+            }
+            FD_CLR(fd, &fds);
+            FD_ZERO(&fds);
+            break;
+        }
     }
-    addrlen = sizeof(addr);
-    timeout(fd);
-    n = recvfrom(fd, bufOKs, 10, 0, &addr, &addrlen); // Recebe a resposta do servidor
-    if (n == -1)                                      /*error*/
+    if (i == 3)
     {
-        printf("erro recv leave.c\n");
+        printf("Servidor indisponivel\n");
         exit(1);
     }
     bufOKs[n] = '\0'; // adiciona terminador de string
@@ -144,27 +197,50 @@ int show(int flagS, char *net, char *IP, char *TCP)
         printf("erro get addrinfo show\n");
         exit(1);
     }
-    n = sendto(fd, sendV, strlen(sendV), 0, res->ai_addr, res->ai_addrlen);
-    if (n == -1) /*error*/
+    int i;
+    for (i = 0; i < 3; i++)
     {
-        printf("erro send show\n");
-        exit(1);
+        struct timeval time;
+        time.tv_sec = 3;
+        time.tv_usec = 0;
+        fd_set fds;
+        FD_ZERO(&fds);
+        FD_SET(fd, &fds);
+        n = sendto(fd, sendV, strlen(sendV), 0, res->ai_addr, res->ai_addrlen);
+        if (n == -1)
+        {
+            printf("erro send reg.c");
+            exit(1);
+        }
+        int flagTempo = select(fd + 1, &fds, NULL, NULL, &time);
+        if (flagTempo == -1)
+        {
+            printf("Erro no select2\n");
+        }
+        else if (FD_ISSET(fd, &fds))
+        {
+            addrlen = sizeof(addr);
+            n = recvfrom(fd, buffer, sizeof(buffer), 0, &addr, &addrlen); // Recebe a resposta do servidor
+            if (n == -1)
+            {
+                printf("erro recv reg.c");
+                exit(1);
+            }
+            FD_CLR(fd, &fds);
+            FD_ZERO(&fds);
+            break;
+        }
     }
-    addrlen = sizeof(addr);
-    timeout(fd);
-    n = recvfrom(fd, buffer, 2500, 0, &addr, &addrlen); // Recebe a resposta do servidor
-    if (n == -1)
-    { /*error*/
-        printf("erro read show\n");
+    if (i == 3)
+    {
+        printf("Servidor indisponivel\n");
         exit(1);
     }
     buffer[n] = '\0'; // adiciona terminador de string
     printf("%s\n\n", buffer);
-    // meter argumentos do buffer nos arrays
-    int intIDv, intID, i = 0; /////////////////////// este i pode ser descartado e substituido por node.flagVaz?
+    int intIDv, intID;
     node.flagVaz = 0;
-
-    if (flagS == 1) // so entra se for chamada com o join //////////////////////////////////////////////////////////////////////////////////////
+    if (flagS == 1) // so entra se for chamada com o join
     {
         intID = atoi(node.id);
         char *saveptr, IDv[100][11], IPv[100][20], Portv[100][6];
@@ -173,23 +249,22 @@ int show(int flagS, char *net, char *IP, char *TCP)
         line = strtok_r(NULL, "\n", &saveptr);
         while (line != NULL)
         {
-            sscanf(line, "%s %s %s", IDv[i], IPv[i], Portv[i]);
-            intIDv = atoi(IDv[i]);
+            sscanf(line, "%s %s %s", IDv[node.flagVaz], IPv[node.flagVaz], Portv[node.flagVaz]);
+            intIDv = atoi(IDv[node.flagVaz]);
             while (intID == intIDv)
             {
                 intID = rand() % 100;
             }
             node.flagVaz++;
-            i++;
             line = strtok_r(NULL, "\n", &saveptr);
         }
-        if (line == NULL && i == 0)
+        if (line == NULL && node.flagVaz == 0)
         {
             printf("Sou o primeiro a entrar na rede\n");
         }
         if (node.flagVaz > 0)
         {
-            int r = rand() % (i);
+            int r = rand() % (node.flagVaz);
             printf("IDv[%d]=%s\n", r, IDv[r]);
             printf("IPv[%d]=%s\n", r, IPv[r]);
             printf("Portv[%d]=%s\n", r, Portv[r]);

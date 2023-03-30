@@ -15,7 +15,7 @@ extern struct NO node; // ter variavel global em varios ficheiros
 
 void client_tcp(char *IP, char *TCP)
 {
-    char buffer[128];
+    char buffer[128] = "";
     struct addrinfo hints, *res;
     int n;
     node.vizExt.fd = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
