@@ -218,6 +218,8 @@ int main(int argc, char *argv[])
                 }
                 else if (strcmp(strV, "exit") == 0) // exit
                 {
+                    close(server_fd);
+                    freeaddrinfo(res);
                     exit(0);
                 }
                 else if (strcmp(strV, "leave") == 0) // leave net id
@@ -262,6 +264,7 @@ int main(int argc, char *argv[])
                         printf("1st:%s\n", line);
                         while (line != NULL)
                         {
+
                             sscanf(line, "%s", cmd);
                             if (strcmp(cmd, "NEW") == 0) /*Como só há 2 nós na rede são ancoras então o NEW é guardado com Externo*/
                             {
