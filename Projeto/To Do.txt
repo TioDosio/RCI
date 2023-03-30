@@ -1,5 +1,4 @@
 Coisas a fazer:
 1- ver lixo que aparece;
-2- atualizar a tabela de Expedição quadnorecebemos NOContent e Content
-3- Ver se há mensagens incompletas
-4- djoin
+2- Ver se há mensagens incompletas
+3- Se não fizer o controlo de mensagens enviadas em dois writes, reformular os buffers de controlo

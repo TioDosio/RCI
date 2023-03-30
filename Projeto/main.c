@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
                     strcpy(node.vizExt.ctrbuf, "-1");
                     node.vizInt[i].ctrbufsize = read(node.vizInt[i].fd, node.vizInt[i].ctrbuf, 100); // NEW net id\n NEW net id\n
                     strcpy(bufR, node.vizInt[i].ctrbuf);
-                    printf("INTERNO[%d]:%d->R:%s\n", i, node.vizInt[i].fd, bufR);
+                    printf("INTERNO[%d]:%d\n", i, node.vizInt[i].fd);
                     if (bufR[node.vizInt[i].ctrbufsize - 1] == '\n')
                     {
                         line = strtok_r(bufR, "\n", &ptr);
@@ -275,14 +275,15 @@ int main(int argc, char *argv[])
                                 char destQ[3], origQ[3], nameQ[100];
                                 sscanf(line, "%s %s %s %s", cmd, destQ, origQ, nameQ);
                                 fdR = node.vizInt[i].fd;
-                                node.tabExp[atoi(origQ)] = atoi(node.vizInt[i].IDv);
+                                node.tabExp[atoi(origQ)] = atoi(node.vizInt[i].IDv); // O query veio danó origem por este nó logo se quiser ir para esta origem vou para este
                                 query(destQ, origQ, nameQ, fdR);
                             }
                             else if (strcmp(cmd, "CONTENT") == 0) // CONTENT ORIG DEST NAME
                             {
                                 char destC[3], origC[3], nameC[100];
-                                sscanf(line, "%s %s %s %s", cmd, destC, origC, nameC);
+                                sscanf(line, "%s %s %s %s", cmd, destC, origC, nameC); // CONTENT ORIG DEST NAME
                                 fdR = node.vizInt[i].fd;
+                                node.tabExp[atoi(origC)] = atoi(node.vizInt[i].IDv);
                                 CNContent(0, destC, origC, nameC, fdR);
                             }
                             else if (strcmp(cmd, "NOCONTENT") == 0) // NOCONTENT ORIG DEST NAME
@@ -290,6 +291,7 @@ int main(int argc, char *argv[])
                                 char destC[3], origC[3], nameC[100];
                                 sscanf(line, "%s %s %s %s", cmd, destC, origC, nameC);
                                 fdR = node.vizInt[i].fd;
+                                node.tabExp[atoi(origC)] = atoi(node.vizInt[i].IDv);
                                 CNContent(1, destC, origC, nameC, fdR);
                             }
                             else if (strcmp(cmd, "WITHDRAW") == 0)
@@ -301,7 +303,6 @@ int main(int argc, char *argv[])
                             }
                             node.vizInt[i].ctrbufsize = 0;
                             line = strtok_r(NULL, "\n", &ptr);
-                            printf("next:%s\n", line);
                         }
                     }
                     else if (node.vizInt[i].ctrbufsize == 0) // saída de um Vizinho Interno
@@ -373,7 +374,6 @@ int main(int argc, char *argv[])
                             char destQ[3], origQ[3], nameQ[100];
                             sscanf(line, "%s %s %s %s", cmd, destQ, origQ, nameQ);
                             node.tabExp[atoi(origQ)] = atoi(node.vizExt.IDv);
-                            printf("tabExp[%d]:%d", atoi(origQ), node.tabExp[atoi(origQ)]);
                             fdR = node.vizExt.fd;
                             query(destQ, origQ, nameQ, fdR);
                         }
@@ -382,6 +382,7 @@ int main(int argc, char *argv[])
                             char destC[3], origC[3], nameC[100];
                             sscanf(line, "%s %s %s %s", cmd, destC, origC, nameC);
                             fdR = node.vizExt.fd;
+                            node.tabExp[atoi(origC)] = atoi(node.vizExt.IDv);
                             CNContent(0, destC, origC, nameC, fdR);
                         }
                         else if (strcmp(cmd, "NOCONTENT") == 0) // NOCONTENT ORIG DEST NAME
@@ -389,6 +390,7 @@ int main(int argc, char *argv[])
                             char destC[3], origC[3], nameC[100];
                             sscanf(line, "%s %s %s %s", cmd, destC, origC, nameC);
                             fdR = node.vizExt.fd;
+                            node.tabExp[atoi(origC)] = atoi(node.vizExt.IDv);
                             CNContent(1, destC, origC, nameC, fdR);
                         }
                         else if (strcmp(cmd, "WITHDRAW") == 0)
@@ -399,13 +401,8 @@ int main(int argc, char *argv[])
                             sscanf(line, "%s %s", cmd, idW);
                             wdraw(idW, fdR);
                         }
-                        else
-                        {
-                            printf("lixo:%s\n", line);
-                        }
                         strcpy(line, "");
                         line = strtok_r(NULL, "\n", &ptr);
-                        printf("pos strtok:%s\n", line);
                     }
                     node.vizExt.ctrbufsize = 0;
                 }
@@ -468,7 +465,7 @@ int main(int argc, char *argv[])
                     }
                     else
                     {
-                        printf("Fiquei sozinho na rede :(\n");
+                        printf("Não tenho nenhuma ligação\n");
                         strcpy(node.vizExt.IDv, "");
                         strcpy(node.vizExt.IPv, "");
                         strcpy(node.vizExt.Portv, "");
@@ -483,13 +480,11 @@ int main(int argc, char *argv[])
             }
             if (FD_ISSET(server_fd, &fds))
             {
-                printf("SERVER IS_SET\n");
                 addrlen = sizeof(addr);
                 if (node.flagVaz == 0) // Sou o único da rede e ligam-se a mim
                 {
                     printf("Sou o único da rede e ligam-se a mim\n");
                     node.vizExt.fd = accept(server_fd, &addr, &addrlen);
-                    printf("Accept %d\n", node.vizExt.fd); ////////////////////////////
                     if ((node.vizExt.fd == -1))
                     {
                         printf("EXT erro accept main.c");
@@ -506,7 +501,6 @@ int main(int argc, char *argv[])
                     {
                         printf("INT erro accept main.c");
                     }
-                    printf("Accept %d\n", node.vizInt[node.maxInter].fd);
                     if (node.vizInt[node.maxInter].fd == -1)
                     {
                         printf("INT erro accept main.c");
@@ -514,7 +508,6 @@ int main(int argc, char *argv[])
                     }
                     node.maxInter++;
                 }
-                printf("FLAG:%d", node.flagVaz);
                 FD_CLR(server_fd, &fds);
             }
         }
