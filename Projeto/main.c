@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
                     debug = 1;
                     printf("Debug on\n");
                 }
-                0 else if (strcmp(strV, "df") == 0) // debug off
+                else if (strcmp(strV, "df") == 0) // debug off
                 {
                     debug = 0;
                     printf("Debug off\n");
