@@ -11,6 +11,7 @@
 #include "TCP.h"
 #include "fs.h"
 extern struct NO node; // ter variavel global em varios ficheiros
+extern int debug;
 
 /*
 Função que regista um nó no servidor de nós e faz a gestão caso já haja um nó com o mesmo id.
@@ -26,13 +27,19 @@ void reg(char *net, char *IP, char *TCP)
     {
         strcpy(node.id, "");
         sprintf(node.id, "0%d", F);
-        printf("id: %s\n", node.id);
+        if (debug = 1)
+        {
+            printf("ID:%s\n", node.id);
+        }
     }
     else if (F >= 10 && F <= 99)
     {
         strcpy(node.id, "");
         sprintf(node.id, "%d", F);
-        printf("id: %s\n", node.id);
+        if (debug = 1)
+        {
+            printf("ID:%s\n", node.id);
+        }
     }
     strcpy(node.vizBackup.IDv, node.id); // inicializa o vizinho de backup com a própria informação
     strcpy(node.vizBackup.IPv, IP);
@@ -97,7 +104,10 @@ void reg(char *net, char *IP, char *TCP)
     }
 
     buffOKs[n] = '\0'; // adiciona terminador de string
-    printf("%s\n", buffOKs);
+    if (debug = 1)
+    {
+        printf("%s\n", buffOKs);
+    }
     if (node.flagVaz > 0) // se não formos o único nó na rede fazemos connect a um nó que já esteja na rede
     {
         client_tcp(IP, TCP); // fazemos connect ao nó que nos quer registar
@@ -177,7 +187,10 @@ void unreg(char *net, char *IP, char *TCP)
         printf("Servidor indisponivel\n");
     }
     bufOKs[n] = '\0'; // adiciona terminador de string
-    printf("%s\n", bufOKs);
+    if (debug = 1)
+    {
+        printf("%s\n", bufOKs);
+    }
     close(fd);
     freeaddrinfo(res);
 }
@@ -252,7 +265,10 @@ int show(int flagS, char *net)
         printf("Servidor indisponivel\n");
     }
     buffer[n] = '\0'; // adiciona terminador de string
-    printf("%s\n\n", buffer);
+    if (debug = 1)
+    {
+        printf("%s\n", buffer);
+    }
     int intIDv, intID;
     node.flagVaz = 0;
     if (flagS == 1) // so entra se for chamada com o join
@@ -274,7 +290,10 @@ int show(int flagS, char *net)
         }
         if (line == NULL && node.flagVaz == 0) // se a rede estiver vazia
         {
-            printf("Sou o primeiro a entrar na rede\n");
+            if (debug = 1)
+            {
+                printf("Sou sozinho na rede");
+            }
         }
         if (node.flagVaz > 0) // se a rede nao estiver vazia
         {

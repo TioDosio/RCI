@@ -12,6 +12,7 @@
 #include "fs.h"
 
 extern struct NO node; // ter variavel global em varios ficheiros
+extern int debug;
 
 /*
 Faz a ligação TCP entre nós e envia NEW através da ligação estabelicida.
@@ -46,7 +47,10 @@ void client_tcp(char *IP, char *TCP)
         exit(1);
     }
     sprintf(buffer, "NEW %s %s %s\n", node.id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
-    printf("enviado por mim: %s\n", buffer);
+    if (debug = 1)
+    {
+        printf("Enviado:%s\n" buffer);
+    }
     write(node.vizExt.fd, buffer, strlen(buffer));
     freeaddrinfo(res);
 }
@@ -63,14 +67,13 @@ void djoin(char *net, char *IP, char *TCP, char *bootID, char *bootIP, char *boo
 {
     if (strcmp(node.id, bootID) == 0)
     {
-        printf("ID igual ao do boot\n");
+        printf("ID igual ao bootID\n");
     }
     else
     {
         strcpy(node.vizExt.IDv, bootID);
         strcpy(node.vizExt.IPv, bootIP);
         strcpy(node.vizExt.Portv, bootTCP);
-        printf("Ip:%s,porto:%s", node.vizExt.IPv, node.vizExt.Portv);
         client_tcp(IP, TCP);
     }
 }

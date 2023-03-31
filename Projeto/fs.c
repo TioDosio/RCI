@@ -10,7 +10,7 @@
 #include "TCP.h"
 #include "fs.h"
 extern struct NO node;
-
+extern int debug;
 /*
 Cria-se um conteudo com o nome dado na variavel.
 name->recebe o conteudo que queremos criar;
@@ -42,7 +42,7 @@ void create(char *name)
     if (flag == 0) // se o nome não existir
     {
         strcpy(node.names[node.flagName], name); // cria o nome na posição flagName
-        printf("Posição:%d, name:%s\n", node.flagName, node.names[node.flagName]);
+        printf("Conteudo criado:%s\n", node.names[node.flagName]);
         node.flagName++;
     }
 }
@@ -92,8 +92,16 @@ void get(char *dest, char *name)
 {
     char bufsend[100] = "";
     sprintf(bufsend, "QUERY %s %s %s\n", dest, node.id, name);
+    if (debug = 1)
+    {
+        printf("Enviado:%s\n", bufsend);
+    }
     if (node.tabExp[atoi(dest)] != -2) // se o destino estiver na tabela de expedição
     {
+        if (debug = 1)
+        {
+            printf("FLOOD\n");
+        }
         if (node.tabExp[atoi(dest)] == atoi(node.vizExt.IDv)) // se o destino for o vizinho externo
         {
             write(node.vizExt.fd, bufsend, strlen(bufsend));
@@ -156,14 +164,17 @@ void query(char *destR, char *origR, char *nameR, int fdR)
 {
     char bufsend[120] = "";
     int flag = 0;
-    printf("QUERY RECEBIDO\n");
+    if (debug = 1)
+    {
+        printf("Query recebido\n");
+    }
     if (strcmp(destR, node.id) == 0) // se o destino formos este nó
     {
         for (int i = 0; i < node.flagName; i++) // procura o conteudo na lista de conteudos
         {
             if (strcmp(node.names[i], nameR) == 0) // se encontrar o conteudo retorna o CONTENT para onde veio o QUERY
             {
-                printf("Nome Encontrado\n");
+                printf("Conteudo Encontrado\n");
                 sprintf(bufsend, "CONTENT %s %s %s\n", origR, destR, nameR);
                 write(fdR, bufsend, strlen(bufsend)); // envia o CONTENT para o nó que nos enviou o QUERY
                 flag = 1;
@@ -172,13 +183,17 @@ void query(char *destR, char *origR, char *nameR, int fdR)
         }
         if (flag == 0) // se não encontrar o name retorna o NOCONTENT para onde veio o QUERY
         {
-            printf("Nome Não Encontrado\n");
+            printf("Conteudo Não Encontrado\n");
             sprintf(bufsend, "NOCONTENT %s %s %s\n", origR, destR, nameR);
             write(fdR, bufsend, strlen(bufsend));
         }
     }
     else // Se o destino não for o próprio nó
     {
+        if (debug = 1)
+        {
+            printf("Retransmite o Query\n");
+        }
         sprintf(bufsend, "QUERY %s %s %s\n", destR, origR, nameR);
         if (node.tabExp[atoi(destR)] == -2) // O destino na Tabela não está preenchido então damos FLOOD
         {
@@ -231,16 +246,18 @@ void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR)
     }
     if (strcmp(destR, node.id) == 0) // se o destino for o próprio nó
     {
-        printf("-->%s\n", bufCNC);
+        printf("%s\n", bufCNC);
     }
     else // Se destino não for o próprio nó
     {
-        printf("O dest não sou eu\n");
+        if (debug = 1)
+        {
+            printf("Retransmite %s\n", bufCNC);
+        }
         sprintf(bufcont, "%s %s %s %s\n", bufCNC, destR, origR, nameR);
         if (node.tabExp[atoi(destR)] == atoi(node.vizExt.IDv)) // Se o destino estiver na tabela de expedição e for o vizinho externo
         {
             write(node.vizExt.fd, bufcont, strlen(bufcont));
-            printf("EXT-Retrans:%s\n", bufcont);
         }
         else
         {
@@ -249,7 +266,6 @@ void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR)
                 if (node.tabExp[atoi(destR)] == atoi(node.vizInt[i].IDv)) // Se o destino estiver na tabela de expedição e for um vizinho interno
                 {
                     write(node.vizInt[i].fd, bufcont, strlen(bufcont));
-                    printf("INT-Retrans:%s\n", bufcont);
                     break;
                 }
             }
@@ -263,6 +279,10 @@ fdR->recebe o descritor do nó que nos enviou o WITHDRAW;
 */
 void wdraw(char *idR, int fdR)
 {
+    if (debug = 1)
+    {
+        printf("Withdraw %s\n", idR);
+    }
     char bufsend[13] = "";        // WITHDRAW + id + \n
     node.tabExp[atoi(idR)] = -2;  // retira o destino da tabela de expedição
     for (int i = 0; i < 100; i++) // Se um vizinho der leave nós tiramos esse caminho da tabela de expedição
