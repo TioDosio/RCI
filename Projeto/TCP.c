@@ -70,6 +70,7 @@ void djoin(char *net, char *IP, char *TCP, char *bootID, char *bootIP, char *boo
         strcpy(node.vizExt.IDv, bootID);
         strcpy(node.vizExt.IPv, bootIP);
         strcpy(node.vizExt.Portv, bootTCP);
+        printf("Ip:%s,porto:%s",node.vizExt.IPv,node.vizExt.Portv);
         client_tcp(IP, TCP);
     }
 }

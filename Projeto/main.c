@@ -137,10 +137,11 @@ int main(int argc, char *argv[])
                 }
                 else if (strcmp(strV, "djoin") == 0) // djoin net id bootid bootIP bootTCP
                 {
-                    char bootid[3], bootIP[16], bootTCP[5], dnet[4];
+                    char bootid[3]="", bootIP[50]="", bootTCP[10]="", dnet[5]="";
                     tam = sscanf(bufstdin, "%s %s %s %s %s %s", strV, dnet, node.id, bootid, bootIP, bootTCP);
                     if (tam == 6)
                     {
+                        //printf("-->%s %s %s %s %s %s\n",strV, dnet, node.id, bootid, bootIP, bootTCP);
                         djoin(dnet, IP, TCP, bootid, bootIP, bootTCP); // junta-se a um outro nó sem se ligar ao servidor de nós
                     }
                     else

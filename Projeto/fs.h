@@ -19,7 +19,7 @@ struct NO
     char names[50][100];
     int flagVaz, flagName, maxInter;
     int tabExp[100]; // 00-99
-    char id[3];
+    char id[5];
 };
 
 void create(char *name);

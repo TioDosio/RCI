@@ -1,8 +1,0 @@
-Coisas a fazer:
-1- ver lixo que aparece;
-2- Ver se há mensagens incompletas
-
-
-Testes a fazer:
-1-for de ISSETS de inetrnos é preciso ter 98 ou pode ter Max INT??
-2- O Externo envia EXTERN?
