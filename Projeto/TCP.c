@@ -70,7 +70,7 @@ void djoin(char *net, char *IP, char *TCP, char *bootID, char *bootIP, char *boo
         strcpy(node.vizExt.IDv, bootID);
         strcpy(node.vizExt.IPv, bootIP);
         strcpy(node.vizExt.Portv, bootTCP);
-        printf("Ip:%s,porto:%s",node.vizExt.IPv,node.vizExt.Portv);
+        printf("Ip:%s,porto:%s", node.vizExt.IPv, node.vizExt.Portv);
         client_tcp(IP, TCP);
     }
 }
@@ -112,4 +112,5 @@ void leave(char *net, char *IP, char *TCP)
         strcpy(node.vizInt[i].IPv, "");
         strcpy(node.vizInt[i].Portv, "");
     }
+    node.maxInter = 0;
 }

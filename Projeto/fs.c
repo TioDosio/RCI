@@ -18,6 +18,11 @@ name->recebe o conteudo que queremos criar;
 void create(char *name)
 {
     int flag = 0;
+    if (strlen(name) > 100)
+    {
+        printf("O conteudo não pode ser criado, limite de 100 caracteres atingido\n");
+        return;
+    }
     for (int i = 0; i < node.flagName; i++) // passa por todos os nomes já criados
     {
         if (node.flagName < 50) // verifica se o limite de conteudos foi atingido
