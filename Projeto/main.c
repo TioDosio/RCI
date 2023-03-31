@@ -14,9 +14,9 @@ struct NO node;
 
 int main(int argc, char *argv[])
 {
-    char IP[20];     // IP do TCP que é dado
-    char TCP[20];    // Porto do TCP que é dado
-    char regIP[20];  // IP do UDP pode ou não ser dado
+    char IP[20];     // IP que vai ser introduzido
+    char TCP[20];    // TCP que vai ser introduzido
+    char regIP[20];  // IP do UDP pode ou não ser dado introduzido
     char regUDP[20]; // Porto do UDP que pode ou não ser dado
     switch (argc)    // leitura dos argumentos de entrada
     {
@@ -29,8 +29,8 @@ int main(int argc, char *argv[])
         strcpy(IP, argv[1]);
         strcpy(TCP, argv[2]);
         break;
-    case 5:                  // Recebe o IP e o TCP e o IP e o UDP
-        strcpy(IP, argv[1]); //"127.0.0.1"; ou "127.0.1.1";
+    case 5: // Recebe o IP e o TCP e o regIP e o regUDP
+        strcpy(IP, argv[1]);
         strcpy(TCP, argv[2]);
         strcpy(regIP, argv[3]);
         strcpy(regUDP, argv[4]);
@@ -137,11 +137,11 @@ int main(int argc, char *argv[])
                 }
                 else if (strcmp(strV, "djoin") == 0) // djoin net id bootid bootIP bootTCP
                 {
-                    char bootid[3]="", bootIP[50]="", bootTCP[10]="", dnet[5]="";
+                    char bootid[3] = "", bootIP[50] = "", bootTCP[10] = "", dnet[5] = "";
                     tam = sscanf(bufstdin, "%s %s %s %s %s %s", strV, dnet, node.id, bootid, bootIP, bootTCP);
                     if (tam == 6)
                     {
-                        //printf("-->%s %s %s %s %s %s\n",strV, dnet, node.id, bootid, bootIP, bootTCP);
+                        // printf("-->%s %s %s %s %s %s\n",strV, dnet, node.id, bootid, bootIP, bootTCP);
                         djoin(dnet, IP, TCP, bootid, bootIP, bootTCP); // junta-se a um outro nó sem se ligar ao servidor de nós
                     }
                     else
@@ -234,6 +234,20 @@ int main(int argc, char *argv[])
                         printf("Somethings missing\n");
                     }
                 }
+                else if (strcmp(strV, "cn") == 0) //  clear names
+                {
+                    for (int i = 0; i < node.flagName; i++)
+                    {
+                        strcpy(node.names[i], "");
+                    }
+                }
+                else if (strcmp(strV, "cr") == 0) // clear routing
+                {
+                    for (int i = 0; i < 100; i++)
+                    {
+                        node.tabExp[i] = -2;
+                    }
+                }
                 else
                 {
                     printf("Invalid command\n");
@@ -246,9 +260,8 @@ int main(int argc, char *argv[])
                     int fdR = -2; // file descriptor do vizinho que enviou a mensagem
                     char bufR[200] = "", cmd[20] = "", bufW[100] = "", *ptr, *line;
                     strcpy(node.vizExt.ctrbuf, "");
-                    printf("Buffer antes: %s F\n", node.vizInt[i].ctrbuf);
                     node.vizInt[i].ctrbufsize = read(node.vizInt[i].fd, node.vizInt[i].ctrbuf, 100); // NEW net id\n NEW net id\n
-                    printf("ctrbuf:%s\n", node.vizInt[i].ctrbuf);
+                    printf("LidoI:%s\n", node.vizInt[i].ctrbuf);
                     strcpy(bufR, node.vizInt[i].ctrbuf);
                     printf("INTERNO[%d]:%d\n", i, node.vizInt[i].fd);
                     if (bufR[node.vizInt[i].ctrbufsize - 1] == '\n')
@@ -297,7 +310,7 @@ int main(int argc, char *argv[])
                             }
                             node.vizInt[i].ctrbufsize = 0;
                             line = strtok_r(NULL, "\n", &ptr); // vai buscar a próxima linha
-                            printf("Possivel lixo:%s\n", line);
+                            printf("--%s\n", line);
                         }
                     }
                     else if (node.vizInt[i].ctrbufsize == 0) // saída de um Vizinho Interno
@@ -342,9 +355,8 @@ int main(int argc, char *argv[])
                 char bufR[200] = "", cmd[20] = "", bufW[100] = "", *ptr, *line;
                 strcpy(node.vizExt.ctrbuf, "-1");
                 printf("EXTERNO:%d\n", node.vizExt.fd);
-                printf("Buffer antes: %s F\n", node.vizExt.ctrbuf);
                 node.vizExt.ctrbufsize = read(node.vizExt.fd, node.vizExt.ctrbuf, 100);
-                printf("CTLBuf%s", node.vizExt.ctrbuf);
+                printf("LidoE:%s\n", node.vizExt.ctrbuf);
                 strcpy(bufR, node.vizExt.ctrbuf);
                 if (bufR[node.vizExt.ctrbufsize - 1] == '\n')
                 {
@@ -358,12 +370,10 @@ int main(int argc, char *argv[])
                             sscanf(line, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv); // guarda os dados do vizinho externo
                             sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                             write(node.vizExt.fd, bufW, strlen(bufW)); // envia os dados do nosso vizinho externo para o vizinho externo
-                            printf("Enviado: %s", bufW);
                         }
                         else if (strcmp(cmd, "EXTERN") == 0)
                         {
                             sscanf(line, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
-                            printf("Recebido: %s\n", line);
                         }
                         else if (strcmp(cmd, "QUERY") == 0) // QUERY DEST ORIG NAME
                         {
@@ -399,7 +409,7 @@ int main(int argc, char *argv[])
                         }
                         strcpy(line, "");
                         line = strtok_r(NULL, "\n", &ptr); // vai buscar a próxima linha
-                        printf("Possivel lixo:%s\n", line);
+                        printf("--%s\n", line);
                     }
                     node.vizExt.ctrbufsize = 0;
                 }
@@ -429,7 +439,6 @@ int main(int argc, char *argv[])
                         strcpy(node.vizExt.IPv, node.vizBackup.IPv);
                         strcpy(node.vizExt.Portv, node.vizBackup.Portv);
                         client_tcp(IP, TCP); // ligar ao novo vizinho externo (vizinho backup)
-                        printf("N.A. Ligar Back-> ID:%s IP:%s Porto:%s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                         for (int i = 0; i < node.maxInter; i++)
                         {
                             if (node.vizInt[i].fd != -2)
@@ -442,7 +451,6 @@ int main(int argc, char *argv[])
                     }
                     else if (node.maxInter != 0) // somos ancora e temos vizinhos internos
                     {
-                        printf("Somos Ancora com Int's\n");
                         strcpy(node.vizExt.IDv, node.vizInt[0].IDv); // atualizar vizinho externo com a informação do primeiro vizinho interno
                         strcpy(node.vizExt.IPv, node.vizInt[0].IPv);
                         strcpy(node.vizExt.Portv, node.vizInt[0].Portv);
@@ -458,7 +466,6 @@ int main(int argc, char *argv[])
                         {
                             write(node.vizInt[i].fd, bufW, strlen(bufW)); // envia o novo vizinho externo para todos os vizinhos internos
                         }
-                        printf("Enviado: %s", bufW);
                     }
                     else
                     {
@@ -480,7 +487,6 @@ int main(int argc, char *argv[])
                 addrlen = sizeof(addr);
                 if (node.flagVaz == 0) // Sou o único da rede e ligam-se a mim
                 {
-                    printf("Sou o único da rede e ligam-se a mim\n");
                     node.vizExt.fd = accept(server_fd, &addr, &addrlen); // aceita a ligação do vizinho externo
                     if ((node.vizExt.fd == -1))
                     {
@@ -491,7 +497,6 @@ int main(int argc, char *argv[])
                 }
                 else if (node.flagVaz > 0) // Já não sou o único da rede e ligam-se a mim
                 {
-                    printf("Aceita um nó (a rede já nao sou só eu)\n");
                     node.vizInt[node.maxInter].fd = accept(server_fd, &addr, &addrlen); // aceita a ligação do vizinho interno
                     if (node.vizInt[node.maxInter].fd == -1)
                     {
