@@ -94,7 +94,6 @@ void reg(char *net, char *IP, char *TCP)
     if (i == 3)
     {
         printf("Servidor indisponivel\n");
-        exit(1);
     }
 
     buffOKs[n] = '\0'; // adiciona terminador de string
@@ -176,7 +175,6 @@ void unreg(char *net, char *IP, char *TCP)
     if (i == 3)
     {
         printf("Servidor indisponivel\n");
-        exit(1);
     }
     bufOKs[n] = '\0'; // adiciona terminador de string
     printf("%s\n", bufOKs);
@@ -252,7 +250,6 @@ int show(int flagS, char *net)
     if (i == 3)
     {
         printf("Servidor indisponivel\n");
-        exit(1);
     }
     buffer[n] = '\0'; // adiciona terminador de string
     printf("%s\n\n", buffer);
