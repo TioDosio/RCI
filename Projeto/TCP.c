@@ -47,9 +47,9 @@ void client_tcp(char *IP, char *TCP)
         exit(1);
     }
     sprintf(buffer, "NEW %s %s %s\n", node.id, IP, TCP); // mensagem enviada ao no a que se liga com NEW ID IP PORTO
-    if (debug = 1)
+    if (debug == 1)
     {
-        printf("Enviado:%s\n" buffer);
+        printf("Enviado:%s\n", buffer);
     }
     write(node.vizExt.fd, buffer, strlen(buffer));
     freeaddrinfo(res);

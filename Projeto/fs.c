@@ -92,13 +92,13 @@ void get(char *dest, char *name)
 {
     char bufsend[100] = "";
     sprintf(bufsend, "QUERY %s %s %s\n", dest, node.id, name);
-    if (debug = 1)
+    if (debug == 1)
     {
         printf("Enviado:%s\n", bufsend);
     }
     if (node.tabExp[atoi(dest)] != -2) // se o destino estiver na tabela de expedição
     {
-        if (debug = 1)
+        if (debug == 1)
         {
             printf("FLOOD\n");
         }
@@ -164,7 +164,7 @@ void query(char *destR, char *origR, char *nameR, int fdR)
 {
     char bufsend[120] = "";
     int flag = 0;
-    if (debug = 1)
+    if (debug == 1)
     {
         printf("Query recebido\n");
     }
@@ -190,7 +190,7 @@ void query(char *destR, char *origR, char *nameR, int fdR)
     }
     else // Se o destino não for o próprio nó
     {
-        if (debug = 1)
+        if (debug == 1)
         {
             printf("Retransmite o Query\n");
         }
@@ -250,7 +250,7 @@ void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR)
     }
     else // Se destino não for o próprio nó
     {
-        if (debug = 1)
+        if (debug == 1)
         {
             printf("Retransmite %s\n", bufCNC);
         }
@@ -279,7 +279,7 @@ fdR->recebe o descritor do nó que nos enviou o WITHDRAW;
 */
 void wdraw(char *idR, int fdR)
 {
-    if (debug = 1)
+    if (debug == 1)
     {
         printf("Withdraw %s\n", idR);
     }

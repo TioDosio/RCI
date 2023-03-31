@@ -11,7 +11,7 @@
 #include "TCP.h"
 #include "fs.h"
 struct NO node;
-int debug = 0;
+int debug;
 int main(int argc, char *argv[])
 {
     char IP[20];     // IP que vai ser introduzido
@@ -246,13 +246,15 @@ int main(int argc, char *argv[])
                         node.tabExp[i] = -2;
                     }
                 }
-                else if (strcmp(strV, "do")) // debug on
+                else if (strcmp(strV, "do") == 0) // debug on
                 {
                     debug = 1;
+                    printf("Debug on\n");
                 }
-                else if (strcmp(strV, "df")) // debug off
+                0 else if (strcmp(strV, "df") == 0) // debug off
                 {
                     debug = 0;
+                    printf("Debug off\n");
                 }
                 else
                 {
@@ -276,85 +278,59 @@ int main(int argc, char *argv[])
                             sscanf(line, "%s", cmd);
                             if (strcmp(cmd, "NEW") == 0)
                             {
-                                if (debug = 1)
+                                if (debug == 1)
                                 {
-                                    printf("Int R:%d\n", cmd);
+                                    printf("Int R:%s\n", cmd);
                                 }
                                 sscanf(line, "%s %s %s %s", cmd, node.vizInt[i].IDv, node.vizInt[i].IPv, node.vizInt[i].Portv); // Recebe NEW e guarda como interno
-                                if (strlen(node.vizInt[i].IDv) != 2 || strlen(node.vizInt[i].IPv) > 15 || strlen(node.vizInt[i].IPv) < 7)
-                                {
-                                    printf("Dados errados, não é processado\n");
-                                    break;
-                                }
-
-                                sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv); // Coloca seu Externo no buffer
-                                write(node.vizInt[i].fd, bufW, strlen(bufW));                                            // Envia EXTERN para o Interno
+                                sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);        // Coloca seu Externo no buffer
+                                write(node.vizInt[i].fd, bufW, strlen(bufW));                                                   // Envia EXTERN para o Interno
                             }
                             else if (strcmp(cmd, "QUERY") == 0) // QUERY DEST ORIG NAME
                             {
-                                if (debug = 1)
+                                if (debug == 1)
                                 {
-                                    printf("Int R:%d\n", cmd);
+                                    printf("Int R:%s\n", cmd);
                                 }
                                 char destQ[3], origQ[3], nameQ[100];
                                 sscanf(line, "%s %s %s %s", cmd, destQ, origQ, nameQ);
-                                if (strlen(destQ) != 2 || strlen(origQ) != 2 || strlen(nameQ) > 99)
-                                {
-                                    printf("Dados errados, não é processado\n");
-                                    break;
-                                }
                                 fdR = node.vizInt[i].fd;                             // file descriptor do vizinho que enviou a mensagem
                                 node.tabExp[atoi(origQ)] = atoi(node.vizInt[i].IDv); // O query veio do nó "origem" por este vizinho logo se quiser ir para esse nó vou para este vizinho
                                 query(destQ, origQ, nameQ, fdR);                     // envia o query ou em FLOOD ou para o vizinho que está na tabela de expedicao
                             }
                             else if (strcmp(cmd, "CONTENT") == 0) // CONTENT ORIG DEST NAME
                             {
-                                if (debug = 1)
+                                if (debug == 1)
                                 {
-                                    printf("Int R:%d\n", cmd);
+                                    printf("Int R:%s\n", cmd);
                                 }
                                 char destC[3], origC[3], nameC[100];
                                 sscanf(line, "%s %s %s %s", cmd, destC, origC, nameC); // CONTENT ORIG DEST NAME
-                                if (strlen(destC) != 2 || strlen(origC) != 2 || strlen(nameC) > 99)
-                                {
-                                    printf("Dados errados, não é processado\n");
-                                    break;
-                                }
-                                fdR = node.vizInt[i].fd;                             // file descriptor do vizinho que enviou a mensagem
-                                node.tabExp[atoi(origC)] = atoi(node.vizInt[i].IDv); // O query veio do nó "origem" por este vizinho logo se quiser ir para esse nó vou para este vizinho
-                                CNContent(0, destC, origC, nameC, fdR);              // Se não somos quem pediu o query, enviamos para o vizinho que está na tabela de expedicao
+                                fdR = node.vizInt[i].fd;                               // file descriptor do vizinho que enviou a mensagem
+                                node.tabExp[atoi(origC)] = atoi(node.vizInt[i].IDv);   // O query veio do nó "origem" por este vizinho logo se quiser ir para esse nó vou para este vizinho
+                                CNContent(0, destC, origC, nameC, fdR);                // Se não somos quem pediu o query, enviamos para o vizinho que está na tabela de expedicao
                             }
                             else if (strcmp(cmd, "NOCONTENT") == 0) // NOCONTENT ORIG DEST NAME
                             {
-                                if (debug = 1)
+                                if (debug == 1)
                                 {
-                                    printf("Int R:%d\n", cmd);
+                                    printf("Int R:%s\n", cmd);
                                 }
                                 char destC[3], origC[3], nameC[100];
                                 sscanf(line, "%s %s %s %s", cmd, destC, origC, nameC);
-                                if (strlen(destC) != 2 || strlen(origC) != 2 || strlen(nameC) > 99)
-                                {
-                                    printf("Dados errados, não é processado\n");
-                                    break;
-                                }
                                 fdR = node.vizInt[i].fd;                             // file descriptor do vizinho que enviou a mensagem
                                 node.tabExp[atoi(origC)] = atoi(node.vizInt[i].IDv); // O query veio do nó "origem" por este vizinho logo se quiser ir para esse nó vou para este vizinho
                                 CNContent(1, destC, origC, nameC, fdR);              // Se não somos quem pediu o query, enviamos para o vizinho que está na tabela de expedicao
                             }
                             else if (strcmp(cmd, "WITHDRAW") == 0)
                             {
-                                if (debug = 1)
+                                if (debug == 1)
                                 {
-                                    printf("Int R:%d\n", cmd);
+                                    printf("Int R:%s\n", cmd);
                                 }
                                 char idW[3];             // id do nó que se vai retirar da rede
                                 fdR = node.vizInt[i].fd; // file descriptor do vizinho que enviou a mensagem
                                 sscanf(line, "%s %s", cmd, idW);
-                                if (strlen(idW) != 2)
-                                {
-                                    printf("Erro no ID, não é processado\n");
-                                    break;
-                                }
                                 wdraw(idW, fdR); // retira o nó da rede
                             }
                             node.vizInt[i].ctrbufsize = 0;
@@ -412,99 +388,70 @@ int main(int argc, char *argv[])
                         sscanf(line, "%s", cmd); // vai buscar o comando
                         if (strcmp(cmd, "NEW") == 0)
                         {
-                            if (debug = 1)
+                            if (debug == 1)
                             {
-                                printf("Ext R:%d\n", cmd);
+                                printf("Ext R:%s\n", cmd);
                             }
                             sscanf(line, "%s %s %s %s", cmd, node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);           // guarda os dados do vizinho externo
                             if (strlen(node.vizExt.IDv) != 2 || strlen(node.vizExt.IPv) > 15 || strlen(node.vizExt.IPv) < 7) // verifica se os dados estão corretos
-                            {
-                                printf("Dados errados, não é processado\n");
-                                break;
-                            }
-                            sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
+                                sprintf(bufW, "EXTERN %s %s %s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
                             write(node.vizExt.fd, bufW, strlen(bufW)); // envia os dados do nosso vizinho externo para o vizinho externo
                         }
                         else if (strcmp(cmd, "EXTERN") == 0)
                         {
-                            if (debug = 1)
+                            if (debug == 1)
                             {
-                                printf("Ext R:%d\n", cmd);
+                                printf("Ext R:%s\n", cmd);
                             }
                             sscanf(line, "%s %s %s %s", cmd, node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
-                            if (strlen(node.vizBackup.IDv) != 2 || strlen(node.vizBackup.IPv) > 15 || strlen(node.vizBackup.IPv) < 7) // verifica se os dados estão corretos
-                            {
-                                printf("Dados errados!\n");
-                                break;
-                            }
                         }
                         else if (strcmp(cmd, "QUERY") == 0) // QUERY DEST ORIG NAME
                         {
-                            if (debug = 1)
+                            if (debug == 1)
                             {
-                                printf("Ext R:%d\n", cmd);
+                                printf("Ext R:%s\n", cmd);
                             }
                             char destQ[3], origQ[3], nameQ[100];
                             sscanf(line, "%s %s %s %s", cmd, destQ, origQ, nameQ);
-                            if (strlen(destQ) != 2 || strlen(origQ) != 2 || strlen(nameQ) > 100) // verifica se os dados estão corretos
-                            {
-                                printf("Dados errados, não é processado\n");
-                                break;
-                            }
                             node.tabExp[atoi(origQ)] = atoi(node.vizExt.IDv); // guarda o ID do vizinho externo na tabela de expedicao
                             fdR = node.vizExt.fd;                             // guarda o file descriptor do vizinho externo
                             query(destQ, origQ, nameQ, fdR);                  // envia o query ou em FLOOD ou para o vizinho que está na tabela de expedicao
                         }
                         else if (strcmp(cmd, "CONTENT") == 0) // CONTENT ORIG DEST NAME
                         {
-                            if (debug = 1)
+                            if (debug == 1)
                             {
-                                printf("Ext R:%d\n", cmd);
+                                printf("Ext R:%s\n", cmd);
                             }
                             char destC[3], origC[3], nameC[100];
                             sscanf(line, "%s %s %s %s", cmd, destC, origC, nameC);
-                            if (strlen(destC) != 2 || strlen(origC) != 2 || strlen(nameC) > 100) // verifica se os dados estão corretos
-                            {
-                                printf("Dados errados, não é processado\n");
-                                break;
-                            }
                             fdR = node.vizExt.fd;                             // guarda o file descriptor do vizinho externo
                             node.tabExp[atoi(origC)] = atoi(node.vizExt.IDv); // guarda o ID do vizinho externo na tabela de expedicao
                             CNContent(0, destC, origC, nameC, fdR);           // Se não somos quem pediu o query, enviamos para o vizinho que está na tabela de expedicao
                         }
                         else if (strcmp(cmd, "NOCONTENT") == 0) // NOCONTENT ORIG DEST NAME
                         {
-                            if (debug = 1)
+                            if (debug == 1)
                             {
-                                printf("Ext R:%d\n", cmd);
+                                printf("Ext R:%s\n", cmd);
                             }
                             char destC[3], origC[3], nameC[100];
                             sscanf(line, "%s %s %s %s", cmd, destC, origC, nameC);
-                            if (strlen(destC) != 2 || strlen(origC) != 2 || strlen(nameC) > 100) // verifica se os dados estão corretos
-                            {
-                                printf("Dados errados, não é processado\n");
-                                break;
-                            }
                             fdR = node.vizExt.fd;                             // guarda o file descriptor do vizinho externo
                             node.tabExp[atoi(origC)] = atoi(node.vizExt.IDv); // guarda o ID do vizinho externo na tabela de expedicao
                             CNContent(1, destC, origC, nameC, fdR);           // Se não somos quem pediu o query, enviamos para o vizinho que está na tabela de expedicao
                         }
                         else if (strcmp(cmd, "WITHDRAW") == 0)
                         {
-                            if (debug = 1)
+                            if (debug == 1)
                             {
-                                printf("Ext R:%d\n", cmd);
+                                printf("Ext R:%s\n", cmd);
                             }
                             char idW[3], bufsend[100];
                             int fdR = node.vizExt.fd;
                             strcpy(bufsend, "");
                             sscanf(line, "%s %s", cmd, idW); // vai buscar o ID do vizinho que se vai desligar
-                            if (strlen(idW) != 2)            // verifica se os dados estão corretos
-                            {
-                                printf("Dados errados, não é processado\n");
-                                break;
-                            }
-                            wdraw(idW, fdR); // envia o withdraw para todos os vizinhos
+                            wdraw(idW, fdR);                 // envia o withdraw para todos os vizinhos
                         }
                         strcpy(line, "");
                         line = strtok_r(NULL, "\n", &ptr); // vai buscar a próxima linha
@@ -533,7 +480,7 @@ int main(int argc, char *argv[])
                     }
                     if (strcmp(node.id, node.vizBackup.IDv) != 0) // não somos ancora
                     {
-                        if (debug = 1)
+                        if (debug == 1)
                         {
                             printf("Não somos ancora\n");
                         }
@@ -553,7 +500,7 @@ int main(int argc, char *argv[])
                     }
                     else if (node.maxInter != 0) // somos ancora e temos vizinhos internos
                     {
-                        if (debug = 1)
+                        if (debug == 1)
                         {
                             printf("Somos ancora e temos internos\n");
                         }
@@ -593,7 +540,7 @@ int main(int argc, char *argv[])
                 addrlen = sizeof(addr);
                 if (node.flagVaz == 0) // Sou o único da rede e ligam-se a mim
                 {
-                    if (debug = 1)
+                    if (debug == 1)
                     {
                         printf("Accept Ext\n");
                     }
@@ -607,7 +554,7 @@ int main(int argc, char *argv[])
                 }
                 else if (node.flagVaz > 0) // Já não sou o único da rede e ligam-se a mim
                 {
-                    if (debug = 1)
+                    if (debug == 1)
                     {
                         printf("Accept Int\n");
                     }

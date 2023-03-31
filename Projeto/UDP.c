@@ -27,7 +27,7 @@ void reg(char *net, char *IP, char *TCP)
     {
         strcpy(node.id, "");
         sprintf(node.id, "0%d", F);
-        if (debug = 1)
+        if (debug == 1)
         {
             printf("ID:%s\n", node.id);
         }
@@ -36,7 +36,7 @@ void reg(char *net, char *IP, char *TCP)
     {
         strcpy(node.id, "");
         sprintf(node.id, "%d", F);
-        if (debug = 1)
+        if (debug == 1)
         {
             printf("ID:%s\n", node.id);
         }
@@ -104,7 +104,7 @@ void reg(char *net, char *IP, char *TCP)
     }
 
     buffOKs[n] = '\0'; // adiciona terminador de string
-    if (debug = 1)
+    if (debug == 1)
     {
         printf("%s\n", buffOKs);
     }
@@ -187,7 +187,7 @@ void unreg(char *net, char *IP, char *TCP)
         printf("Servidor indisponivel\n");
     }
     bufOKs[n] = '\0'; // adiciona terminador de string
-    if (debug = 1)
+    if (debug == 1)
     {
         printf("%s\n", bufOKs);
     }
@@ -265,7 +265,7 @@ int show(int flagS, char *net)
         printf("Servidor indisponivel\n");
     }
     buffer[n] = '\0'; // adiciona terminador de string
-    if (debug = 1)
+    if (debug == 1)
     {
         printf("%s\n", buffer);
     }
@@ -290,9 +290,9 @@ int show(int flagS, char *net)
         }
         if (line == NULL && node.flagVaz == 0) // se a rede estiver vazia
         {
-            if (debug = 1)
+            if (debug == 1)
             {
-                printf("Sou sozinho na rede");
+                printf("Sou sozinho na rede\n");
             }
         }
         if (node.flagVaz > 0) // se a rede nao estiver vazia
