@@ -343,7 +343,7 @@ int main(int argc, char *argv[])
                         printf("vizInt[%d] disconnected\n", i);
                         sprintf(bufW, "WITHDRAW %s\n", node.vizInt[i].IDv); // WITHDRAW ID
                         node.tabExp[atoi(node.vizInt[i].IDv)] = -2;         // retira o nó da tabela de expedicao
-                        for (int i = 0; i < node.maxInter; i++)
+                        for (int i = 0; i < 100; i++)
                         {
                             if (node.tabExp[i] == atoi(node.vizInt[i].IDv))
                             {
