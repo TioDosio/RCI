@@ -13,12 +13,17 @@
 
 extern struct NO node; // ter variavel global em varios ficheiros
 
+/*
+Faz a ligação TCP entre nós e envia NEW através da ligação estabelicida.
+IP-> recebe ip que nos queremos ligar;
+TCP-> recebe porto a que nos queremos ligar
+*/
 void client_tcp(char *IP, char *TCP)
 {
     char buffer[128] = "";
     struct addrinfo hints, *res;
     int n;
-    node.vizExt.fd = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
+    node.vizExt.fd = socket(AF_INET, SOCK_STREAM, 0); // criação de um socket TCP
     printf("socket clientTCP:%d\n", node.vizExt.fd);
     if (node.vizExt.fd == -1)
     {
@@ -28,15 +33,14 @@ void client_tcp(char *IP, char *TCP)
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET; // IPv4
     hints.ai_socktype = SOCK_STREAM;
-    n = getaddrinfo(node.vizExt.IPv, node.vizExt.Portv, &hints, &res);
-    if (n != 0) /*error*/
+    n = getaddrinfo(node.vizExt.IPv, node.vizExt.Portv, &hints, &res); // preenche a estrutura res com o endereço do vizinho externo
+    if (n != 0)                                                        /*error*/
     {
         printf("erro getaddrinfo tcp.c");
         exit(1);
     }
-    n = connect(node.vizExt.fd, res->ai_addr, res->ai_addrlen);
-    printf("connect clientTCP:%d\n", node.vizExt.fd); ///////////////////////////
-    if (n == -1)                                      /*error*/
+    n = connect(node.vizExt.fd, res->ai_addr, res->ai_addrlen); // estabelece a ligação TCP
+    if (n == -1)                                                /*error*/
     {
         printf("error connect tcp.c\n");
         exit(1);
@@ -46,7 +50,15 @@ void client_tcp(char *IP, char *TCP)
     write(node.vizExt.fd, buffer, strlen(buffer));
     freeaddrinfo(res);
 }
-
+/*
+Faz a gestão da ligação através do comando djoin
+net->rede do nó que nos queremos ligar;
+IP->recebe ip que nos queremos ligar;
+TCP->recebe porto a que nos queremos ligar
+bootID->recebe id do nó que nos queremos ligar;
+bootIP->recebe ip do nó que nos queremos ligar;
+bootTCP->recebe porto do nó que nos queremos ligar;
+*/
 void djoin(char *net, char *IP, char *TCP, char *bootID, char *bootIP, char *bootTCP)
 {
     if (strcmp(node.id, bootID) == 0)
@@ -61,37 +73,41 @@ void djoin(char *net, char *IP, char *TCP, char *bootID, char *bootIP, char *boo
         client_tcp(IP, TCP);
     }
 }
+/*
+Fecha todas as ligações TCP e UDP e limpa as tabelas de expedição e dados dos vizinhos. Retira apenas do servidor de nós se não formos o próprio nó.
+net-> recebe rede onde está o nó que queremos retirar do servidor de nós;
+IP-> recebe ip que queremos retirar do servidor de nós;
+TCP-> recebe porto a que queremos retirar do servidor de nós
+*/
 void leave(char *net, char *IP, char *TCP)
 {
-    unreg(net, IP, TCP);
+    unreg(net, IP, TCP); // retira do servidor de nós
     for (int i = 0; i < node.maxInter; i++)
     {
         if (node.vizInt[i].fd != -2)
         {
-            printf("closing vizInt[%d] %s\n", node.vizInt[i].fd, node.vizInt[i].IDv);
-            close(node.vizInt[i].fd);
-            node.vizInt[i].fd = -2;
+            close(node.vizInt[i].fd); // fecha a ligação TCP com o interno
+            node.vizInt[i].fd = -2;   // coloca o fd a -2 para indicar que não tem ligação TCP
         }
     }
     if (node.vizExt.fd != -2)
     {
-        printf("closing vizExt\n");
-        close(node.vizExt.fd);
-        node.vizExt.fd = -2;
+        close(node.vizExt.fd); // fecha a ligação TCP com o externo
+        node.vizExt.fd = -2;   // coloca o fd a -2 para indicar que não tem ligação TCP
     }
     for (int i = 0; i < 100; i++)
     {
-        node.tabExp[i] = -2;
+        node.tabExp[i] = -2; // limpa a tabela de expedição
     }
-    strcpy(node.vizExt.IDv, "");
+    strcpy(node.vizExt.IDv, ""); // limpa os dados do vizinho externo
     strcpy(node.vizExt.IPv, "");
     strcpy(node.vizExt.Portv, "");
-    strcpy(node.vizBackup.IDv, "");
+    strcpy(node.vizBackup.IDv, ""); // limpa os dados do vizinho de backup
     strcpy(node.vizBackup.IPv, "");
     strcpy(node.vizBackup.Portv, "");
     for (int i = 0; i < node.maxInter; i++)
     {
-        strcpy(node.vizInt[i].IDv, "");
+        strcpy(node.vizInt[i].IDv, ""); // limpa os dados dos vizinhos internos
         strcpy(node.vizInt[i].IPv, "");
         strcpy(node.vizInt[i].Portv, "");
     }

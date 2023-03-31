@@ -11,12 +11,16 @@
 #include "fs.h"
 extern struct NO node;
 
+/*
+Cria-se um conteudo com o nome dado na variavel.
+name->recebe o conteudo que queremos criar;
+*/
 void create(char *name)
 {
     int flag = 0;
     for (int i = 0; i < node.flagName; i++) // passa por todos os nomes já criados
     {
-        if (node.flagName < 50)
+        if (node.flagName < 50) // verifica se o limite de conteudos foi atingido
         {
             if (strcmp(node.names[i], name) == 0) // procura o nome
             {
@@ -30,13 +34,17 @@ void create(char *name)
             flag = 1;
         }
     }
-    if (flag == 0)
+    if (flag == 0) // se o nome não existir
     {
-        strcpy(node.names[node.flagName], name);
+        strcpy(node.names[node.flagName], name); // cria o nome na posição flagName
         printf("Posição:%d, name:%s\n", node.flagName, node.names[node.flagName]);
         node.flagName++;
     }
 }
+/*
+Elimina-se um conteudo com o nome dado na variavel.
+name->recebe o conteudo que queremos eliminar;
+*/
 void delet(char *name)
 {
     int flag = 0;
@@ -44,21 +52,24 @@ void delet(char *name)
     {
         if (strcmp(node.names[i], name) == 0) // procura o nome
         {
-            strcpy(node.names[i], "\0");            // apaga o nome
-            for (int j = i; j < node.flagName; j++) // shift left
+            strcpy(node.names[i], "\0"); // apaga o nome
+            for (int j = i; j < node.flagName; j++)
             {
-                strcpy(node.names[j], node.names[j + 1]);
+                strcpy(node.names[j], node.names[j + 1]); // move os nomes para a esquerda
             }
-            node.flagName--;
+            node.flagName--; // diminui o numero de nomes
             flag = 1;
             printf("O conteudo foi apagado\n");
         }
     }
-    if (flag == 0)
+    if (flag == 0) // se o nome não existir
     {
         printf("O conteudo não existe\n");
     }
 }
+/*
+Mostra os conteudos presentes no nó.
+*/
 void showNames()
 {
     printf("Conteudos do nó:\n");
@@ -67,14 +78,18 @@ void showNames()
         printf("Conteudo %d »» %s\n", i, node.names[i]);
     }
 }
+/*
+Pesquisa na rede o conteudo com o nome dado na variavel no nó com o id dado na variavel dest.
+dest->recebe o id do nó onde queremos pesquisar o conteudo;
+name->recebe o nome que queremos pesquisar;
+*/
 void get(char *dest, char *name)
 {
-    // QUERY dest orig name
     char bufsend[100] = "";
     sprintf(bufsend, "QUERY %s %s %s\n", dest, node.id, name);
-    if (node.tabExp[atoi(dest)] != -2) // se o destino estiver na tabela de exp
+    if (node.tabExp[atoi(dest)] != -2) // se o destino estiver na tabela de expedição
     {
-        if (node.tabExp[atoi(dest)] == atoi(node.vizExt.IDv))
+        if (node.tabExp[atoi(dest)] == atoi(node.vizExt.IDv)) // se o destino for o vizinho externo
         {
             write(node.vizExt.fd, bufsend, strlen(bufsend));
         }
@@ -82,24 +97,26 @@ void get(char *dest, char *name)
         {
             for (int i = 0; i < node.maxInter; i++)
             {
-                if (node.tabExp[atoi(dest)] == atoi(node.vizInt[i].IDv))
+                if (node.tabExp[atoi(dest)] == atoi(node.vizInt[i].IDv)) // se o destino for um vizinho interno
                 {
                     write(node.vizInt[i].fd, bufsend, strlen(bufsend));
                 }
             }
         }
     }
-    else // FLOOD
+    else // se o destino não estiver na tabela de expedição
     {
         for (int i = 0; i < node.maxInter; i++) // FLOOD internos
         {
             write(node.vizInt[i].fd, bufsend, strlen(bufsend));
-            printf("FLOODINT %d\n", i);
         }
         write(node.vizExt.fd, bufsend, strlen(bufsend)); // FLOOD externo
     }
 }
-void showTopo() // node.maxInter para o for dos viz internos
+/*
+Mostra a tologia da rede.
+*/
+void showTopo()
 {
     printf("Nó=>%s\n", node.id);
     printf("Vizinho Externo:    id:%s ip:%s porto:%s\n", node.vizExt.IDv, node.vizExt.IPv, node.vizExt.Portv);
@@ -109,38 +126,48 @@ void showTopo() // node.maxInter para o for dos viz internos
     }
     printf("Vizinho Backup:     id:%s ip:%s porto:%s\n", node.vizBackup.IDv, node.vizBackup.IPv, node.vizBackup.Portv);
 }
+/*
+Mostra a tabela de expedição do nó.
+*/
 void showRouting()
 {
     printf("Tabela Expedicao:\n");
     for (int i = 0; i < 100; i++)
     {
-        if (node.tabExp[i] != -2)
+        if (node.tabExp[i] != -2) // se o destino estiver na tabela de expedição
         {
             printf("Destino:%d »» Vizinho:%d\n", i, node.tabExp[i]);
         }
     }
 }
+/*
+Recebe o pedido de pesquisa, procura o conteudo em sim ou retransmite a mensagem para os vizinhos.
+destR->recebe o id do nó onde queremos pesquisar o conteudo;
+origR->recebe o id do nó que enviou o QUERY;
+name->recebe o nome que queremos pesquisar;
+fdR->recebe o descritor do nó que nos enviou o QUERY;
+*/
 void query(char *destR, char *origR, char *nameR, int fdR)
 {
-    char bufsend[120] = ""; // NOCONTENT 00 00 name
+    char bufsend[120] = "";
     int flag = 0;
     printf("QUERY RECEBIDO\n");
-    if (strcmp(destR, node.id) == 0) // se o destino formos nós
+    if (strcmp(destR, node.id) == 0) // se o destino formos este nó
     {
-        for (int i = 0; i < node.flagName; i++) // procura o name na lista de names
+        for (int i = 0; i < node.flagName; i++) // procura o conteudo na lista de conteudos
         {
-            if (strcmp(node.names[i], nameR) == 0) // se encontrar o name retorna o CONTENT para onde veio o QUERY
+            if (strcmp(node.names[i], nameR) == 0) // se encontrar o conteudo retorna o CONTENT para onde veio o QUERY
             {
-                printf("NOME ENCONTRADO\n");
+                printf("Nome Encontrado\n");
                 sprintf(bufsend, "CONTENT %s %s %s\n", origR, destR, nameR);
-                write(fdR, bufsend, strlen(bufsend));
+                write(fdR, bufsend, strlen(bufsend)); // envia o CONTENT para o nó que nos enviou o QUERY
                 flag = 1;
                 break;
             }
         }
         if (flag == 0) // se não encontrar o name retorna o NOCONTENT para onde veio o QUERY
         {
-            printf("NOME NÃO ENCONTRADO\n");
+            printf("Nome Não Encontrado\n");
             sprintf(bufsend, "NOCONTENT %s %s %s\n", origR, destR, nameR);
             write(fdR, bufsend, strlen(bufsend));
         }
@@ -150,15 +177,15 @@ void query(char *destR, char *origR, char *nameR, int fdR)
         sprintf(bufsend, "QUERY %s %s %s\n", destR, origR, nameR);
         if (node.tabExp[atoi(destR)] == -2) // O destino na Tabela não está preenchido então damos FLOOD
         {
-            if (node.vizExt.fd != fdR)
+            if (node.vizExt.fd != fdR) // Se o vizinho externo não for o nó que nos enviou o QUERY
             {
-                write(node.vizExt.fd, bufsend, strlen(bufsend));
+                write(node.vizExt.fd, bufsend, strlen(bufsend)); // envia o QUERY para o vizinho externo
             }
             for (int i = 0; i < node.maxInter; i++)
             {
-                if (node.vizInt[i].fd != fdR)
+                if (node.vizInt[i].fd != fdR) // Se o vizinho interno não for o nó que nos enviou o QUERY
                 {
-                    write(node.vizInt[i].fd, bufsend, strlen(bufsend));
+                    write(node.vizInt[i].fd, bufsend, strlen(bufsend)); // envia o QUERY para todos os vizinho interno
                 }
             }
         }
@@ -170,14 +197,22 @@ void query(char *destR, char *origR, char *nameR, int fdR)
         {
             for (int i = 0; i < node.maxInter; i++)
             {
-                if (node.tabExp[atoi(destR)] == atoi(node.vizInt[i].IDv))
+                if (node.tabExp[atoi(destR)] == atoi(node.vizInt[i].IDv)) // Se o destino estiver na tabela de expedição e for um vizinho interno
                 {
-                    write(node.vizInt[i].fd, bufsend, strlen(bufsend));
+                    write(node.vizInt[i].fd, bufsend, strlen(bufsend)); // envia o QUERY para o vizinho interno
                 }
             }
         }
     }
 }
+/*
+Pesquisa na rede o conteudo com o nome dado na variavel no nó com o id dado na variavel dest.
+CNC->recebe 0 se o conteudo for encontrado e 1 se não for encontrado;
+destR->recebe o id do nó onde a mensagem CONTENT ou NOCONTENT tem de ser entregue;
+origR->recebe o id do nó que enviou o CONTENT ou NOCONTENT em primeiro lugar;
+nameR->recebe o conteudo da pesquisa feita;
+fdR->recebe o descritor do nó que nos enviou o CONTENT ou NOCONTENT;
+*/
 void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR)
 {
     char bufCNC[10] = "", bufcont[100] = "";
@@ -191,32 +226,36 @@ void CNContent(int CNC, char *destR, char *origR, char *nameR, int fdR)
     }
     if (strcmp(destR, node.id) == 0) // se o destino for o próprio nó
     {
-        printf("--------->%s\n", bufCNC);
+        printf("-->%s\n", bufCNC);
     }
     else // Se destino não for o próprio nó
     {
         printf("O dest não sou eu\n");
         sprintf(bufcont, "%s %s %s %s\n", bufCNC, destR, origR, nameR);
-        printf("ENVIADO bufcont:%s\n", bufcont);
-        if (node.tabExp[atoi(destR)] == atoi(node.vizExt.IDv))
+        if (node.tabExp[atoi(destR)] == atoi(node.vizExt.IDv)) // Se o destino estiver na tabela de expedição e for o vizinho externo
         {
             write(node.vizExt.fd, bufcont, strlen(bufcont));
-            printf("EXT-Tenho na tabela de Exp e envio:%s\n", bufcont);
+            printf("EXT-Retrans:%s\n", bufcont);
         }
         else
         {
             for (int i = 0; i < node.maxInter; i++)
             {
-                if (node.tabExp[atoi(destR)] == atoi(node.vizInt[i].IDv))
+                if (node.tabExp[atoi(destR)] == atoi(node.vizInt[i].IDv)) // Se o destino estiver na tabela de expedição e for um vizinho interno
                 {
                     write(node.vizInt[i].fd, bufcont, strlen(bufcont));
-                    printf("INT-Tenho na tabela de Exp e envio:%s\n", bufcont);
+                    printf("INT-Retrans:%s\n", bufcont);
                     break;
                 }
             }
         }
     }
 }
+/*
+Recebe a mensagem WITHDRAW e retira o nó da variavel idR da tabela de expedição.
+idR->recebe o id do nó que queres retirar da tabela de expedição;
+fdR->recebe o descritor do nó que nos enviou o WITHDRAW;
+*/
 void wdraw(char *idR, int fdR)
 {
     char bufsend[13] = "";        // WITHDRAW + id + \n
@@ -225,11 +264,11 @@ void wdraw(char *idR, int fdR)
     {
         if (node.tabExp[i] == atoi(idR))
         {
-            node.tabExp[i] = -2;
+            node.tabExp[i] = -2; // retira o vizinho da tabela de expedição
         }
     }
     sprintf(bufsend, "WITHDRAW %s\n", idR);
-    for (int i = 0; i < node.maxInter; i++)
+    for (int i = 0; i < node.maxInter; i++) // FLOOD internos
     {
         if (node.vizInt[i].fd != fdR) // Todos os vizinhos internos menos o que enviou o WITHDRAW
         {

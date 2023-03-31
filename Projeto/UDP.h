@@ -5,6 +5,6 @@
 
 void reg(char *net, char *IP, char *TCP);
 void unreg(char *net, char *IP, char *TCP);
-int show(int flagS, char *net, char *IP, char *TCP);
+int show(int flagS, char *net);
 
 #endif
